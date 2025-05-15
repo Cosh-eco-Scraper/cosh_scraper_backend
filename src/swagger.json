@@ -1,0 +1,29 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Cosh scraper API",
+    "description": "This will display all api calls to the cosh scraper backend",
+    "version": "1.0.0"
+  },
+  "host": "localhost:3001",
+  "basePath": "/api",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/default": {
+      "get": {
+        "summary": "Returns hello world.",
+        "description": "#returns hello world",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}
