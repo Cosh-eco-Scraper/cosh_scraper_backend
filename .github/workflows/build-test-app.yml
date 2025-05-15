@@ -1,12 +1,29 @@
 name: build and test app
 run-name: ${{ github.actor }} is running a build and test app
-on: [ push ]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  Explore-GitHub-Actions:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - run: cd ../../
-      - run: echo "Run installation"
-      - run: npm install
-      - run: npm run build
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Change this to your Node.js version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build app
+        run: npm run build # Adjust this if your build script is named differently
+
+      - name: Run tests
+        run: npm test # Optional, if you have tests
