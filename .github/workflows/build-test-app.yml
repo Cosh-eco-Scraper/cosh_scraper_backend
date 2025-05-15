@@ -22,11 +22,14 @@ jobs:
           node-version: '18' # Or whatever Node version you're using
 
       - name: Install dependencies
+        working-directory: /home/runner/work/Cosh.Eco_Scraper_Backend
         run: npm install
 
       - name: Build app
+        working-directory: /home/runner/work/Cosh.Eco_Scraper_Backend
         run: npm run build # Only if you have a build script
 
       - name: Run tests
+        working-directory: /home/runner/work/Cosh.Eco_Scraper_Backend
         run: npm test # Optional
 
