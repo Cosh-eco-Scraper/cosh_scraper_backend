@@ -1,0 +1,46 @@
+name: build-deploy-app.yml
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm install
+      - run: npm ci
+      - run: npm run build --if-present
+      - uses: actions/upload-artifact@v4
+        with:
+          name: node-build
+          path: dist/
+      - run: npm test
+
+
+  deploy_to_docker:
+    runs-on: ubuntu-latest
+    needs: build_test
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: node-build
+          path: ./dist
+      # Build Docker image using local dist
+      - name: Build Docker image
+        run: |
+          docker build -t Cosh-Scraper-Backend:latest --build-arg DIST_PATH=dist .
+
+      - name: Save Docker image to tarball
+        run: docker save Cosh-Scraper-Backend:latest -o Cosh-Scraper-Backend.tar
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: Cosh-Scraper-Backend.tar
+
