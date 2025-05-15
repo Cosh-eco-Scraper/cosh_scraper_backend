@@ -1,0 +1,58 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -r ts-node/register \"src/test/**/*.test.ts\"",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "nodemon --watch \"src/**/*.ts\" --exec \"npx ts-node\" src/server.ts",
+    "lint": "eslint 'src/**/*.ts'",
+    "format": "prettier --write .",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cosh-eco-Scraper/Cosh.Eco_Scraper_Backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Cosh-eco-Scraper/Cosh.Eco_Scraper_Backend/issues"
+  },
+  "homepage": "https://github.com/Cosh-eco-Scraper/Cosh.Eco_Scraper_Backend#readme",
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/js-yaml": "^4.0.9",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.15.18",
+    "@types/swagger-ui-express": "^4.1.8",
+    "dotenv": "^16.5.0",
+    "eslint": "^9.26.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.0",
+    "express": "^5.1.0",
+    "husky": "^9.1.7",
+    "install": "^0.13.0",
+    "lint-staged": "^15.5.2",
+    "mocha": "^11.2.2",
+    "nodemon": "^3.1.10",
+    "npm": "^10.9.2",
+    "prettier": "^3.5.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "lint-staged": {
+    "*.{js,ts,json,css,md}": [
+      "prettier --write",
+      "eslint --fix",
+      "git add"
+    ]
+  }
+}
