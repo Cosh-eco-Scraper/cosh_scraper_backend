@@ -6,6 +6,7 @@ jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
+      - run: cd ../../
       - run: echo "Run installation"
       - run: npm install
       - run: npm run build
