@@ -21,9 +21,12 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: ./Cosh.Eco_Scraper_Backend
 
       - name: Build app
         run: npm run build # Adjust this if your build script is named differently
+        working-directory: ./Cosh.Eco_Scraper_Backend
 
       - name: Run tests
         run: npm test # Optional, if you have tests
+        working-directory: ./Cosh.Eco_Scraper_Backend
