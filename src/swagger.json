@@ -24,6 +24,53 @@
           }
         }
       }
+    },
+    "/llm": {
+      "post": {
+        "summary": "Send a prompt to the LLM and get a response.",
+        "description": "Sends a prompt string to the LLM and returns the generated response.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Prompt payload",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "example": "Hello, AI!"
+                }
+              },
+              "required": ["prompt"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response from LLM.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "response": {
+                  "type": "string",
+                  "example": "Hello, human!"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
     }
   }
 }
