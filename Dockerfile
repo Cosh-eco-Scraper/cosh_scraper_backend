@@ -4,38 +4,34 @@ ARG NODE_VERSION=20.10.0
 ARG PNPM_VERSION=10.11.0
 
 FROM node:${NODE_VERSION}-alpine as base
-
 WORKDIR /usr/src/app
 
 RUN --mount=type=cache,target=/root/.npm \
     npm install -g pnpm@${PNPM_VERSION}
 
 ################################################################################
-# Install production dependencies
 FROM base as deps
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json ./
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --prod --frozen-lockfile
+    pnpm install --prod --ignore-scripts
+
 
 ################################################################################
-# Build the application
 FROM base as build
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json ./
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile
+    pnpm install
 
 COPY . .
 RUN pnpm run build
 
 ################################################################################
-# Final image
 FROM base as final
 
 ENV NODE_ENV=production
 USER node
-
 WORKDIR /usr/src/app
 
 COPY package.json ./
