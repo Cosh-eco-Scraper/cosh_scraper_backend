@@ -26,10 +26,13 @@ services:
       POSTGRES_USER: prodUser
       POSTGRES_PASSWORD: prodPassword
       POSTGRES_DB: ScraperDB
+    ports:
+      - "5432:5432"
     volumes:
       - db-prod-data:/var/lib/postgresql/data
+      - ./database/tables.sql:/docker-entrypoint-initdb.d/01_tables.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U prodUser" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -43,10 +46,14 @@ services:
       POSTGRES_USER: devUser
       POSTGRES_PASSWORD: devPassword
       POSTGRES_DB: devPassword
+    ports:
+      - "5433:5432"
     volumes:
       - db-dev-data:/var/lib/postgresql/data
+      - ./database/tables.sql:/docker-entrypoint-initdb.d/01_tables.sql
+      - ./database/seeder.sql:/docker-entrypoint-initdb.d/02_seeder.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U devUser" ]
       interval: 10s
       timeout: 5s
       retries: 5
