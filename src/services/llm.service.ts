@@ -1,6 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
+import * as dotenv from "dotenv";
 
-const ai = new GoogleGenAI({ apiKey: "AIzaSyA2dYJVOQNBmh9Ne2b3lnuO-Fbw7oSAV6U" });
+dotenv.config();
+const ai = new GoogleGenAI({ apiKey: process.env.AI_API_KEY });
 
 const sendPrompt = async (prompt: string): Promise<string | undefined> => {
   const response = await ai.models.generateContent({
@@ -8,7 +10,7 @@ const sendPrompt = async (prompt: string): Promise<string | undefined> => {
     contents: prompt,
   });
   console.log(response.text);
-    return response.text;
+  return response.text;
 }
 
 
