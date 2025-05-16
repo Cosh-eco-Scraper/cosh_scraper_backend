@@ -32,13 +32,13 @@ jobs:
       # Build Docker image using local dist
       - name: Build Docker image
         run: |
-          docker build -t Cosh-Scraper-Backend:latest --build-arg DIST_PATH=dist .
+          docker build -t cosh_scraper_backend:latest --build-arg DIST_PATH=dist .
 
       - name: Save Docker image to tarball
-        run: docker save Cosh-Scraper-Backend:latest -o Cosh-Scraper-Backend.tar
+        run: docker save cosh_scraper_backend:latest -o cosh_scraper_backend.tar
 
       - uses: actions/upload-artifact@v4
         with:
           name: docker-image
-          path: Cosh-Scraper-Backend.tar
+          path: cosh_scraper_backend.tar
 
