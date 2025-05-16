@@ -1,8 +1,6 @@
 name: build-deploy-app.yml
 on:
-  push:
-    branches:
-      - main
+  [push]
 
 jobs:
   build_test:
