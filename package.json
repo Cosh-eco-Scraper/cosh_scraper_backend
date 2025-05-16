@@ -42,14 +42,14 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@types/js-yaml": "^4.0.9",
-    "@types/express": "^5.0.1",
-    "@types/node": "^22.15.18",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0",
     "@google/genai": "^0.14.0",
     "@prisma/client": "^6.8.1",
+    "@types/express": "^5.0.1",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.15.18",
     "backend": "file:",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "js-yaml": "^4.1.0",
     "swagger-ui-express": "^5.0.1"
   },
