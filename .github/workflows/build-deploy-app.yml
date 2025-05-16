@@ -1,6 +1,10 @@
 name: build-deploy-app.yml
+run-name: ${{ github.actor }} has pushed to main and is deploying the app to Docker
+
 on:
-  [push]
+  push:
+    branches:
+      - main
 
 jobs:
   build_test:
