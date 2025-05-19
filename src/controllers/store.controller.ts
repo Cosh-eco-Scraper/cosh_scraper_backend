@@ -30,3 +30,23 @@ export async function getStore(req: Request, res: Response, next: NextFunction) 
     next(error);
   }
 }
+
+export async function getStoreOpeningsHours(req: Request, res: Response, next: NextFunction) {
+  try {
+    const storeId = req.params.id;
+
+    if (!storeId) {
+      res.status(400).json({ message: 'Store ID is required' });
+    }
+
+    const hours = await StoreService.getOpeningsHoursByStoreId(parseInt(storeId));
+
+    if (!hours.length) {
+      res.status(404).json({ message: 'Store not found' });
+    }
+
+    res.json(hours.map(dtoMapper.mapOpeningHours));
+  } catch (error) {
+    next(error);
+  }
+}
