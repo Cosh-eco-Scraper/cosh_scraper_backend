@@ -5,7 +5,7 @@ import { StoreRepository } from '../repositories/store.repository';
 import { Store } from '../domain/Store';
 import { DatabaseOpeningHours } from '../domain/OpeningHours';
 import NotFoundError from '../domain/errors/NotFoundError';
-import { Brand, DatabaseBrand } from '../domain/Brand';
+import { DatabaseBrand } from '../domain/Brand';
 
 describe('StoreService', () => {
   const originalGetAllStores = StoreRepository.getAllStores;
@@ -165,8 +165,8 @@ describe('StoreService', () => {
   describe('getBrandsByStoreId()', () => {
     it('should return brands when store exists', async () => {
       const expectedBrands: DatabaseBrand[] = [
-        { id: 1, name: 'Brand 1', label:'A',storeId:1},
-        { id: 2, name: 'Brand 2', label:'B',storeId:1 }
+        { id: 1, name: 'Brand 1', label: 'A', storeId: 1 },
+        { id: 2, name: 'Brand 2', label: 'B', storeId: 1 }
       ];
       StoreRepository.getBrandsByStoreId = async () => expectedBrands;
 
