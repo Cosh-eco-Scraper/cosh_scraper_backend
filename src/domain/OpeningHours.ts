@@ -1,10 +1,21 @@
 import { Store } from './Store';
+import { Day } from './Day';
 
 export type OpeningHours = {
   id: number;
-  details: string;
-  storeId: number;
+  day: {
+    name: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+    orderValue: Day;
+  };
+  openingAt: string;
+  closingAt: string;
   createdAt: Date;
   updatedAt: Date;
   store: Store;
+};
+
+export type OpeningHoursDto = {
+  id: number;
+  day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+  storeId: number;
 };
