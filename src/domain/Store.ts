@@ -10,3 +10,9 @@ export type Store = {
   location?: Location;
   brands?: Brand[];
 };
+
+export type StoreDto = {
+  id: number;
+  name: string;
+  description?: string;
+};

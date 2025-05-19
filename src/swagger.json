@@ -30,6 +30,56 @@
         }
       }
     },
+    "/stores/{id}": {
+      "get": {
+        "summary": "Returns a single store by ID",
+        "description": "Retrieves detailed information about a specific store.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the store to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Store found and returned",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": "1"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "a beautiful store"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "description of the store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Store not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/llm": {
       "post": {
         "summary": "Send a prompt to the LLM and get a response.",
