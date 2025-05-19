@@ -13,6 +13,9 @@
   "paths": {
     "/stores": {
       "get": {
+        "tags": [
+          "stores"
+        ],
         "summary": "Returns all stores",
         "produces": [
           "application/json"
@@ -31,7 +34,11 @@
       }
     },
     "/stores/{id}": {
+
       "get": {
+        "tags": [
+          "stores"
+        ],
         "summary": "Returns a single store by ID",
         "description": "Retrieves detailed information about a specific store.",
         "produces": [
@@ -82,6 +89,9 @@
     },
     "/llm": {
       "post": {
+        "tags": [
+          "llm"
+        ],
         "summary": "Send a prompt to the LLM and get a response.",
         "description": "Sends a prompt string to the LLM and returns the generated response.",
         "consumes": [
