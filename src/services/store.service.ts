@@ -18,5 +18,9 @@ export const StoreService = {
     hours = hours.sort((a, b) => a.day.orderValue - b.day.orderValue);
 
     return hours;
+  },
+  getBrandsByStoreId: async (id: number) => {
+    let brands = await StoreRepository.getBrandsByStoreId(id);
+    return brands;
   }
 };

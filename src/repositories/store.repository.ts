@@ -4,6 +4,7 @@ import { Store } from '../domain/Store';
 import { mapper } from './mapper';
 import NotFoundError from '../domain/errors/NotFoundError';
 import { DatabaseOpeningHours } from '../domain/OpeningHours';
+import { DatabaseBrand } from '../domain/Brand';
 
 export const StoreRepository = {
   getAllStores: async () => {
@@ -49,11 +50,29 @@ export const StoreRepository = {
         throw new NotFoundError('Store not found');
       }
 
-      hours = result.rows.map(mapper.mapHours);
+      hours = result.rows.map(mapper.mapHour);
     } finally {
       databaseClient.end();
     }
 
     return hours;
+  },
+  getBrandsByStoreId: async (id: number) => {
+    let brands: DatabaseBrand[] = [];
+
+    try {
+      databaseClient.connect();
+      const result = await databaseClient.query(storeQueries.getBrandsByStoreId(id));
+
+      if (!result.rows.length) {
+        throw new NotFoundError('Store not found');
+      }
+
+      brands = result.rows.map(mapper.mapBrand);
+    } finally {
+      databaseClient.end();
+    }
+
+    return brands;
   }
 };
