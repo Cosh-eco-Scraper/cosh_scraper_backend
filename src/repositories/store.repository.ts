@@ -1,7 +1,7 @@
 import databaseClient from '../config/dbConnectionConfig';
 import { storeQueries } from './queries/store.queries';
 import { Store } from '../domain/Store';
-import { mapper } from './mapper';
+import { storeMapper } from './mapper';
 import NotFoundError from '../domain/errors/NotFoundError';
 
 export const StoreRepository = {
@@ -12,7 +12,7 @@ export const StoreRepository = {
       databaseClient.connect();
       const result = await databaseClient.query(storeQueries.getAllStores());
 
-      stores = result.rows.map(mapper.mapStore);
+      stores = result.rows.map(storeMapper.mapStore);
     } finally {
       databaseClient.end();
     }
@@ -28,7 +28,7 @@ export const StoreRepository = {
         throw new NotFoundError('Store not found');
       }
 
-      return result.rows.map(mapper.mapStore)[0] as Store;
+      return result.rows.map(storeMapper.mapStore)[0] as Store;
     } finally {
       databaseClient.end();
     }
