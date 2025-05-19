@@ -34,7 +34,6 @@
       }
     },
     "/stores/{id}": {
-
       "get": {
         "tags": [
           "stores"
@@ -71,6 +70,67 @@
                 "description": {
                   "type": "string",
                   "example": "description of the store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Store not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/stores/{id}/openingshours": {
+      "get": {
+        "tags": [
+          "stores"
+        ],
+        "summary": "Returns all opening hours for a single store by ID",
+        "description": "Retrieves opening hours for a specific store.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the store to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Store found and returned",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": "1"
+                },
+                "day": {
+                  "type": "string",
+                  "example": "monday"
+                },
+                "opening": {
+                  "type": "string",
+                  "example": "09:00h"
+                },
+                "closing": {
+                  "type": "string",
+                  "example": "17:30h"
+                },
+                "storeId": {
+                  "type": "number",
+                  "example": "1"
                 }
               }
             }
