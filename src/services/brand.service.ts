@@ -6,3 +6,8 @@ const updateBrand = async (brandId: number, name: string, label: string) => {
     BrandRepository.updateBrand(brandId, name, label)
 
 }
+
+const BrandService = {
+    updateBrand,
+};
+export default BrandService;

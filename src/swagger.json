@@ -138,6 +138,79 @@
           }
         }
       }
+    },
+    "/brands/{brandId}": {
+      "put": {
+        "tags": [
+          "brand"
+        ],
+        "summary": "Update a brand by ID",
+        "description": "Updates the details of a brand specified by brandId.",
+        "parameters": [
+          {
+            "name": "brandId",
+            "in": "path",
+            "description": "ID of the brand to update",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Brand update payload",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "BrandName"
+                },
+                "label": {
+                  "type": "string",
+                  "example": "BR"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Brand updated successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Brand not found."
+          },
+          "400": {
+            "description": "Invalid input."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
     }
   }
 }
