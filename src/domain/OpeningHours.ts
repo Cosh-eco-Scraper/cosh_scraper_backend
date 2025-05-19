@@ -17,5 +17,20 @@ export type OpeningHours = {
 export type OpeningHoursDto = {
   id: number;
   day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+  openingAt: string;
+  closingAt: string;
+  storeId: number;
+};
+
+export type DatabaseOpeningHours = {
+  id: number;
+  day: {
+    name: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+    orderValue: Day;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+  openingAt: string;
+  closingAt: string;
   storeId: number;
 };
