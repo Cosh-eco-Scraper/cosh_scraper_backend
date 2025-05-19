@@ -11,16 +11,21 @@
     "http"
   ],
   "paths": {
-    "/default": {
+    "/stores": {
       "get": {
-        "summary": "Returns hello world.",
-        "description": "#returns hello world",
+        "summary": "Returns all stores",
         "produces": [
           "application/json"
         ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "500": {
+            "description": "Internal server error."
           }
         }
       }
@@ -49,7 +54,9 @@
                   "example": "Hello, AI!"
                 }
               },
-              "required": ["prompt"]
+              "required": [
+                "prompt"
+              ]
             }
           }
         ],
