@@ -5,16 +5,19 @@ import { StoreRepository } from '../repositories/store.repository';
 import { Store } from '../domain/Store';
 import { DatabaseOpeningHours } from '../domain/OpeningHours';
 import NotFoundError from '../domain/errors/NotFoundError';
+import { Brand, DatabaseBrand } from '../domain/Brand';
 
 describe('StoreService', () => {
   const originalGetAllStores = StoreRepository.getAllStores;
   const originalGetStore = StoreRepository.getStore;
   const originalGetStoreWithOpeningsHours = StoreRepository.getStoreWithOpeningsHours;
+  const originalGetBrandsByStoreId = StoreRepository.getBrandsByStoreId;
 
   afterEach(() => {
     StoreRepository.getAllStores = originalGetAllStores;
     StoreRepository.getStore = originalGetStore;
     StoreRepository.getStoreWithOpeningsHours = originalGetStoreWithOpeningsHours;
+    StoreRepository.getBrandsByStoreId = originalGetBrandsByStoreId;
   });
 
   describe('getAllStores()', () => {
@@ -152,6 +155,42 @@ describe('StoreService', () => {
 
       try {
         await StoreService.getOpeningsHoursByStoreId(1);
+        assert.fail('Should have thrown error');
+      } catch (e) {
+        assert.strictEqual(e, error);
+      }
+    });
+  });
+
+  describe('getBrandsByStoreId()', () => {
+    it('should return brands when store exists', async () => {
+      const expectedBrands: DatabaseBrand[] = [
+        { id: 1, name: 'Brand 1', label:'A',storeId:1},
+        { id: 2, name: 'Brand 2', label:'B',storeId:1 }
+      ];
+      StoreRepository.getBrandsByStoreId = async () => expectedBrands;
+
+      const brands = await StoreService.getBrandsByStoreId(1);
+
+      assert.deepStrictEqual(brands, expectedBrands);
+    });
+
+    it('should return empty array when store has no brands', async () => {
+      StoreRepository.getBrandsByStoreId = async () => [];
+
+      const brands = await StoreService.getBrandsByStoreId(1);
+
+      assert.deepStrictEqual(brands, []);
+    });
+
+    it('should throw error when database operation fails', async () => {
+      const error = new Error('Database error');
+      StoreRepository.getBrandsByStoreId = async () => {
+        throw error;
+      };
+
+      try {
+        await StoreService.getBrandsByStoreId(1);
         assert.fail('Should have thrown error');
       } catch (e) {
         assert.strictEqual(e, error);

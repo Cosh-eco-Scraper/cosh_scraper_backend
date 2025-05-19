@@ -42,10 +42,30 @@ export async function getStoreOpeningsHours(req: Request, res: Response, next: N
     const hours = await StoreService.getOpeningsHoursByStoreId(parseInt(storeId));
 
     if (!hours.length) {
-      res.status(404).json({ message: 'Store not found' });
+      res.status(204).json({ message: 'No opening hours found' });
     }
 
     res.json(hours.map(dtoMapper.mapOpeningHours));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getStoreBrands(req: Request, res: Response, next: NextFunction) {
+  try {
+    const storeId = req.params.id;
+
+    if (!storeId) {
+      res.status(400).json({ message: 'Store ID is required' });
+    }
+
+    const brands = await StoreService.getBrandsByStoreId(parseInt(storeId));
+
+    if (!brands.length) {
+      res.status(204).json({ message: 'No opening hours found' });
+    }
+
+    res.json(brands.map(dtoMapper.mapBrand));
   } catch (error) {
     next(error);
   }
