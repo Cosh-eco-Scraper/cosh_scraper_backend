@@ -13,5 +13,14 @@ export const StoreService = {
 
 
     return store;
-  }
+  },
+  updateStore: async (storeId: number, name: string, location_id: number, description?: string) => {
+    const store = await StoreRepository.updateStore(storeId, name, location_id, description);
+
+    if (!store) {
+      throw new NotFoundError('Store not found');
+    }
+
+    return store;
+  },
 };

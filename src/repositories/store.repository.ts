@@ -32,5 +32,22 @@ export const StoreRepository = {
     } finally {
       databaseClient.end();
     }
-  }
+  },
+
+  updateStore: async (storeId: number, name: string, location_id: number, description?: string) => {
+    try {
+      databaseClient.connect();
+      const result = await databaseClient.query(
+        storeQueries.updateStore(storeId, name, location_id, description)
+      );
+
+      if (!result.rowCount) {
+        throw new NotFoundError('Store not found');
+      }
+
+      return result.rows.map(storeMapper.mapStore)[0] as Store;
+    } finally {
+      databaseClient.end();
+    }
+  },
 };

@@ -34,7 +34,6 @@
       }
     },
     "/stores/{id}": {
-
       "get": {
         "tags": [
           "stores"
@@ -83,6 +82,84 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "stores"
+        ],
+        "summary": "Update a store by ID",
+        "description": "Updates the details of a store specified by id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the store to update",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Store update payload",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Updated Store Name"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Updated description"
+                },
+                "location_id": {
+                  "type": "integer",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Store updated successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "location_id": {
+                  "type": "integer"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Store not found."
+          },
+          "400": {
+            "description": "Invalid input."
+          },
+          "500": {
+            "description": "Internal server error."
           }
         }
       }
