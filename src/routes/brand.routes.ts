@@ -3,7 +3,5 @@ import { updateBrand } from '../controllers/brand.controller';
 
 const router = Router();
 
-router.put('/:brandId', (req: Request, res: Response, next: NextFunction) => {
-	updateBrand(req, res, next);
-});
+router.put('/:brandId', updateBrand);
 export default router;

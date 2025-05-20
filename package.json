@@ -26,6 +26,7 @@
   "homepage": "https://github.com/Cosh-eco-Scraper/Cosh.Eco_Scraper_Backend#readme",
   "devDependencies": {
     "@types/mocha": "^10.0.10",
+    "@types/pg": "^8.15.2",
     "@types/swagger-ui-express": "^4.1.8",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.5",
