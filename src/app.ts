@@ -5,8 +5,11 @@ import { errorHandler } from './middlewares/errorHandler';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './swagger.json';
 import storeRoutes from './routes/store.routes';
+import cors from 'cors';
+
 
 const app = express();
+// app.use(cors({ origin: 'http://localhost:3000' })); // Adjust the origin as needed
 app.use(express.json());
 
 // Routes

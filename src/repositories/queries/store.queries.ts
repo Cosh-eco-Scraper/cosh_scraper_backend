@@ -1,7 +1,19 @@
 export const storeQueries = {
-  getStoreById: (id: number) => `SELECT *
-                                 FROM stores
-                                 WHERE id = ${id};`,
+  getStoreById: (id: number) => `SELECT s.id,
+                              s.name,
+                              s.description,
+                              l.street,
+                              l.id         as location_id,
+                              l.street,
+                              l.number,
+                              l.city,
+                              l.postal_code,
+                              l.country,
+                              l.created_at as loc_created_at,
+                              l.updated_at as loc_updated_at
+                       FROM stores s
+                              JOIN locations l ON s.location_id = l.id
+                                 WHERE s.id = ${id};`,
   getAllStores: () => `SELECT s.id,
                               s.name,
                               s.description,
