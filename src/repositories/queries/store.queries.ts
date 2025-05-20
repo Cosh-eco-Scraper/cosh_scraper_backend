@@ -5,9 +5,10 @@ export const storeQueries = {
   getAllStores: () => `SELECT *
                        FROM stores;`,
 
-  updateStore: (storeId: number, name: string, location_id: number, description?: string) => `UPDATE stores
-                                                SET name = '${name}',
+  updateStore: (storeId: number, name: string, location_id: number, description?: string) =>
+    `UPDATE stores
+                                                    SET name = '${name}',
                                                     description = '${description}',
-                                                    location_id = '${location_id}',
-                                                WHERE id = ${storeId};`
+                                                    location_id = '${location_id}'
+                                                    WHERE id = ${storeId};`
 };
