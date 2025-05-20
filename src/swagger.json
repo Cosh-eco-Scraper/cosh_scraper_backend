@@ -401,6 +401,187 @@
           }
         }
       }
+    },
+    "/locations/{id}": {
+      "put": {
+        "tags": [
+          "locations"
+        ],
+        "summary": "Update a location by ID",
+        "description": "Updates the details of a location specified by id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the location to update",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Location update payload",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "street": {
+                  "type": "string",
+                  "example": "Main Street"
+                },
+                "number": {
+                  "type": "string",
+                  "example": "123A"
+                },
+                "postal_code": {
+                  "type": "string",
+                  "example": "12345"
+                },
+                "city": {
+                  "type": "string",
+                  "example": "Amsterdam"
+                },
+                "country": {
+                  "type": "string",
+                  "example": "Netherlands"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location updated successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "street": {
+                  "type": "string"
+                },
+                "number": {
+                  "type": "string"
+                },
+                "postal_code": {
+                  "type": "string"
+                },
+                "city": {
+                  "type": "string"
+                },
+                "country": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Location not found."
+          },
+          "400": {
+            "description": "Invalid input."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/openinghours/{id}": {
+      "put": {
+        "tags": [
+          "openinghours"
+        ],
+        "summary": "Update opening hours by ID",
+        "description": "Updates the details of an opening hours entry specified by id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the opening hours entry to update",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Opening hours update payload",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "day": {
+                  "type": "string",
+                  "example": "monday"
+                },
+                "opening": {
+                  "type": "string",
+                  "example": "09:00h"
+                },
+                "closing": {
+                  "type": "string",
+                  "example": "17:30h"
+                },
+                "storeId": {
+                  "type": "integer",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Opening hours updated successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "day": {
+                  "type": "string"
+                },
+                "opening": {
+                  "type": "string"
+                },
+                "closing": {
+                  "type": "string"
+                },
+                "storeId": {
+                  "type": "integer"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Opening hours entry not found."
+          },
+          "400": {
+            "description": "Invalid input."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
     }
   }
 }
