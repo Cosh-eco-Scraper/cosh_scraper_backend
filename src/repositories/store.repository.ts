@@ -1,7 +1,7 @@
 import databaseClient from '../config/dbConnectionConfig';
 import { storeQueries } from './queries/store.queries';
 import { Store } from '../domain/Store';
-import { mapper, storeMapper } from './mapper';
+import { mapper } from './mapper';
 import NotFoundError from '../domain/errors/NotFoundError';
 import { DatabaseOpeningHours } from '../domain/OpeningHours';
 import { DatabaseBrand } from '../domain/Brand';
@@ -14,7 +14,7 @@ export const StoreRepository = {
       databaseClient.connect();
       const result = await databaseClient.query(storeQueries.getAllStores());
 
-      stores = result.rows.map(storeMapper.mapStore);
+      stores = result.rows.map(mapper.mapStore);
     } finally {
       databaseClient.end();
     }
@@ -32,7 +32,7 @@ export const StoreRepository = {
         throw new NotFoundError('Store not found');
       }
 
-      return result.rows.map(storeMapper.mapStore)[0] as Store;
+      return result.rows.map(mapper.mapStore)[0] as Store;
     } finally {
       databaseClient.end();
     }
@@ -49,7 +49,7 @@ export const StoreRepository = {
         throw new NotFoundError('Store not found');
       }
 
-      return result.rows.map(storeMapper.mapStore)[0] as Store;
+      return result.rows.map(mapper.mapStore)[0] as Store;
     } finally {
       databaseClient.end();
     }
