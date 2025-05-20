@@ -1,192 +1,187 @@
 import { chromium, Page } from 'playwright';
+import { GoogleGenAI } from "@google/genai";
+import * as dotenv from "dotenv";
+
+dotenv.config();
+const ai = new GoogleGenAI({ apiKey: process.env.AI_API_KEY });
 
 type ScrapedInfo = {
     url: string;
     brands: string[];
-    openingHours: string[];
-    location: string[];
+    openingHours: {
+        "monday": { "open": string, "close": string } | null,
+        "tuesday": { "open": string, "close": string } | null,
+        "wednesday": { "open": string, "close": string } | null,
+        "thursday": { "open": string, "close": string } | null,
+        "friday": { "open": string, "close": string } | null,
+        "saturday": { "open": string, "close": string } | null,
+        "sunday": { "open": string, "close": string } | null,
+    };
+    location: string;
     about: string;
 };
 
 async function getAllInternalLinks(page: Page): Promise<string[]> {
     const baseUrl = new URL(page.url()).origin;
-
     const hrefs = await page.$$eval('a[href]', anchors =>
         Array.from(anchors)
             .map(a => (a as HTMLAnchorElement).href)
             .filter(Boolean)
     );
-
     const internalLinks = hrefs
         .filter(href => href.startsWith(baseUrl))
         .filter(href => !href.startsWith('mailto:') && !href.startsWith('tel:'))
         .filter((href, i, arr) => arr.indexOf(href) === i);
-
     return internalLinks;
 }
 
 
-async function scrapeBrands(page: Page): Promise<string[]> {
-    const brandsFromMerk = await page.$$eval('a[href*="/merk/"]', links =>
-        links.map(link => {
-            for (const node of link.childNodes) {
-                if (node.nodeType === Node.TEXT_NODE) {
-                    return node.textContent?.trim() || '';
+async function extractRelevantSnippets(page: Page): Promise<string[]> {
+    const keywords = [
+        'about', 'over ons', 'about us', 'intro',
+        'brand', 'merk', 'merken',
+        'location', 'locatie', 'adres', 'address',
+        'open', 'opening', 'hour', 'uur', 'tijd', 'time', 'openingstijden', 'opening hours',
+        'openingsuren', 'opening hours',
+        'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+        'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag', 'gesloten',
+    ];
+    const keywordRegex = new RegExp(keywords.join('|'), 'i');
+
+    const title = await page.title();
+    const metaDescription = await page.$eval('meta[name="description"]', el => el.getAttribute('content'), { timeout: 2000 }).catch(() => '');
+
+    const blocks = await page.$$eval('section, article, div, ul, ol', (elements, keywordRegexStr) => {
+        const regex = new RegExp(keywordRegexStr, 'i');
+        return elements
+            .map(el => (el as HTMLElement).innerText?.trim() || '')
+            .filter(Boolean)
+            .filter(text => regex.test(text) && text.length > 0 && text.length < 2000);
+    }, keywordRegex.source);
+
+    const directSnippets = await page.$$eval('h1, h2, h3, h4, h5, h6, p, span, li, td, th, tr', (elements, keywordRegexStr) => {
+        const regex = new RegExp(keywordRegexStr, 'i');
+        return elements
+            .map(el => el.textContent?.trim() || '')
+            .filter(Boolean)
+            .filter(text => regex.test(text) && text.length > 0 && text.length < 500);
+    }, keywordRegex.source);
+
+    const allSnippets = [title, metaDescription, ...blocks, ...directSnippets]
+        .map(s => (s ?? '').trim())
+        .filter(Boolean);
+
+    return Array.from(new Set(allSnippets));
+}
+
+async function openDropdowns(page: Page) {
+    const dropdownSelectors = [
+        'button', 'a', '[role="button"]', '[aria-haspopup="true"]'
+    ];
+    for (const selector of dropdownSelectors) {
+        const elements = await page.$$(selector);
+        for (const el of elements) {
+            const text = (await el.innerText().catch(() => ''))?.toLowerCase() || '';
+            const aria = (await el.getAttribute('aria-label').catch(() => ''))?.toLowerCase() || '';
+            if (text.includes('brand') || aria.includes('brand')) {
+                try {
+                    await el.click({ force: true });
+                    await page.waitForTimeout(500);
+                } catch (e) {
+                    console.error(`Failed to click on dropdown: ${e}`);
                 }
             }
-            return '';
-        })
-            .filter(text => text.length > 0 && !['Ontdek alle merken', 'Alle merken', 'Merken', 'Alle kleding', 'Alle accessoires'].includes(text))
-    );
-
-    if (brandsFromMerk.length > 0) {
-        return Array.from(new Set(brandsFromMerk));
-    }
-
-    const brandsFromDropdown = await page.$$eval('li.has-dropdown', dropdowns => {
-        for (const dropdown of dropdowns) {
-            const anchor = dropdown.querySelector('a');
-            if (anchor?.textContent?.trim().toLowerCase() === 'brands') {
-                const brandLinks = dropdown.querySelectorAll('ul.dropdown > li > a');
-                return Array.from(brandLinks).map(el => el.textContent?.trim() || '').filter(Boolean);
-            }
         }
-        return [];
-    });
-
-    if (brandsFromDropdown.length > 0) {
-        return brandsFromDropdown;
     }
-
-    return await scrapeByKeywords(page, ['brand', 'merk', 'merken']);
 }
 
-async function scrapeByKeywords(page: Page, keywords: string[]): Promise<string[]> {
-    for (const keyword of keywords) {
-        const selector = `[id*="${keyword}"], [class*="${keyword}"]`;
-        const texts = await page.$$eval(selector, els =>
-            els.map(el => el.textContent?.trim() || '').filter(Boolean)
-        );
-        if (texts.length > 0) return texts;
+async function gatherRelevantTexts(page: Page): Promise<string[]> {
+    const visited = new Set<string>();
+    const snippets: string[] = [];
+
+    let internalLinks: string[] = [];
+    try {
+        internalLinks = await getAllInternalLinks(page);
+    } catch (e) {
+        internalLinks = [];
     }
-    return [];
-}
+    const toVisit = [page.url(), ...internalLinks.filter(link => link !== page.url())].slice(0, 10);
 
-async function scrapeAboutParagraph(page: Page): Promise<string> {
-    const aboutText = await page.$$eval('section, div', (sections) => {
-        for (const sec of sections) {
-            if (/about|intro/i.test(sec.className) || /about|intro/i.test(sec.id || '')) {
-                const p = sec.querySelector('p');
-                if (p) return p.textContent?.trim() || '';
-            }
-        }
-        return '';
-    });
-    if (aboutText) return aboutText;
-
-    const paragraphs = await page.$$eval('p', ps =>
-        ps.map(p => p.textContent?.trim() || '').filter(Boolean)
-    );
-    return paragraphs.find(p => /about/i.test(p)) || '';
-}
-
-async function scrapeOpeningHours(page: Page): Promise<string[]> {
-    let results = await page.$$eval('footer p', ps =>
-        ps.map(p => p.textContent?.trim() || '').filter(text => /hour|uur|open/i.test(text))
-    );
-    if (results.length) return results;
-
-    results = await scrapeByKeywords(page, ['hour', 'open', 'time', 'uur']);
-    return results;
-}
-
-async function scrapeAddress(page: Page): Promise<string[]> {
-    const links = await getAllInternalLinks(page);
-    console.log(`Found ${links.length} internal links`);
-
-    for (const link of links) {
-        console.log(`Visiting: ${link}`);
-        const subPage = await page.context().newPage();
+    for (const url of toVisit) {
+        if (visited.has(url)) continue;
+        visited.add(url);
 
         try {
-            await subPage.goto(link, { waitUntil: 'domcontentloaded', timeout: 10000 });
-            await subPage.waitForTimeout(500);
-
-            //Case 1: <p> with "Adres: ..."
-            const inlineAddress = await subPage.$$eval('p', ps =>
-                ps
-                    .map(p => p.textContent?.trim() || '')
-                    .filter(text => /Adres:/i.test(text))
-                    .map(text => {
-                        const match = text.match(/Adres:\s*(.+)/i);
-                        return match ? match[1].trim() : '';
-                    })
-                    .filter(Boolean)
-            );
-            if (inlineAddress.length) {
-                console.log(`Inline <p> address found: ${inlineAddress[0]}`);
-                await subPage.close();
-                return inlineAddress;
-            }
-
-            //Case 2: Heading followed by paragraph
-            const addressFromHeading = await subPage.$$eval('h1, h2, h3, h4, h5, h6', headings => {
-                for (let i = 0; i < headings.length; i++) {
-                    const heading = headings[i];
-                    if (/Adres:/i.test(heading.textContent || '')) {
-                        let next = heading.nextElementSibling;
-                        while (next) {
-                            if (next.tagName.toLowerCase() === 'p') {
-                                return [next.textContent?.trim() || ''];
-                            }
-                            next = next.nextElementSibling;
-                        }
-                    }
-                }
-                return [];
-            });
-            if (addressFromHeading.length) {
-                console.log(`Heading + <p> address found: ${addressFromHeading[0]}`);
-                await subPage.close();
-                return addressFromHeading;
-            }
-
-            //Case 3: Two spans — label then address
-            const addressFromSpan = await subPage.$$eval('span', spans => {
-                for (let i = 0; i < spans.length; i++) {
-                    const text = spans[i].textContent?.trim() || '';
-                    if (/adres/i.test(text)) {
-                        const next = spans[i + 1];
-                        if (next) {
-                            const nextText = next.textContent?.trim();
-                            if (nextText && /\d{4}/.test(nextText)) {
-                                return [nextText];
-                            }
-                        }
-                    }
-                }
-                return [];
-            });
-            if (addressFromSpan.length) {
-                console.log(`Label <span> + address <span> found: ${addressFromSpan[0]}`);
-                await subPage.close();
-                return addressFromSpan;
-            }
-
-            await subPage.close();
-        } catch (err) {
-            if (err instanceof Error) {
-                console.error(`Error visiting ${link}:`, err.message);
-            } else {
-                console.error(`Error visiting ${link}:`, err);
-            }
-            await subPage.close();
+            await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
+            await openDropdowns(page);
+            const pageSnippets = await extractRelevantSnippets(page);
+            snippets.push(...pageSnippets);
+        } catch (e) {
+            console.error(`Error visiting ${url}:`, e);
             continue;
         }
     }
+    return Array.from(new Set(snippets));
+}
 
-    console.log('No address found in any subpages');
-    return [];
+const sendPrompt = async (prompt: string): Promise<string | undefined> => {
+    const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: prompt,
+    });
+    console.log(response.text);
+    return response.text;
+}
+
+async function summarizeRelevantInfoWithAI(url: string, snippets: string[]): Promise<ScrapedInfo | null> {
+    const prompt = `
+The website URL is: ${url}
+
+Given the following relevant text snippets from a shop website, extract and summarize the following fields as a JSON object:
+
+{
+  "url": string,
+  "brands": string[],
+  "openingHours": {
+    "monday": {"open": string, "close": string } | null,
+    "tuesday": {"open": string, "close": string } | null,
+    "wednesday": {"open": string, "close": string } | null,
+    "thursday": {"open": string, "close": string } | null,
+    "friday": {"open": string, "close": string } | null,
+    "saturday": {"open": string, "close": string } | null,
+    "sunday": {"open": string, "close": string } | null
+  },
+  "location": string,
+  "about": string
+}
+
+Instructions:
+- For "brands", extract all brand names mentioned in the snippets. If none are found, return an empty array.
+- For "openingHours", if a day is marked as "gesloten", "closed", or any other non-time value, set both "open" and "close" to "closed". Only use an object with "open" and "close" if there are actual times.
+- For "location" and "about", extract the relevant information.
+
+
+Snippets:
+${snippets.map((s, i) => `[${i + 1}] ${s}`).join('\n')}
+
+Respond ONLY with the JSON object.
+    `.trim();
+    console.log('Prompt:', prompt); // Remove this if you don't want see the whole prompt
+    const aiResponse = await sendPrompt(prompt);
+    if (!aiResponse) return null;
+
+    try {
+        const jsonStart = aiResponse.indexOf('{');
+        const jsonEnd = aiResponse.lastIndexOf('}');
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+            const jsonString = aiResponse.substring(jsonStart, jsonEnd + 1);
+            return JSON.parse(jsonString) as ScrapedInfo;
+        }
+        return null;
+    } catch (err) {
+        console.error('Failed to parse AI response as JSON:', err);
+        return null;
+    }
 }
 
 export async function scraper(url: string): Promise<ScrapedInfo | null> {
@@ -197,35 +192,11 @@ export async function scraper(url: string): Promise<ScrapedInfo | null> {
     try {
         await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-        const brands = await scrapeBrands(page);
-        let openingHours = await scrapeOpeningHours(page);
-        const location = await scrapeAddress(page);
+        const snippets = await gatherRelevantTexts(page);
 
-        let about = await scrapeAboutParagraph(page);
-        const aboutLinks = await page.$$eval('a[href]', as =>
-            as.map(a => a.getAttribute('href') || '').filter(href => /about|over-ons|about-us/i.test(href))
-        );
+        const aiSummary = await summarizeRelevantInfoWithAI(url, snippets);
+        return aiSummary;
 
-        if (aboutLinks.length > 0) {
-            const aboutUrl = new URL(aboutLinks[0], url).href;
-            if (aboutUrl !== url) {
-                try {
-                    await page.goto(aboutUrl, { waitUntil: 'domcontentloaded' });
-                    about = await scrapeAboutParagraph(page) || about;
-                    await page.goto(url, { waitUntil: 'domcontentloaded' });
-                } catch {
-                    console.error(`Error visiting about page: ${aboutUrl}`);
-                }
-            }
-        }
-
-        return {
-            url,
-            brands,
-            openingHours,
-            location,
-            about,
-        };
     } catch (e) {
         console.error(`Error scraping ${url}:`, e);
         return null;
@@ -237,8 +208,7 @@ export async function scraper(url: string): Promise<ScrapedInfo | null> {
 }
 
 (async () => {
-    const url = 'https://harvestclub.be/';
+    const url = 'https://www.blabloom.com/nl/'; // Here you can put the URL to test the scraper
     const scrapedData = await scraper(url);
     console.log(scrapedData);
-}
-)();
+})();
