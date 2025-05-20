@@ -1,6 +1,7 @@
 import { Store } from '../domain/Store';
 import { Day } from '../domain/Day';
 import { DatabaseOpeningHours } from '../domain/OpeningHours';
+import { DatabaseBrand } from '../domain/Brand';
 
 function mapStore(databaseResult: any): Store {
   return {
@@ -28,7 +29,17 @@ function mapHours(databaseResult: any): DatabaseOpeningHours {
   };
 }
 
+function mapBrand(databaseResult: any): DatabaseBrand {
+  return {
+    id: databaseResult.id,
+    name: databaseResult.name,
+    storeId: databaseResult.store_id,
+    label: databaseResult.label,
+  }
+}
+
 export const mapper = {
   mapStore: (databaseResult: any) => mapStore(databaseResult),
-  mapHours: (databaseResult: any) => mapHours(databaseResult)
+  mapHour: (databaseResult: any) => mapHours(databaseResult),
+  mapBrand: (databaseResult: any) => mapBrand(databaseResult)
 };

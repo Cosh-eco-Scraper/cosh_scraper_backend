@@ -147,6 +147,58 @@
         }
       }
     },
+    "/stores/{id}/brands": {
+      "get": {
+        "tags": [
+          "stores"
+        ],
+        "summary": "Returns all brands for a single store by ID",
+        "description": "Retrieves brands for a specific store.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the store to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "brand found and returned",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": "1"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Jack & Jones"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No brands found"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Store not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/llm": {
       "post": {
         "tags": [
