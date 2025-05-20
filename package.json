@@ -25,6 +25,8 @@
   },
   "homepage": "https://github.com/Cosh-eco-Scraper/Cosh.Eco_Scraper_Backend#readme",
   "devDependencies": {
+    "@types/axios": "^0.14.4",
+    "@types/cheerio": "^1.0.0",
     "@types/mocha": "^10.0.10",
     "@types/swagger-ui-express": "^4.1.8",
     "eslint": "^9.26.0",
@@ -41,13 +43,14 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@types/js-yaml": "^4.0.9",
+    "@google/genai": "^0.14.0",
     "@types/express": "^5.0.1",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.15.18",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "@google/genai": "^0.14.0",
     "js-yaml": "^4.1.0",
+    "playwright": "^1.52.0",
     "swagger-ui-express": "^5.0.1"
   },
   "lint-staged": {
