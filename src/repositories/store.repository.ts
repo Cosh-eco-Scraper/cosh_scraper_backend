@@ -33,7 +33,7 @@ export const StoreRepository = {
     }
   },
 
-  updateStore: async (storeId: number, name: string, location_id: number, description?: string) => {
+  updateStore: async (storeId: number, name: string, location_id: number, description?: string): Promise<void> => {
     try {
       databasePool.connect();
       const result = await databasePool.query(
@@ -44,7 +44,6 @@ export const StoreRepository = {
         throw new NotFoundError('Store not found');
       }
 
-      return result.rows.map(mapper.mapStore)[0] as Store;
     } finally {
       databasePool.end();
     }

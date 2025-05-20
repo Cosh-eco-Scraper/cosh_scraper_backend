@@ -1,8 +1,8 @@
-import { Brand } from '../domain/Brand';
 import { Store } from '../domain/Store';
 import { Day } from '../domain/Day';
 import { DatabaseOpeningHours } from '../domain/OpeningHours';
 import { DatabaseBrand } from '../domain/Brand';
+import { Location } from '../domain/Location';
 
 function mapStore(databaseResult: any): Store {
   return {
@@ -39,8 +39,22 @@ function mapHours(databaseResult: any): DatabaseOpeningHours {
   };
 }
 
+function mapLocation(databaseResult: any): Location {
+  return {
+    id: databaseResult.id,
+    street: databaseResult.street,
+    number: databaseResult.number,
+    postalCode: databaseResult.postal_code,
+    city: databaseResult.city,
+    country: databaseResult.country,
+    createdAt: databaseResult.created_at,
+    updatedAt: databaseResult.updated_at
+  };
+}
+
 export const mapper = {
   mapStore: (databaseResult: any) => mapStore(databaseResult),
   mapHour: (databaseResult: any) => mapHours(databaseResult),
-  mapBrand: (databaseResult: any) => mapBrand(databaseResult)
+  mapBrand: (databaseResult: any) => mapBrand(databaseResult),
+  mapLocation: (databaseResult: any) => mapLocation(databaseResult)
 };

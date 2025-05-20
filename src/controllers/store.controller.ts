@@ -40,18 +40,10 @@ export async function updateStore(req: Request, res: Response, next: NextFunctio
       res.status(400).json({ message: 'Store ID is required' });
     }
 
-    const store = await StoreService.updateStore(
-      parseInt(storeId),
-      name,
-      location_id,
-      description
-    );
+    await StoreService.updateStore(parseInt(storeId), name, location_id, description);
 
-    if (!store) {
-      res.status(404).json({ message: 'Store not found' });
-    }
 
-    res.json(dtoMapper.mapStore(store));
+    res.status(200).json({ message: 'Store updated successfully' });
   } catch (error) {
     next(error);
   }

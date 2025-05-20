@@ -1,6 +1,6 @@
 import databaseClient from "../config/dbConnectionConfig"
 import { Brand } from "../domain/Brand";
-import { brandMapper } from "./mapper";
+import { mapper } from "./mapper";
 import { brandQueries } from "./queries/brands.queries";
 
 export const BrandRepository = {
