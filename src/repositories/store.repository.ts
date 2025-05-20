@@ -44,8 +44,9 @@ export const StoreRepository = {
         throw new NotFoundError('Store not found');
       }
 
-    } finally {
-      databasePool.end();
+    } catch (error) {
+      console.error('Error updating store:', error);
+      throw new Error('Error updating store');
     }
   },
   getStoreWithOpeningsHours: async (id: number) => {

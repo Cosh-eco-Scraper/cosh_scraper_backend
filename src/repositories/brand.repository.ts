@@ -7,10 +7,8 @@ export const BrandRepository = {
     updateBrand: async (brandId: number, name: string, label: string): Promise<void> => {
         try {
 
-            console.log(databasePool);
             databasePool.connect();
 
-            console.log(databasePool);
             const result = await databasePool.query(brandQueries.updateBrand(brandId, name, label));
 
             console.log("Brand updated successfully", result);

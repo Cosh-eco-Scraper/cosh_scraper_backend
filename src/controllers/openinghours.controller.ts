@@ -4,7 +4,7 @@ import OpeningHoursService from "../services/openingshours.service";
 export async function updateOpeningHours(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { openingHoursId } = req.params;
-    const { day, startTime, endTime } = req.body;
+    const { day, startTime, endTime, store_id } = req.body;
 
     if (!openingHoursId) {
       res.status(400).json({ message: 'Opening hours ID is required' });
@@ -16,7 +16,7 @@ export async function updateOpeningHours(req: Request, res: Response, next: Next
       return;
     }
 
-    await OpeningHoursService.updateOpeningHours(Number(openingHoursId), day, startTime, endTime);
+    await OpeningHoursService.updateOpeningHours(Number(openingHoursId), day, startTime, endTime, store_id);
     res.status(200).json({ message: 'Opening hours updated successfully' });
   } catch (error) {
     next(error);
