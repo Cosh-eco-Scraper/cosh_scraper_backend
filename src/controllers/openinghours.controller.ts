@@ -8,12 +8,10 @@ export async function updateOpeningHours(req: Request, res: Response, next: Next
 
     if (!openingHoursId) {
       res.status(400).json({ message: 'Opening hours ID is required' });
-      return;
     }
 
-    if (!day || !startTime || !endTime) {
-      res.status(400).json({ message: 'Day, startTime and endTime are required' });
-      return;
+    if (!day || !startTime || !endTime || !store_id) {
+      res.status(400).json({ message: "Day, startTime, endTime, and store_id are required" });
     }
 
     await OpeningHoursService.updateOpeningHours(Number(openingHoursId), day, startTime, endTime, store_id);

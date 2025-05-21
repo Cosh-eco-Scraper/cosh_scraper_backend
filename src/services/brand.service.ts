@@ -3,7 +3,7 @@ import databaseClient from "../config/dbConnectionConfig";
 import { BrandRepository } from "../repositories/brand.repository";
 
 const updateBrand = async (brandId: number, name: string, label: string) => {
-    BrandRepository.updateBrand(brandId, name, label)
+    await BrandRepository.updateBrand(brandId, name, label)
 
 }
 

@@ -1,7 +1,7 @@
-import { Router} from 'express';
+import { Router } from 'express';
 import { updateOpeningHours } from '../controllers/openinghours.controller';
 const router = Router();
 
-router.put('/:openingHourId', updateOpeningHours);
+router.put('/:openingHoursId', updateOpeningHours);
 
 export default router;

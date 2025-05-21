@@ -1,4 +1,5 @@
 import databasePool from "../config/dbConnectionConfig";
+import NotFoundError from "../domain/errors/NotFoundError";
 import { openingHoursQueries } from "./queries/openinghours.queries";
 
 export const openingHoursRespository = {
@@ -8,11 +9,11 @@ export const openingHoursRespository = {
             const result = await databasePool.query(openingHoursQueries.updateOpeningHours(openingHoursId, day, startTime, endTime, store_id));
 
             if (!result.rowCount) {
-                throw new Error("Opening hours not found");
+                throw new NotFoundError("Opening hours not found");
             }
         } catch (error) {
             console.error("Error updating opening hours:", error);
-            throw new Error("Database error");
+            throw new Error("Error updating opening hours");
         }
     }
 }

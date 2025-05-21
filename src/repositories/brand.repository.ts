@@ -19,7 +19,7 @@ export const BrandRepository = {
 
         } catch (error) {
             console.error("Error updating brand:", error);
-            throw new Error("Database error");
+            throw new Error("Error updating brand");
         }
     }
 };

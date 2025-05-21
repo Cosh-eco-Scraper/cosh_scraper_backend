@@ -523,11 +523,11 @@
                   "type": "string",
                   "example": "monday"
                 },
-                "opening": {
+                "startTime": {
                   "type": "string",
                   "example": "09:00h"
                 },
-                "closing": {
+                "endTime": {
                   "type": "string",
                   "example": "17:30h"
                 },
