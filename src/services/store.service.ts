@@ -1,6 +1,10 @@
 import { Store } from '../domain/Store';
 import { StoreRepository } from '../repositories/store.repository';
 import NotFoundError from '../domain/errors/NotFoundError';
+import OpeningHoursService from './openingshours.service';
+import LocationService from './location.service';
+import BrandService from './brand.service';
+import { UpdateStoreDto } from '../domain/UpdateStore';
 
 export const StoreService = {
   getAllStores: async () => {
@@ -13,8 +17,11 @@ export const StoreService = {
 
     return store;
   },
-  updateStore: async (storeId: number, name: string, location_id: number, description?: string) => {
-    await StoreRepository.updateStore(storeId, name, location_id, description);
+  updateStore: async (data: UpdateStoreDto) => {
+    await StoreRepository.updateStore(data.storeId, data.name, data.locationId, data.description);
+    await OpeningHoursService.updateOpeningHours(data.openingHoursId, data.day, data.startTime, data.endTime, data.storeId);
+    await LocationService.updateLocation(data.locationId, data.street, data.number, data.postalCode, data.city, data.country);
+    await BrandService.updateBrand(data.brandId, data.name, data.label);
   },
   getOpeningsHoursByStoreId: async (id: number) => {
     let hours = await StoreRepository.getStoreWithOpeningsHours(id);

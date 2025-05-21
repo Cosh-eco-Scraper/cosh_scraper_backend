@@ -5,7 +5,7 @@ export const storeQueries = {
   getAllStores: () => `SELECT *
                        FROM stores;`,
 
-  updateStore: (storeId: number, name: string, location_id: number, description?: string) =>
+  updateStore: (storeId?: number, name?: string, location_id?: number, description?: string) =>
     `UPDATE stores
                                                     SET name = '${name}',
                                                     description = '${description}',

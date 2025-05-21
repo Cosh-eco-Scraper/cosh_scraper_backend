@@ -3,7 +3,7 @@ import NotFoundError from "../domain/errors/NotFoundError";
 import { openingHoursQueries } from "./queries/openinghours.queries";
 
 export const openingHoursRespository = {
-    updateOpeningHours: async (openingHoursId: number, day: string, startTime: string, endTime: string, store_id: number): Promise<void> => {
+    updateOpeningHours: async (openingHoursId?: number, day?: string, startTime?: string, endTime?: string, store_id?: number): Promise<void> => {
         try {
             databasePool.connect();
             const result = await databasePool.query(openingHoursQueries.updateOpeningHours(openingHoursId, day, startTime, endTime, store_id));

@@ -33,7 +33,7 @@ export const StoreRepository = {
     }
   },
 
-  updateStore: async (storeId: number, name: string, location_id: number, description?: string): Promise<void> => {
+  updateStore: async (storeId?: number, name?: string, location_id?: number, description?: string): Promise<void> => {
     try {
       databasePool.connect();
       const result = await databasePool.query(

@@ -4,7 +4,7 @@ import { locationQuerries } from "./queries/location.querries";
 
 
 export const LocationRepository = {
-    updateLocation: async (locationId: number, street: string, number: string, postal_code: string, city: string, country: string): Promise<void> => {
+    updateLocation: async (locationId?: number, street?: string, number?: string, postal_code?: string, city?: string, country?: string): Promise<void> => {
         try {
             databasePool.connect();
             const result = await databasePool.query(locationQuerries.updateLocation(locationId, street, number, postal_code, city, country));

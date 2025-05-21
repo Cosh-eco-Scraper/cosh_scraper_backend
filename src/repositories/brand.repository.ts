@@ -4,7 +4,7 @@ import { mapper } from "./mapper";
 import { brandQueries } from "./queries/brands.queries";
 
 export const BrandRepository = {
-    updateBrand: async (brandId: number, name: string, label: string): Promise<void> => {
+    updateBrand: async (brandId?: number, name?: string, label?: string): Promise<void> => {
         try {
 
             databasePool.connect();

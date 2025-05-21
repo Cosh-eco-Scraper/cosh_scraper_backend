@@ -89,77 +89,138 @@
         "tags": [
           "stores"
         ],
-        "summary": "Update a store by ID",
-        "description": "Updates the details of a store specified by id.",
+        "summary": "Update a store",
+        "description": "Updates the details of a store, including its location, opening hours, and associated brand.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "description": "ID of the store to update",
             "required": true,
-            "type": "integer"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Store update payload",
-            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "example": "Updated Store Name"
-                },
-                "description": {
-                  "type": "string",
-                  "example": "Updated description"
-                },
-                "location_id": {
-                  "type": "integer",
-                  "example": 1
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Details of the store to update",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Updated Store Name"
+                  },
+                  "locationId": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Updated description"
+                  },
+                  "brandId": {
+                    "type": "integer",
+                    "example": 4
+                  },
+                  "label": {
+                    "type": "string",
+                    "example": "Updated Label"
+                  },
+                  "openingHoursId": {
+                    "type": "integer",
+                    "example": 3
+                  },
+                  "day": {
+                    "type": "string",
+                    "example": "Monday"
+                  },
+                  "startTime": {
+                    "type": "string",
+                    "format": "time",
+                    "example": "09:00"
+                  },
+                  "endTime": {
+                    "type": "string",
+                    "format": "time",
+                    "example": "17:00"
+                  },
+                  "street": {
+                    "type": "string",
+                    "example": "Main Street"
+                  },
+                  "number": {
+                    "type": "string",
+                    "example": "123"
+                  },
+                  "postalCode": {
+                    "type": "string",
+                    "example": "12345"
+                  },
+                  "city": {
+                    "type": "string",
+                    "example": "Sample City"
+                  },
+                  "country": {
+                    "type": "string",
+                    "example": "Sample Country"
+                  }
                 }
               }
             }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "Store updated successfully.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "integer"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "location_id": {
-                  "type": "integer"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updated_at": {
-                  "type": "string",
-                  "format": "date-time"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Store updated successfully"
+                    }
+                  }
                 }
               }
             }
           },
-          "404": {
-            "description": "Store not found."
-          },
           "400": {
-            "description": "Invalid input."
+            "description": "Invalid input or missing parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Store ID is required"
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "An unexpected error occurred."
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -579,6 +640,101 @@
           },
           "500": {
             "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/storeBrands/{storeId}/{brandId}": {
+      "put": {
+        "tags": [
+          "StoreBrands"
+        ],
+        "summary": "Update a specific brand for a store",
+        "description": "Updates the association of a specific brand with a specific store identified by storeId and brandId.",
+        "parameters": [
+          {
+            "name": "storeId",
+            "in": "path",
+            "description": "ID of the store to update",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "brandId",
+            "in": "path",
+            "description": "ID of the brand to associate with the store",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Store brands updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Store brands updated successfully."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or missing parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Store ID is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Store or brand not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Store or brand not found."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "An unexpected error occurred."
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

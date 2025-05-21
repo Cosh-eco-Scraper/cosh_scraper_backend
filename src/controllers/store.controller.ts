@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { StoreService } from '../services/store.service';
 import { dtoMapper } from './dtoMapper';
+import { UpdateStoreDto } from '../domain/UpdateStore';
 
 export async function getAllStores(req: Request, res: Response, next: NextFunction) {
   try {
@@ -34,13 +35,30 @@ export async function getStore(req: Request, res: Response, next: NextFunction) 
 export async function updateStore(req: Request, res: Response, next: NextFunction) {
   try {
     const storeId = req.params.id;
-    const { name, location_id, description } = req.body;
 
     if (!storeId) {
       res.status(400).json({ message: 'Store ID is required' });
     }
 
-    await StoreService.updateStore(parseInt(storeId), name, location_id, description);
+    const updateStoreDto: UpdateStoreDto = {
+      storeId: parseInt(storeId),
+      name: req.body.name,
+      locationId: req.body.locationId,
+      description: req.body.description,
+      brandId: req.body.brandId,
+      label: req.body.label,
+      openingHoursId: req.body.openingHoursId,
+      day: req.body.day,
+      startTime: req.body.startTime,
+      endTime: req.body.endTime,
+      street: req.body.street,
+      number: req.body.number,
+      postalCode: req.body.postalCode,
+      city: req.body.city,
+      country: req.body.country,
+    };
+
+    await StoreService.updateStore(updateStoreDto);
 
 
     res.status(200).json({ message: 'Store updated successfully' });
