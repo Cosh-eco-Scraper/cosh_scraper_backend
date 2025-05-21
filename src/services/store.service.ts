@@ -19,7 +19,7 @@ export const StoreService = {
   },
   updateStore: async (data: UpdateStoreDto) => {
     await StoreRepository.updateStore(data.storeId, data.name, data.locationId, data.description);
-    await OpeningHoursService.updateOpeningHours(data.openingHoursId, data.day, data.startTime, data.endTime, data.storeId);
+    // await OpeningHoursService.updateOpeningHours(data.openingHoursId, data.day, data.startTime, data.endTime, data.storeId);
     await LocationService.updateLocation(data.locationId, data.street, data.number, data.postalCode, data.city, data.country);
     await BrandService.updateBrand(data.brandId, data.name, data.label);
   },
