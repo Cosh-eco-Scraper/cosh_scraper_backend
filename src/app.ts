@@ -9,7 +9,7 @@ import cors from 'cors';
 
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:3000' })); // Adjust the origin as needed
+app.use(cors({ origin: '*' })); // Allow any origin
 app.use(express.json());
 
 // Routes
