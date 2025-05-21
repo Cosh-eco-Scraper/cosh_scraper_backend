@@ -3,8 +3,7 @@ run-name: ${{ github.actor }} has pushed to main and is deploying the app to Doc
 
 on:
   push:
-    branches:
-      - main
+
 
 jobs:
   build_test:
