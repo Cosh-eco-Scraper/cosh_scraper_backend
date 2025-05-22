@@ -14,6 +14,19 @@ const sendPrompt = async (prompt: string): Promise<string | undefined> => {
   return response.text;
 };
 
+const descrtiptionCheck = async (description: string): Promise<string | undefined> => {
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.0-flash',
+    contents:
+      'give me only true or false for answer. can you check if this description complies to the European and Belgian guidelines for greeNwashing:' +
+      description,
+  });
+  console.log(response.text);
+
+  return response.text;
+};
+
+
 export const LLMService = {
-  sendPrompt,
+  sendPrompt, descrtiptionCheck
 };
