@@ -34,7 +34,10 @@ module.exports = [
       curly: ['error', 'all'],
       'no-console': 'off',
       'no-unused-vars': 'off', // handled by TS plugin
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
     },
   },
 
