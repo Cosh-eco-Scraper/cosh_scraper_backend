@@ -2,14 +2,16 @@ import sinon from 'sinon';
 import { Brand } from '../domain/Brand';
 import brandService from '../services/brand.service';
 import { BrandRepository } from '../repositories/brand.repository';
+
 let expect: typeof import('chai').expect;
-before(async () => {
-  ({ expect } = await import('chai'));
-});
 
 describe('BrandService', () => {
-  afterEach(() => {
-    sinon.restore(); // Restore all mocked methods after each test
+  beforeEach(() => {
+    sinon.restore(); // Restore all mocked methods before each test
+  });
+
+  before(async () => {
+    ({ expect } = await import('chai'));
   });
 
   describe('updateBrand', () => {
