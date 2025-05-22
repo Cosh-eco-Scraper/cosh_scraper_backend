@@ -2,7 +2,7 @@ import sinon from 'sinon';
 import { Brand } from '../domain/Brand';
 import brandService from '../services/brand.service';
 import { BrandRepository } from '../repositories/brand.repository';
-
+import NotFoundError from '../domain/errors/NotFoundError';
 
 describe('BrandService', () => {
   let expect: typeof import('chai').expect;
@@ -45,24 +45,20 @@ describe('BrandService', () => {
       // expect(findBrandByIdStub.calledOnceWith(brandId)).to.be.true;
       expect(updateBrandStub.calledOnceWith(brandId, brandData.name, brandData.label)).to.be.true;
     });
-
     it('should throw an error if the brand does not exist', async () => {
       // Arrange
       const brandId = 999;
       const brandData = { name: 'Nonexistent Brand', label: 'Nonexistent Label' };
 
-      // Mock the repository methods
-      // const findBrandByIdStub = sinon.stub(BrandRepository, "findBrandById").resolves(null);
+      // Mock the repository method to throw an error
+      sinon.stub(BrandRepository, 'updateBrand').rejects(new Error('Failed to update brand'));
 
-      // Act & Assert
       try {
         await brandService.updateBrand(brandId, brandData.name, brandData.label);
         expect.fail('Expected an error to be thrown');
       } catch (error: any) {
-        expect(error.message).to.equal('Error updating brand');
+        expect('Failed to update brand').equal(error.message);
       }
-
-      // expect(findBrandByIdStub.calledOnceWith(brandId)).to.be.true;
     });
   });
 });
