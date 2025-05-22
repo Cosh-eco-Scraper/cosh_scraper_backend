@@ -119,23 +119,6 @@
               "properties": {
                 "id": {
                   "type": "integer"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "location_id": {
-                  "type": "integer"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updated_at": {
-                  "type": "string",
-                  "format": "date-time"
                 }
               }
             }
@@ -303,7 +286,7 @@
     },
     "/brands/{brandId}": {
       "put": {
-        "tags": ["brand"],
+        "tags": ["brands"],
         "summary": "Update a brand by ID",
         "description": "Updates the details of a brand specified by brandId.",
         "parameters": [
@@ -342,20 +325,6 @@
               "properties": {
                 "id": {
                   "type": "integer"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "label": {
-                  "type": "string"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updated_at": {
-                  "type": "string",
-                  "format": "date-time"
                 }
               }
             }
@@ -425,29 +394,6 @@
               "properties": {
                 "id": {
                   "type": "integer"
-                },
-                "street": {
-                  "type": "string"
-                },
-                "number": {
-                  "type": "string"
-                },
-                "postal_code": {
-                  "type": "string"
-                },
-                "city": {
-                  "type": "string"
-                },
-                "country": {
-                  "type": "string"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updated_at": {
-                  "type": "string",
-                  "format": "date-time"
                 }
               }
             }
@@ -513,26 +459,6 @@
               "properties": {
                 "id": {
                   "type": "integer"
-                },
-                "day": {
-                  "type": "string"
-                },
-                "opening": {
-                  "type": "string"
-                },
-                "closing": {
-                  "type": "string"
-                },
-                "storeId": {
-                  "type": "integer"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updated_at": {
-                  "type": "string",
-                  "format": "date-time"
                 }
               }
             }
