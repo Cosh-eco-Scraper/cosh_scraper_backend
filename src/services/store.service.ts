@@ -21,5 +21,5 @@ export const StoreService = {
     let brands = await StoreRepository.getBrandsByStoreId(id);
 
     return brands;
-  },
+  }
 };

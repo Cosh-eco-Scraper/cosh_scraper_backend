@@ -52,5 +52,5 @@ export const StoreRepository = {
     brands = result.rows.map(mapper.mapBrand);
 
     return brands;
-  },
+  }
 };
