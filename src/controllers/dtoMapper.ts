@@ -12,7 +12,7 @@ export const dtoMapper = {
       number: store.location?.number ?? 'unknown',
       city: store.location?.city ?? 'unknown',
       postalCode: store.location?.postalCode ?? 'unknown',
-      country: store.location?.country ?? 'unknown',
+      country: store.location?.country ?? 'unknown'
     };
   },
   mapOpeningHours: (openingHours: DatabaseOpeningHours): OpeningHoursDto => {

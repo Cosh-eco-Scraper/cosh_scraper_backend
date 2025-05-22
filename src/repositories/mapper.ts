@@ -18,8 +18,8 @@ function mapStore(databaseResult: any): Store {
       postalCode: databaseResult.postal_code,
       country: databaseResult.country,
       createdAt: databaseResult.loc_created_at,
-      updatedAt: databaseResult.loc_updated_at,
-    },
+      updatedAt: databaseResult.loc_updated_at
+    }
   };
 }
 
@@ -43,8 +43,8 @@ function mapBrand(databaseResult: any): DatabaseBrand {
     id: databaseResult.id,
     name: databaseResult.name,
     storeId: databaseResult.store_id,
-    label: databaseResult.label,
-  }
+    label: databaseResult.label
+  };
 }
 
 export const mapper = {

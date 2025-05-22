@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 services:
   server:
@@ -6,8 +6,8 @@ services:
     build:
       context: .
     environment:
-      NODE_ENV: production  # Change to development when running dev profile
-      DB_HOST: db-prod      # Change to db-dev for development profile
+      NODE_ENV: production # Change to development when running dev profile
+      DB_HOST: db-prod # Change to db-dev for development profile
       DB_PORT: 5432
       DB_USER: prodUser
       DB_PASSWORD: prodPassword
@@ -27,12 +27,12 @@ services:
       POSTGRES_PASSWORD: prodPassword
       POSTGRES_DB: ScraperDB
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - db-prod-data:/var/lib/postgresql/data
       - ./database/tables.sql:/docker-entrypoint-initdb.d/01_tables.sql
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U prodUser" ]
+      test: ['CMD-SHELL', 'pg_isready -U prodUser']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,13 +47,13 @@ services:
       POSTGRES_PASSWORD: devPassword
       POSTGRES_DB: devPassword
     ports:
-      - "5433:5432"
+      - '5433:5432'
     volumes:
       - db-dev-data:/var/lib/postgresql/data
       - ./database/tables.sql:/docker-entrypoint-initdb.d/01_tables.sql
       - ./database/seeder.sql:/docker-entrypoint-initdb.d/02_seeder.sql
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U devUser" ]
+      test: ['CMD-SHELL', 'pg_isready -U devUser']
       interval: 10s
       timeout: 5s
       retries: 5
