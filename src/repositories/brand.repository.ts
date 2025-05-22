@@ -1,5 +1,6 @@
 import databasePool from "../config/dbConnectionConfig"
 import { Brand } from "../domain/Brand";
+import NotFoundError from "../domain/errors/NotFoundError";
 import { mapper } from "./mapper";
 import { brandQueries } from "./queries/brands.queries";
 
@@ -14,14 +15,12 @@ export const BrandRepository = {
             console.log("Brand updated successfully", result);
 
             if (!result.rowCount) {
-                throw new Error("Brand not found");
+                throw new NotFoundError("Brand not found");
             }
 
-            return brandId as number;
 
-        } catch (error) {
-            console.error("Error updating brand:", error);
-            throw new Error("Error updating brand");
+        } finally {
+            return brandId as number;
         }
     }
 };

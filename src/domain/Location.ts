@@ -11,11 +11,11 @@ export type Location = {
 
 export type LocationDTO = {
   id?: number;
-  street?: string;
-  number?: string;
-  postalCode?: string;
-  city?: string;
-  country?: string;
+  street: string;
+  number: string;
+  postalCode: string;
+  city: string;
+  country: string;
   createdAt?: Date;
   updatedAt?: Date;
 };

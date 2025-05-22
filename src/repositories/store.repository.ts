@@ -20,7 +20,6 @@ export const StoreRepository = {
     const result = await databasePool.query(storeQueries.getStoreById(id));
 
     try {
-      databasePool.connect();
       const result = await databasePool.query(storeQueries.getStoreById(id));
 
       if (!result.rows.length) {
@@ -28,8 +27,10 @@ export const StoreRepository = {
       }
 
       return result.rows.map(mapper.mapStore)[0] as Store;
-    } finally {
-      databasePool.end();
+    }
+    catch (error) {
+      console.error('Error getting store:', error);
+      throw new Error('Error getting store');
     }
   },
 
@@ -44,12 +45,11 @@ export const StoreRepository = {
         throw new NotFoundError('Store not found');
       }
 
+
+
+    } finally {
       return storeId as number;
 
-
-    } catch (error) {
-      console.error('Error updating store:', error);
-      throw new Error('Error updating store');
     }
   },
   getStoreWithOpeningsHours: async (id: number) => {

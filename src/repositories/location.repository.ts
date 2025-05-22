@@ -6,16 +6,13 @@ import { locationQuerries } from "./queries/location.querries";
 export const LocationRepository = {
     updateLocation: async (locationId?: number, street?: string, number?: string, postal_code?: string, city?: string, country?: string): Promise<number> => {
         try {
-            databasePool.connect();
             const result = await databasePool.query(locationQuerries.updateLocation(locationId, street, number, postal_code, city, country));
 
             if (!result.rowCount) {
                 throw new NotFoundError("Location not found");
             }
+        } finally {
             return locationId as number;
-        } catch (error) {
-            console.error("Error updating location:", error);
-            throw new Error("Error updating location");
         }
     }
 }
