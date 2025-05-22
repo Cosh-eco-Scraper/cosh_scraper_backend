@@ -9,10 +9,10 @@ const updateBrand = async (brandId?: number, name?: string, label?: string): Pro
 const createBrand = async (name: string, label: string): Promise<Brand> => {
   const result = await BrandRepository.createBrand(name, label);
   return result;
-}
+};
 
 const BrandService = {
   updateBrand,
-  createBrand
+  createBrand,
 };
 export default BrandService;

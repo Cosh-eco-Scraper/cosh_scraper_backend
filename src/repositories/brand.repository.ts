@@ -3,7 +3,6 @@ import { Brand } from '../domain/Brand';
 import { mapper } from './mapper';
 import { brandQueries } from './queries/brands.queries';
 
-
 const BrandRepository = {
   updateBrand: async (brandId?: number, name?: string, label?: string): Promise<number> => {
     const result = await databasePool.query(brandQueries.updateBrand(brandId, name, label));
@@ -28,8 +27,6 @@ const BrandRepository = {
 
     const brand = result.rows.map(mapper.mapBrand)[0] as Brand;
     return brand;
-
-    
   },
 };
 
