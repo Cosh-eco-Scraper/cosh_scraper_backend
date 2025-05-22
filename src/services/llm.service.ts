@@ -26,7 +26,7 @@ const descrtiptionCheck = async (description: string): Promise<string | undefine
   return response.text;
 };
 
-
 export const LLMService = {
-  sendPrompt, descrtiptionCheck
+  sendPrompt,
+  descrtiptionCheck,
 };

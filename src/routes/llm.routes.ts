@@ -6,5 +6,4 @@ const router = Router();
 router.post('/', sendPrompt);
 router.post('/greenwash', descrtiptionCheck);
 
-
 export default router;
