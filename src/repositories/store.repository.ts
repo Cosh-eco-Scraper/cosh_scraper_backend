@@ -33,7 +33,7 @@ export const StoreRepository = {
     }
   },
 
-  updateStore: async (storeId?: number, name?: string, location_id?: number, description?: string): Promise<void> => {
+  updateStore: async (storeId?: number, name?: string, location_id?: number, description?: string): Promise<number> => {
     try {
       databasePool.connect();
       const result = await databasePool.query(
@@ -43,6 +43,9 @@ export const StoreRepository = {
       if (!result.rowCount) {
         throw new NotFoundError('Store not found');
       }
+
+      return storeId as number;
+
 
     } catch (error) {
       console.error('Error updating store:', error);

@@ -14,8 +14,8 @@ export async function updateOpeningHours(req: Request, res: Response, next: Next
       res.status(400).json({ message: "Day, startTime, endTime, and store_id are required" });
     }
 
-    await OpeningHoursService.updateOpeningHours(Number(openingHoursId), day, startTime, endTime, storeId);
-    res.status(200).json({ message: 'Opening hours updated successfully' });
+    const result = await OpeningHoursService.updateOpeningHours(Number(openingHoursId), day, startTime, endTime, storeId);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }

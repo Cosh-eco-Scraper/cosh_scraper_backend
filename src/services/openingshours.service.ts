@@ -7,8 +7,9 @@ const updateOpeningHours = async (
     startTime?: string,
     endTime?: string,
     store_id?: number
-): Promise<void> => {
-    await openingHoursRespository.updateOpeningHours(openingHoursId, day, startTime, endTime, store_id);
+): Promise<number> => {
+    const result = await openingHoursRespository.updateOpeningHours(openingHoursId, day, startTime, endTime, store_id);
+    return result;
 }
 
 const OpeningHoursService = {

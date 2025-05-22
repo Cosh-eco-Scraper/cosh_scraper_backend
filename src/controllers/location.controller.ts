@@ -14,8 +14,8 @@ export async function updateLocation(req: Request, res: Response, next: NextFunc
       res.status(400).json({ message: 'Street, number, postal_code, city and country are required' });
     }
 
-    await LocationService.updateLocation(Number(locationId), street, number, postal_code, city, country);
-    res.status(200).json({ message: 'Location updated successfully' });
+    const result = await LocationService.updateLocation(Number(locationId), street, number, postal_code, city, country);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }

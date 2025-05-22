@@ -4,7 +4,7 @@ import { mapper } from "./mapper";
 import { brandQueries } from "./queries/brands.queries";
 
 export const BrandRepository = {
-    updateBrand: async (brandId?: number, name?: string, label?: string): Promise<void> => {
+    updateBrand: async (brandId?: number, name?: string, label?: string): Promise<number> => {
         try {
 
             databasePool.connect();
@@ -16,6 +16,8 @@ export const BrandRepository = {
             if (!result.rowCount) {
                 throw new Error("Brand not found");
             }
+
+            return brandId as number;
 
         } catch (error) {
             console.error("Error updating brand:", error);

@@ -42,10 +42,18 @@ export async function updateStore(req: Request, res: Response, next: NextFunctio
     }
 
 
-    await StoreService.updateStore(parseInt(storeId), name, location_id, description);
+    const updatedStoreId = await StoreService.updateStore(
+      parseInt(storeId),
+      name,
+      location_id,
+      description
+    );
 
 
-    res.status(200).json({ message: 'Store updated successfully' });
+
+
+
+    res.status(200).json(updatedStoreId);
   } catch (error) {
     next(error);
   }
