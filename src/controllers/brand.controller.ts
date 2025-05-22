@@ -15,7 +15,7 @@ export async function updateBrand(req: Request, res: Response, next: NextFunctio
     }
 
     const result = await BrandService.updateBrand(Number(brandId), name, label);
-    res.status(200).json(result);
+    res.status(200).json({ id: result });
   } catch (error) {
     next(error);
   }

@@ -25,7 +25,7 @@ export async function updateOpeningHours(
       endTime,
       storeId,
     );
-    res.status(200).json(result);
+    res.status(200).json({ id: result });
   } catch (error) {
     next(error);
   }

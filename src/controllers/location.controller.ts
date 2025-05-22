@@ -28,7 +28,7 @@ export async function updateLocation(
       city,
       country,
     );
-    res.status(200).json(result);
+    res.status(200).json({ id: result });
   } catch (error) {
     next(error);
   }

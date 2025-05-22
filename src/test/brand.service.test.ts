@@ -1,7 +1,6 @@
 import sinon from 'sinon';
 import { Brand } from '../domain/Brand';
 
-
 describe('BrandService', () => {
   let expect: typeof import('chai').expect;
 

@@ -47,7 +47,7 @@ export async function updateStore(req: Request, res: Response, next: NextFunctio
       description,
     );
 
-    res.status(200).json(updatedStoreId);
+    res.status(200).json({ id: updatedStoreId });
   } catch (error) {
     next(error);
   }
