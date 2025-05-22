@@ -1,7 +1,7 @@
 import databasePool from '../config/dbConnectionConfig';
 import { brandQueries } from './queries/brands.queries';
 
-export const BrandRepository = {
+const BrandRepository = {
   updateBrand: async (brandId?: number, name?: string, label?: string): Promise<number> => {
     const result = await databasePool.query(brandQueries.updateBrand(brandId, name, label));
 
@@ -14,3 +14,5 @@ export const BrandRepository = {
     return brandId as number;
   },
 };
+
+export default BrandRepository;

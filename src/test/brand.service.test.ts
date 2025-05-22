@@ -1,5 +1,7 @@
 import sinon from 'sinon';
 import { Brand } from '../domain/Brand';
+import BrandRepository from '../repositories/brand.repository';
+import BrandService from '../services/brand.service';
 
 describe('BrandService', () => {
   let expect: typeof import('chai').expect;
@@ -36,7 +38,7 @@ describe('BrandService', () => {
       const updateBrandStub = sinon.stub(BrandRepository, 'updateBrand').resolves();
 
       // Act
-      await brandService.updateBrand(brandId, brandData.name, brandData.label);
+      await BrandService.updateBrand(brandId, brandData.name, brandData.label);
 
       // Assert
       // expect(findBrandByIdStub.calledOnceWith(brandId)).to.be.true;
@@ -51,7 +53,7 @@ describe('BrandService', () => {
       sinon.stub(BrandRepository, 'updateBrand').rejects(new Error('Failed to update brand'));
 
       try {
-        await brandService.updateBrand(brandId, brandData.name, brandData.label);
+        await BrandService.updateBrand(brandId, brandData.name, brandData.label);
         expect.fail('Expected an error to be thrown');
       } catch (error: any) {
         expect('Failed to update brand').equal(error.message);
