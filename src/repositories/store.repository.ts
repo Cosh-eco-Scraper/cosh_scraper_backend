@@ -30,19 +30,15 @@ export const StoreRepository = {
     name?: string,
     location_id?: number,
     description?: string,
-  ): Promise<number> => {
-    try {
-      databasePool.connect();
-      const result = await databasePool.query(
-        storeQueries.updateStore(storeId, name, location_id, description),
-      );
+  ) => {
+    const result = await databasePool.query(
+      storeQueries.updateStore(storeId, name, location_id, description),
+    );
 
-      if (!result.rowCount) {
-        throw new NotFoundError('Store not found');
-      }
-    } finally {
-      return storeId as number;
+    if (!result.rowCount) {
+      throw new NotFoundError('Store not found');
     }
+    return storeId as number;
   },
   getStoreWithOpeningsHours: async (id: number) => {
     let hours: DatabaseOpeningHours[] = [];
