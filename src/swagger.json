@@ -85,84 +85,84 @@
           }
         }
       },
- "put": {
-    "tags": ["stores"],
-    "summary": "Update a store",
-    "description": "Updates a store, including its name, brand, location, and opening hours.",
-    "parameters": [
-      {
-        "name": "storeId",
-        "in": "path",
-        "description": "ID of the store to update",
-        "required": true,
-        "type": "integer"
-      },
-      {
-        "name": "body",
-        "in": "body",
-        "description": "Payload containing updated store details",
-        "required": true,
-        "schema": {
-          "type": "object",
-          "properties": {
-            "name": { "type": "string", "example": "Updated Store Name" },
-            "description": { "type": "string", "example": "Updated description" },
-            "locationId": { "type": "integer", "example": 2 },
-            "street": { "type": "string", "example": "Main Street" },
-            "number": { "type": "string", "example": "123" },
-            "postalCode": { "type": "string", "example": "12345" },
-            "city": { "type": "string", "example": "Sample City" },
-            "country": { "type": "string", "example": "Sample Country" },
-            "brandId": { "type": "integer", "example": 4 },
-            "label": { "type": "string", "example": "Updated Label" },
-            "openingHoursId": { "type": "integer", "example": 3 },
-            "day": { "type": "string", "example": "Monday" },
-            "startTime": { "type": "string", "example": "09:00" },
-            "endTime": { "type": "string", "example": "17:00" }
+      "put": {
+        "tags": [
+          "stores"
+        ],
+        "summary": "Update a store by ID",
+        "description": "Updates the details of a store specified by id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the store to update",
+            "required": true,
+            "type": "integer"
           },
-          "required": ["locationId", "brandId", "openingHoursId"]
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Store update payload",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Updated Store Name"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Updated description"
+                },
+                "location_id": {
+                  "type": "integer",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Store updated successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "location_id": {
+                  "type": "integer"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Store not found."
+          },
+          "400": {
+            "description": "Invalid input."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
         }
       }
-    ],
-    "responses": {
-      "200": {
-        "description": "Store updated successfully.",
-        "schema": {
-          "type": "object",
-          "properties": {
-            "message": {
-              "type": "string",
-              "example": "Store updated successfully"
-            }
-          }
-        }
-      },
-      "400": {
-        "description": "Invalid input or missing parameters.",
-        "schema": {
-          "type": "object",
-          "properties": {
-            "message": {
-              "type": "string",
-              "example": "Invalid input"
-            }
-          }
-        }
-      },
-      "500": {
-        "description": "Internal server error.",
-        "schema": {
-          "type": "object",
-          "properties": {
-            "message": {
-              "type": "string",
-              "example": "An unexpected error occurred."
-            }
-          }
-        }
-      }
-    }
-  }
     },
     "/stores/{id}/openingshours": {
       "get": {

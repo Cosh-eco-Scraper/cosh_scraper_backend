@@ -35,30 +35,14 @@ export async function getStore(req: Request, res: Response, next: NextFunction) 
 export async function updateStore(req: Request, res: Response, next: NextFunction) {
   try {
     const storeId = req.params.id;
+    const { name, location_id, description } = req.body;
 
     if (!storeId) {
       res.status(400).json({ message: 'Store ID is required' });
     }
 
-    const updateStoreDto: UpdateStoreDto = {
-      storeId: parseInt(storeId),
-      name: req.body.name,
-      locationId: req.body.locationId,
-      description: req.body.description,
-      brandId: req.body.brandId,
-      label: req.body.label,
-      openingHoursId: req.body.openingHoursId,
-      day: req.body.day,
-      startTime: req.body.startTime,
-      endTime: req.body.endTime,
-      street: req.body.street,
-      number: req.body.number,
-      postalCode: req.body.postalCode,
-      city: req.body.city,
-      country: req.body.country,
-    };
 
-    await StoreService.updateStore(updateStoreDto);
+    await StoreService.updateStore(parseInt(storeId), name, location_id, description);
 
 
     res.status(200).json({ message: 'Store updated successfully' });

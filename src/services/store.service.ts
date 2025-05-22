@@ -17,11 +17,8 @@ export const StoreService = {
 
     return store;
   },
-  updateStore: async (data: UpdateStoreDto) => {
-    await StoreRepository.updateStore(data.storeId, data.name, data.locationId, data.description);
-    // await OpeningHoursService.updateOpeningHours(data.openingHoursId, data.day, data.startTime, data.endTime, data.storeId);
-    await LocationService.updateLocation(data.locationId, data.street, data.number, data.postalCode, data.city, data.country);
-    await BrandService.updateBrand(data.brandId, data.name, data.label);
+  updateStore: async (storeId: number, name: string, location_id: number, description?: string) => {
+    await StoreRepository.updateStore(storeId, name, location_id, description);
   },
   getOpeningsHoursByStoreId: async (id: number) => {
     let hours = await StoreRepository.getStoreWithOpeningsHours(id);
