@@ -3,9 +3,10 @@ import { Brand } from '../domain/Brand';
 import brandService from '../services/brand.service';
 import { BrandRepository } from '../repositories/brand.repository';
 
-let expect: typeof import('chai').expect;
 
 describe('BrandService', () => {
+  let expect: typeof import('chai').expect;
+
   beforeEach(() => {
     sinon.restore(); // Restore all mocked methods before each test
   });
