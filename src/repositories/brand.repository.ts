@@ -1,5 +1,8 @@
 import databasePool from '../config/dbConnectionConfig';
+import { Brand } from '../domain/Brand';
+import { mapper } from './mapper';
 import { brandQueries } from './queries/brands.queries';
+
 
 const BrandRepository = {
   updateBrand: async (brandId?: number, name?: string, label?: string): Promise<number> => {
@@ -12,6 +15,21 @@ const BrandRepository = {
     }
 
     return brandId as number;
+  },
+
+  createBrand: async (name: string, label: string): Promise<Brand> => {
+    const result = await databasePool.query(brandQueries.createBrand(name, label));
+
+    console.log('Brand created successfully', result);
+
+    if (!result.rowCount) {
+      throw new Error('Failed to create brand');
+    }
+
+    const brand = result.rows.map(mapper.mapBrand)[0] as Brand;
+    return brand;
+
+    
   },
 };
 
