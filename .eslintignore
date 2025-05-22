@@ -1,0 +1,3 @@
+node_modules/
+dist/
+# make sure nothing excludes src/
