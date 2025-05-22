@@ -46,7 +46,7 @@ jobs:
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/cosh_scraper:backend
 
       - name: Save Docker image to tarball
-        run: docker save cosh_scraper:backend -o cosh_scraper_backend.tar
+        run: docker save ${{ secrets.DOCKERHUB_USERNAME }}/cosh_scraper:backend -o cosh_scraper_backend.tar
 
       - uses: actions/upload-artifact@v4
         with:
