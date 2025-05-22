@@ -34,16 +34,16 @@ describe('BrandService', () => {
       };
 
       // Mock the repository methods
-      // const findBrandByIdStub = sinon.stub(BrandRepository, "findBrandById").resolves(existingBrand);
-      const updateBrandStub = sinon.stub(BrandRepository, 'updateBrand').resolves();
+      const updateBrandStub = sinon.stub(BrandRepository, 'updateBrand').resolves(brandId);
 
       // Act
-      await BrandService.updateBrand(brandId, brandData.name, brandData.label);
+      const result = await BrandService.updateBrand(brandId, brandData.name, brandData.label);
 
       // Assert
-      // expect(findBrandByIdStub.calledOnceWith(brandId)).to.be.true;
       expect(updateBrandStub.calledOnceWith(brandId, brandData.name, brandData.label)).to.be.true;
+      expect(result).to.equal(brandId);
     });
+
     it('should throw an error if the brand does not exist', async () => {
       // Arrange
       const brandId = 999;
@@ -56,7 +56,7 @@ describe('BrandService', () => {
         await BrandService.updateBrand(brandId, brandData.name, brandData.label);
         expect.fail('Expected an error to be thrown');
       } catch (error: any) {
-        expect('Failed to update brand').equal(error.message);
+        expect(error.message).to.equal('Failed to update brand');
       }
     });
   });
