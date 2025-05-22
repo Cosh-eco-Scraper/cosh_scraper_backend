@@ -8,7 +8,6 @@ import storeRoutes from './routes/store.routes';
 import brandRoutes from './routes/brand.routes';
 import locationRoutes from './routes/location.routes';
 import openingHoursRoutes from './routes/openingHours.routes';
-import storeBrandsRoutes from './routes/storeBrands.routes';
 import cors from 'cors';
 
 const app = express();
@@ -28,7 +27,6 @@ app.use('/api/llm', llmRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/openinghours', openingHoursRoutes);
-app.use('/api/storeBrands', storeBrandsRoutes);
 
 // Global error handler (should be after routes)
 app.use(errorHandler);
