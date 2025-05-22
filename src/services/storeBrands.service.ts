@@ -1,11 +1,10 @@
-import { storeBrandsRepository } from "../repositories/storeBrands.repository"
-
+import { storeBrandsRepository } from '../repositories/storeBrands.repository';
 
 const updateStoreBrands = async (storeId: number, brandId: number) => {
-    await storeBrandsRepository.updateStoreBrands(storeId, brandId);
-}
+  await storeBrandsRepository.updateStoreBrands(storeId, brandId);
+};
 
 const storeBrandsService = {
-    updateStoreBrands,
-}
+  updateStoreBrands,
+};
 export default storeBrandsService;

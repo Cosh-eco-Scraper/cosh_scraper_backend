@@ -28,7 +28,7 @@ app.use('/api/llm', llmRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/openinghours', openingHoursRoutes);
-app.use('/api/storeBrands', storeBrandsRoutes)
+app.use('/api/storeBrands', storeBrandsRoutes);
 
 // Global error handler (should be after routes)
 app.use(errorHandler);

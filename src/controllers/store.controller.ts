@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { StoreService } from '../services/store.service';
 import { dtoMapper } from './dtoMapper';
-import { UpdateStoreDto } from '../domain/UpdateStore';
 
-export async function getAllStores(req: Request, res: Response, next: NextFunction) {
+export async function getAllStores(_req: Request, res: Response, next: NextFunction) {
   try {
     const stores = await StoreService.getAllStores();
     res.json(stores.map(dtoMapper.mapStore));
@@ -41,17 +40,12 @@ export async function updateStore(req: Request, res: Response, next: NextFunctio
       res.status(400).json({ message: 'Store ID is required' });
     }
 
-
     const updatedStoreId = await StoreService.updateStore(
       parseInt(storeId),
       name,
       location_id,
-      description
+      description,
     );
-
-
-
-
 
     res.status(200).json(updatedStoreId);
   } catch (error) {

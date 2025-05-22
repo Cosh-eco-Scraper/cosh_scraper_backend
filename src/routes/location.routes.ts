@@ -1,4 +1,4 @@
-import { Router} from 'express';
+import { Router } from 'express';
 import { updateLocation } from '../controllers/location.controller';
 const router = Router();
 

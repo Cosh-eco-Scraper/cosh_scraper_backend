@@ -1,5 +1,11 @@
 import { Router } from 'express';
-import { getAllStores, getStore, getStoreBrands, getStoreOpeningsHours, updateStore } from '../controllers/store.controller';
+import {
+  getAllStores,
+  getStore,
+  getStoreBrands,
+  getStoreOpeningsHours,
+  updateStore,
+} from '../controllers/store.controller';
 
 const router = Router();
 

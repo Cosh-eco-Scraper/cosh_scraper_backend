@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import storeBrandsService from '../services/storeBrands.service';
 
-
 // export async function updateStoreBrands(req: Request, res: Response, next: NextFunction): Promise<void> {
 //     try {
 //         const { storeId } = req.params;

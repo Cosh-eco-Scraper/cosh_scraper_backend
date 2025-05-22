@@ -30,7 +30,7 @@ function mapBrand(databaseResult: any): DatabaseBrand {
     name: databaseResult.name,
     storeId: databaseResult.store_id,
     label: databaseResult.label,
-  }
+  };
 }
 
 function mapHours(databaseResult: any): DatabaseOpeningHours {
@@ -57,7 +57,7 @@ function mapLocation(databaseResult: any): Location {
     city: databaseResult.city,
     country: databaseResult.country,
     createdAt: databaseResult.created_at,
-    updatedAt: databaseResult.updated_at
+    updatedAt: databaseResult.updated_at,
   };
 }
 
@@ -65,5 +65,5 @@ export const mapper = {
   mapStore: (databaseResult: any) => mapStore(databaseResult),
   mapHour: (databaseResult: any) => mapHours(databaseResult),
   mapBrand: (databaseResult: any) => mapBrand(databaseResult),
-  mapLocation: (databaseResult: any) => mapLocation(databaseResult)
+  mapLocation: (databaseResult: any) => mapLocation(databaseResult),
 };

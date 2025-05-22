@@ -76,9 +76,7 @@
         }
       },
       "put": {
-        "tags": [
-          "stores"
-        ],
+        "tags": ["stores"],
         "summary": "Update a store by ID",
         "description": "Updates the details of a store specified by id.",
         "parameters": [
@@ -305,9 +303,7 @@
     },
     "/brands/{brandId}": {
       "put": {
-        "tags": [
-          "brand"
-        ],
+        "tags": ["brand"],
         "summary": "Update a brand by ID",
         "description": "Updates the details of a brand specified by brandId.",
         "parameters": [
@@ -378,9 +374,7 @@
     },
     "/locations/{id}": {
       "put": {
-        "tags": [
-          "locations"
-        ],
+        "tags": ["locations"],
         "summary": "Update a location by ID",
         "description": "Updates the details of a location specified by id.",
         "parameters": [
@@ -472,9 +466,7 @@
     },
     "/openinghours/{id}": {
       "put": {
-        "tags": [
-          "openinghours"
-        ],
+        "tags": ["openinghours"],
         "summary": "Update opening hours by ID",
         "description": "Updates the details of an opening hours entry specified by id.",
         "parameters": [

@@ -1,14 +1,13 @@
-import { Brand } from "../domain/Brand";
-import databaseClient from "../config/dbConnectionConfig";
-import { BrandRepository } from "../repositories/brand.repository";
+import { Brand } from '../domain/Brand';
+import databaseClient from '../config/dbConnectionConfig';
+import { BrandRepository } from '../repositories/brand.repository';
 
 const updateBrand = async (brandId?: number, name?: string, label?: string): Promise<number> => {
-    const result = await BrandRepository.updateBrand(brandId, name, label)
-    return result
-
-}
+  const result = await BrandRepository.updateBrand(brandId, name, label);
+  return result;
+};
 
 const BrandService = {
-    updateBrand,
+  updateBrand,
 };
 export default BrandService;
