@@ -1,9 +1,9 @@
-import typescriptPlugin from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
-import prettierPlugin from 'eslint-plugin-prettier';
-import js from '@eslint/js';
+const typescriptPlugin = require('@typescript-eslint/eslint-plugin');
+const tsParser = require('@typescript-eslint/parser');
+const prettierPlugin = require('eslint-plugin-prettier');
+const js = require('@eslint/js');
 
-export default [
+module.exports = [
   js.configs.recommended,
 
   {
@@ -38,7 +38,6 @@ export default [
     },
   },
 
-  // Add ignores here
   {
     ignores: ['node_modules/**', 'dist/**'],
   },
