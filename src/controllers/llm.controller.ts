@@ -11,10 +11,10 @@ export async function sendPrompt(req: Request, res: Response) {
   }
 }
 
-export async function descrtiptionCheck(req: Request, res: Response) {
+export async function descriptionCheck(req: Request, res: Response) {
   try {
     const { description } = req.body;
-    const response = await LLMService.descrtiptionCheck(description);
+    const response = await LLMService.descriptionCheck(description);
     res.json({ response });
   } catch {
     res.status(500).json({ error: 'An error occurred while processing the request.' });

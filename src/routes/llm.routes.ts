@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { descrtiptionCheck, sendPrompt } from '../controllers/llm.controller';
+import { descriptionCheck, sendPrompt } from '../controllers/llm.controller';
 
 const router = Router();
 
 router.post('/', sendPrompt);
-router.post('/greenwash', descrtiptionCheck);
+router.post('/greenwash', descriptionCheck);
 
 export default router;

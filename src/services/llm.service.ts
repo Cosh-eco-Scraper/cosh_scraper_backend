@@ -14,7 +14,7 @@ const sendPrompt = async (prompt: string): Promise<string | undefined> => {
   return response.text;
 };
 
-const descrtiptionCheck = async (description: string): Promise<string | undefined> => {
+const descriptionCheck = async (description: string): Promise<string | undefined> => {
   const response = await ai.models.generateContent({
     model: 'gemini-2.0-flash',
     contents:
@@ -28,5 +28,5 @@ const descrtiptionCheck = async (description: string): Promise<string | undefine
 
 export const LLMService = {
   sendPrompt,
-  descrtiptionCheck,
+  descriptionCheck,
 };
