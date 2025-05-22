@@ -67,11 +67,7 @@ export const StoreRepository = {
     return brands;
   },
 
-  createStore: async (
-    name: string,
-    location_id: number,
-    description?: string,
-  ): Promise<Store> => {
+  createStore: async (name: string, location_id: number, description?: string): Promise<Store> => {
     const result = await databasePool.query(
       storeQueries.createStore(name, location_id, description),
     );

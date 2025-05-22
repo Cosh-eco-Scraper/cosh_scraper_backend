@@ -1,4 +1,3 @@
-import { create } from 'domain';
 import databasePool from '../config/dbConnectionConfig';
 import NotFoundError from '../domain/errors/NotFoundError';
 import { locationQuerries } from './queries/location.querries';
@@ -40,6 +39,6 @@ export const LocationRepository = {
     }
 
     const location = result.rows.map(mapper.mapLocation)[0] as Location;
-    return location;  }
-
+    return location;
+  },
 };

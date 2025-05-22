@@ -1,4 +1,3 @@
-import { create } from 'domain';
 import { StoreRepository } from '../repositories/store.repository';
 
 export const StoreService = {
@@ -40,6 +39,7 @@ export const StoreService = {
     // await StoreRepository.createStoreBrands(store.id, brands);
     // await StoreRepository.createStoreOpeningHours(store.id, opening_hours);
     // return store;
-
-  }
+    console.log('Store name:', name);
+    console.log('Store URL:', URL);
+  },
 };

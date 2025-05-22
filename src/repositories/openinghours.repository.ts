@@ -35,8 +35,7 @@ export const openingHoursRespository = {
     if (!result.rowCount) {
       throw new NotFoundError('Opening hours not found');
     }
-        const opening_hours = result.rows.map(mapper.mapHour)[0] as OpeningHours;
-        return opening_hours;  }
-        
-  }
-
+    const opening_hours = result.rows.map(mapper.mapHour)[0] as OpeningHours;
+    return opening_hours;
+  },
+};
