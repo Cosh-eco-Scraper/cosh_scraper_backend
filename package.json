@@ -10,6 +10,7 @@
     "start": "node dist/server.js",
     "dev": "nodemon --watch \"src/**/*.ts\" --exec \"npx ts-node\" src/server.ts",
     "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint --fix \"src/**/*.ts\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky install"
@@ -49,6 +50,7 @@
     "@types/express": "^5.0.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.15.18",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
     "backend": "file:",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
