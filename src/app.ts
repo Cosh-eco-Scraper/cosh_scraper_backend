@@ -1,5 +1,5 @@
 import express from 'express';
-import llmRoutes from 'rou/llm.routes'; // Assuming you have a llm.routes.ts file
+import llmRoutes from './routes/llm.routes';
 import { errorHandler } from './middlewares/errorHandler';
 
 import swaggerUi from 'swagger-ui-express';
