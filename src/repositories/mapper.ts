@@ -11,7 +11,16 @@ function mapStore(databaseResult: any): Store {
     description: databaseResult.description,
     createdAt: databaseResult.created_at,
     updatedAt: databaseResult.updated_at,
-    brands: []
+    location: {
+      id: databaseResult.location_id,
+      street: databaseResult.street,
+      number: databaseResult.number,
+      city: databaseResult.city,
+      postalCode: databaseResult.postal_code,
+      country: databaseResult.country,
+      createdAt: databaseResult.loc_created_at,
+      updatedAt: databaseResult.loc_updated_at,
+    },
   };
 }
 

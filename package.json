@@ -27,6 +27,7 @@
   "devDependencies": {
     "@types/chai": "^5.2.2",
     "@types/chai-as-promised": "^8.0.2",
+    "@types/cors": "^2.8.18",
     "@types/mocha": "^10.0.10",
     "@types/pg": "^8.15.2",
     "@types/sinon": "^17.0.4",
@@ -53,6 +54,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.15.18",
     "backend": "file:",
+    "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "js-yaml": "^4.1.0",

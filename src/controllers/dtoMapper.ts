@@ -7,7 +7,12 @@ export const dtoMapper = {
     return {
       id: store.id,
       description: store.description,
-      name: store.name
+      name: store.name,
+      street: store.location?.street ?? 'unknown',
+      number: store.location?.number ?? 'unknown',
+      city: store.location?.city ?? 'unknown',
+      postalCode: store.location?.postalCode ?? 'unknown',
+      country: store.location?.country ?? 'unknown',
     };
   },
 
