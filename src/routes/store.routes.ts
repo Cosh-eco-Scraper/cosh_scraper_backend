@@ -3,7 +3,7 @@ import {
   getAllStores,
   getStore,
   getStoreBrands,
-  getStoreOpeningsHours,
+  getStoreOpeningsHours
 } from '../controllers/store.controller';
 
 const router = Router();
