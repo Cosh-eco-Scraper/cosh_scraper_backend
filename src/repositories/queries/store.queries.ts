@@ -46,5 +46,5 @@ export const storeQueries = {
                    join store_brands sb on sb.store_id = s.id
                    join brands b on b.id = sb.brand_id
             WHERE s.id = ${id};`;
-  }
+  },
 };

@@ -12,7 +12,7 @@ export default [
       parser: tsParser,
       parserOptions: {
         project: './tsconfig.json',
-        sourceType: 'module',
+        sourceType: 'module'
       },
       ecmaVersion: 2024,
       globals: {
@@ -20,19 +20,19 @@ export default [
         __dirname: 'readonly',
         module: 'readonly',
         require: 'readonly',
-        console: 'readonly',
-      },
+        console: 'readonly'
+      }
     },
     plugins: {
       prettier,
       'unused-imports': unusedImports,
-      '@typescript-eslint': typescript,
+      '@typescript-eslint': typescript
     },
     rules: {
       // TypeScript-aware rules (prefer these over base ones)
       '@typescript-eslint/no-unused-vars': [
         'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
       ],
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': [
@@ -41,8 +41,8 @@ export default [
           vars: 'all',
           varsIgnorePattern: '^_',
           args: 'after-used',
-          argsIgnorePattern: '^_',
-        },
+          argsIgnorePattern: '^_'
+        }
       ],
       'newline-before-return': 'error',
       'prettier/prettier': [
@@ -51,9 +51,9 @@ export default [
           bracketSpacing: true,
           semi: true,
           singleQuote: true,
-          trailingComma: 'all',
-        },
-      ],
-    },
-  },
+          trailingComma: 'all'
+        }
+      ]
+    }
+  }
 ];

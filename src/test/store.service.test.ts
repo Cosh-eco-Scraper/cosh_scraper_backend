@@ -24,7 +24,7 @@ describe('StoreService', () => {
     it('should return all stores when stores exist', async () => {
       const expectedStores = [
         { id: 1, name: 'Store 1' },
-        { id: 2, name: 'Store 2' }
+        { id: 2, name: 'Store 2' },
       ] as Store[];
       StoreRepository.getAllStores = async () => expectedStores;
 
@@ -62,7 +62,7 @@ describe('StoreService', () => {
         id: 1,
         name: 'Store 1',
         updatedAt: new Date(),
-        createdAt: new Date()
+        createdAt: new Date(),
       };
       StoreRepository.getStore = async () => expectedStore;
 
@@ -109,7 +109,7 @@ describe('StoreService', () => {
           id: 2,
           createdAt: new Date(),
           updatedAt: new Date(),
-          storeId: 1
+          storeId: 1,
         },
         {
           day: { name: 'monday', orderValue: 0 },
@@ -118,7 +118,7 @@ describe('StoreService', () => {
           id: 3,
           createdAt: new Date(),
           updatedAt: new Date(),
-          storeId: 1
+          storeId: 1,
         },
         {
           day: { name: 'tuesday', orderValue: 1 },
@@ -127,8 +127,8 @@ describe('StoreService', () => {
           id: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
-          storeId: 1
-        }
+          storeId: 1,
+        },
       ];
       StoreRepository.getStoreWithOpeningsHours = async () => mockHours;
 
@@ -166,7 +166,7 @@ describe('StoreService', () => {
     it('should return brands when store exists', async () => {
       const expectedBrands: DatabaseBrand[] = [
         { id: 1, name: 'Brand 1', label: 'A', storeId: 1 },
-        { id: 2, name: 'Brand 2', label: 'B', storeId: 1 }
+        { id: 2, name: 'Brand 2', label: 'B', storeId: 1 },
       ];
       StoreRepository.getBrandsByStoreId = async () => expectedBrands;
 

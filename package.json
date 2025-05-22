@@ -31,6 +31,7 @@
     "@types/cors": "^2.8.18",
     "@types/mocha": "^10.0.10",
     "@types/swagger-ui-express": "^4.1.8",
+    "@typescript-eslint/parser": "^8.32.1",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.0",
