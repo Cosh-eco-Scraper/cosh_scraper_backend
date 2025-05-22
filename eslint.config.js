@@ -36,6 +36,12 @@ export default [
     languageOptions: {
       ecmaVersion: 2024,
       sourceType: 'module',
+      globals: {
+        process: 'readonly',
+        __dirname: 'readonly',
+        module: 'readonly',
+        require: 'readonly',
+      },
     },
   },
 ];
