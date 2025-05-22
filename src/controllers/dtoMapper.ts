@@ -15,6 +15,7 @@ export const dtoMapper = {
       country: store.location?.country ?? 'unknown',
     };
   },
+
   mapOpeningHours: (openingHours: DatabaseOpeningHours): OpeningHoursDto => {
     return {
       id: openingHours.id,
