@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { LLMService } from '../services/llm.service';
 
 export async function sendPrompt(req: Request, res: Response) {

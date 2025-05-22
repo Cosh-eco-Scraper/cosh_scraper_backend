@@ -1,5 +1,5 @@
 import { Store, StoreDto } from '../domain/Store';
-import { DatabaseOpeningHours, OpeningHours, OpeningHoursDto } from '../domain/OpeningHours';
+import { DatabaseOpeningHours, OpeningHoursDto } from '../domain/OpeningHours';
 import { BrandDto, DatabaseBrand } from '../domain/Brand';
 
 export const dtoMapper = {
@@ -12,7 +12,7 @@ export const dtoMapper = {
       number: store.location?.number ?? 'unknown',
       city: store.location?.city ?? 'unknown',
       postalCode: store.location?.postalCode ?? 'unknown',
-      country: store.location?.country ?? 'unknown'
+      country: store.location?.country ?? 'unknown',
     };
   },
   mapOpeningHours: (openingHours: DatabaseOpeningHours): OpeningHoursDto => {
@@ -21,7 +21,7 @@ export const dtoMapper = {
       day: openingHours.day.name,
       openingAt: openingHours.openingAt,
       closingAt: openingHours.closingAt,
-      storeId: openingHours.storeId
+      storeId: openingHours.storeId,
     };
   },
   mapBrand: (brand: DatabaseBrand): BrandDto => {
@@ -29,7 +29,7 @@ export const dtoMapper = {
       id: brand.id,
       name: brand.name,
       label: brand.label,
-      storeId: brand.storeId
+      storeId: brand.storeId,
     };
-  }
+  },
 };
