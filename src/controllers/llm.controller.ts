@@ -6,7 +6,7 @@ export async function sendPrompt(req: Request, res: Response) {
     const { prompt } = req.body;
     const response = await LLMService.sendPrompt(prompt);
     res.json({ response });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'An error occurred while processing the request.' });
   }
 }
