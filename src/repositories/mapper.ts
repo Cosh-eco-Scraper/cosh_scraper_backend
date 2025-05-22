@@ -38,13 +38,13 @@ function mapHours(databaseResult: any): DatabaseOpeningHours {
     id: databaseResult.id,
     day: {
       name: databaseResult.day,
-      orderValue: Day[databaseResult.day as keyof typeof Day]
+      orderValue: Day[databaseResult.day as keyof typeof Day],
     },
     openingAt: databaseResult.opening_at,
     closingAt: databaseResult.closing_at,
     storeId: databaseResult.store_id,
     createdAt: databaseResult.created_at,
-    updatedAt: databaseResult.updated_at
+    updatedAt: databaseResult.updated_at,
   };
 }
 

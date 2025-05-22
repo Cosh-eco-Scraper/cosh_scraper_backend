@@ -7,19 +7,13 @@
   },
   "host": "localhost:3001",
   "basePath": "/api",
-  "schemes": [
-    "http"
-  ],
+  "schemes": ["http"],
   "paths": {
     "/stores": {
       "get": {
-        "tags": [
-          "stores"
-        ],
+        "tags": ["stores"],
         "summary": "Returns all stores",
-        "produces": [
-          "application/json"
-        ],
+        "produces": ["application/json"],
         "responses": {
           "200": {
             "description": "OK"
@@ -35,14 +29,10 @@
     },
     "/stores/{id}": {
       "get": {
-        "tags": [
-          "stores"
-        ],
+        "tags": ["stores"],
         "summary": "Returns a single store by ID",
         "description": "Retrieves detailed information about a specific store.",
-        "produces": [
-          "application/json"
-        ],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "id",
@@ -166,14 +156,10 @@
     },
     "/stores/{id}/openingshours": {
       "get": {
-        "tags": [
-          "stores"
-        ],
+        "tags": ["stores"],
         "summary": "Returns all opening hours for a single store by ID",
         "description": "Retrieves opening hours for a specific store.",
-        "produces": [
-          "application/json"
-        ],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "id",
@@ -227,14 +213,10 @@
     },
     "/stores/{id}/brands": {
       "get": {
-        "tags": [
-          "stores"
-        ],
+        "tags": ["stores"],
         "summary": "Returns all brands for a single store by ID",
         "description": "Retrieves brands for a specific store.",
-        "produces": [
-          "application/json"
-        ],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "id",
@@ -279,17 +261,11 @@
     },
     "/llm": {
       "post": {
-        "tags": [
-          "llm"
-        ],
+        "tags": ["llm"],
         "summary": "Send a prompt to the LLM and get a response.",
         "description": "Sends a prompt string to the LLM and returns the generated response.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
         "parameters": [
           {
             "in": "body",
@@ -304,9 +280,7 @@
                   "example": "Hello, AI!"
                 }
               },
-              "required": [
-                "prompt"
-              ]
+              "required": ["prompt"]
             }
           }
         ],
