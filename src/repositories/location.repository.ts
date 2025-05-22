@@ -11,16 +11,14 @@ export const LocationRepository = {
     city?: string,
     country?: string,
   ): Promise<number> => {
-    try {
-      const result = await databasePool.query(
-        locationQuerries.updateLocation(locationId, street, number, postal_code, city, country),
-      );
+    const result = await databasePool.query(
+      locationQuerries.updateLocation(locationId, street, number, postal_code, city, country),
+    );
 
-      if (!result.rowCount) {
-        throw new NotFoundError('Location not found');
-      }
-    } finally {
-      return locationId as number;
+    if (!result.rowCount) {
+      throw new NotFoundError('Location not found');
     }
+
+    return locationId as number;
   },
 };

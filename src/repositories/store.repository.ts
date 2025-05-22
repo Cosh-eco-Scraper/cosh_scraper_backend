@@ -16,21 +16,13 @@ export const StoreRepository = {
     return stores;
   },
   getStore: async (id: number) => {
-    let store: Store;
     const result = await databasePool.query(storeQueries.getStoreById(id));
 
-    try {
-      const result = await databasePool.query(storeQueries.getStoreById(id));
-
-      if (!result.rows.length) {
-        throw new NotFoundError('Store not found');
-      }
-
-      return result.rows.map(mapper.mapStore)[0] as Store;
-    } catch (error) {
-      console.error('Error getting store:', error);
-      throw new Error('Error getting store');
+    if (!result.rows.length) {
+      throw new NotFoundError('Store not found');
     }
+
+    return result.rows.map(mapper.mapStore)[0] as Store;
   },
 
   updateStore: async (
