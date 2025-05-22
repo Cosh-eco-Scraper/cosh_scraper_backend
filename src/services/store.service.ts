@@ -1,6 +1,4 @@
-import { Store } from '../domain/Store';
 import { StoreRepository } from '../repositories/store.repository';
-import NotFoundError from '../domain/errors/NotFoundError';
 
 export const StoreService = {
   getAllStores: async () => {
@@ -21,6 +19,7 @@ export const StoreService = {
   },
   getBrandsByStoreId: async (id: number) => {
     let brands = await StoreRepository.getBrandsByStoreId(id);
+
     return brands;
-  }
+  },
 };
