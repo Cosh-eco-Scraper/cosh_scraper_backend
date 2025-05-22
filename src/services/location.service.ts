@@ -19,8 +19,26 @@ const updateLocation = async (
   return result;
 };
 
+const createLocation = async (
+  street: string,
+  number: string,
+  postal_code: string,
+  city: string,
+  country: string,
+): Promise<Location> => {
+  const result = await LocationRepository.createLocation(
+    street,
+    number,
+    postal_code,
+    city,
+    country,
+  );
+  return result;
+};
+
 const LocationService = {
   updateLocation,
+  createLocation,
 };
 
 export default LocationService;

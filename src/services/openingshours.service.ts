@@ -1,3 +1,4 @@
+import { OpeningHours } from '../domain/OpeningHours';
 import { openingHoursRespository } from '../repositories/openinghours.repository';
 
 const updateOpeningHours = async (
@@ -17,8 +18,24 @@ const updateOpeningHours = async (
   return result;
 };
 
+const createOpeningHours = async (
+  day: string,
+  startTime: string,
+  endTime: string,
+  store_id: number,
+): Promise<OpeningHours> => {
+  const result = await openingHoursRespository.createOpeningHours(
+    day,
+    startTime,
+    endTime,
+    store_id,
+  );
+  return result;
+};
+
 const OpeningHoursService = {
   updateOpeningHours,
+  createOpeningHours,
 };
 
 export default OpeningHoursService;

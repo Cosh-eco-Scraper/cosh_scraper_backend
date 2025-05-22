@@ -1,3 +1,4 @@
+import { create } from 'domain';
 import { StoreRepository } from '../repositories/store.repository';
 
 export const StoreService = {
@@ -30,4 +31,15 @@ export const StoreService = {
     let brands = await StoreRepository.getBrandsByStoreId(id);
     return brands;
   },
+
+  createCompleteStore: async (name: string, URL: string) => {
+    //to do: scraper takes the URL and returns the store name, description, brands, opening hours and location
+    // const { name, description, brands, opening_hours } = await scraper.scrapeStore(URL);
+    // const location = await locationService.createLocation(location);
+    // const store = await StoreRepository.createStore(name, location.id, description);
+    // await StoreRepository.createStoreBrands(store.id, brands);
+    // await StoreRepository.createStoreOpeningHours(store.id, opening_hours);
+    // return store;
+
+  }
 };

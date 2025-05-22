@@ -66,4 +66,21 @@ export const StoreRepository = {
 
     return brands;
   },
+
+  createStore: async (
+    name: string,
+    location_id: number,
+    description?: string,
+  ): Promise<Store> => {
+    const result = await databasePool.query(
+      storeQueries.createStore(name, location_id, description),
+    );
+
+    if (!result.rowCount) {
+      throw new NotFoundError('Store not found');
+    }
+
+    const store = result.rows.map(mapper.mapStore)[0] as Store;
+    return store;
+  },
 };

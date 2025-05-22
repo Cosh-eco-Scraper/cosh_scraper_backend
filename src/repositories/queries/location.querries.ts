@@ -14,4 +14,14 @@ export const locationQuerries = {
              city = '${city}',
              country = '${country}'
          WHERE id = ${locationId};`,
-};
+    createLocation: (
+           street: string,
+           number: string,
+           postal_code: string,
+           city: string,
+           country: string,
+         ) =>
+           `INSERT INTO locations (street, number, postal_code, city, country)
+                VALUES ('${street}', '${number}', '${postal_code}', '${city}', '${country}');`,
+}
+
