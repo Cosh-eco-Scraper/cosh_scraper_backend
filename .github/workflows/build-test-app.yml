@@ -1,7 +1,6 @@
 name: build and test app
 run-name: ${{ github.actor }} has opened a pull request and is building and testing the app
 
-
 on:
   pull_request:
 
