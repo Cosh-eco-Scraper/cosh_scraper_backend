@@ -40,11 +40,7 @@ export async function updateStore(req: Request, res: Response, next: NextFunctio
       res.status(400).json({ message: 'Store ID is required' });
     }
 
-    const updatedStoreId = await StoreService.updateStore(
-      parseInt(storeId),
-      name,
-      description,
-    );
+    const updatedStoreId = await StoreService.updateStore(parseInt(storeId), name, description);
 
     res.status(200).json({ id: updatedStoreId });
   } catch (error) {

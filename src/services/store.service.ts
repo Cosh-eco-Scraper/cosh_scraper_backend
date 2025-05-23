@@ -12,11 +12,7 @@ export const StoreService = {
 
     return store;
   },
-  updateStore: async (
-    storeId: number,
-    name: string,
-    description?: string,
-  ): Promise<number> => {
+  updateStore: async (storeId: number, name: string, description?: string): Promise<number> => {
     const result = await StoreRepository.updateStore(storeId, name, description);
     return result;
   },
