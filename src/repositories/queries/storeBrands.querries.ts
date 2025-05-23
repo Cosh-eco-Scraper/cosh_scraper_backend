@@ -1,6 +1,8 @@
 export const storeBrandsQueries = {
-  updateStoreBrands: (storeId: number, brandId: number) =>
-    `UPDATE store_brands
-        SET brand_id = ${brandId}
-        WHERE store_id = ${storeId};`,
+  addBrandToStore(storeId: number, brandId: number) {
+    return `
+      INSERT INTO store_brands (store_id, brand_id)
+      VALUES (${storeId}, ${brandId})
+    `;
+  }
 };
