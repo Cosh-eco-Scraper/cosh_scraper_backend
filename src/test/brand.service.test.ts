@@ -4,7 +4,6 @@ import BrandRepository from '../repositories/brand.repository';
 import BrandService from '../services/brand.service';
 import assert from 'assert';
 
-
 describe('BrandService', () => {
   let expect: typeof import('chai').expect;
 
@@ -93,19 +92,19 @@ describe('BrandService', () => {
     });
 
     it('should throw an error if the repository fails', async () => {
-       it('should throw error when database operation fails', async () => {
-           const error = new Error('Database error');
-           BrandRepository.getAllBrands = async () => {
-             throw error;
-           };
-     
-           try {
-             await BrandService.getAllBrands();
-             assert.fail('Should have thrown error');
-           } catch (e) {
-             assert.strictEqual(e, error);
-           }
-  }
-  );
+      it('should throw error when database operation fails', async () => {
+        const error = new Error('Database error');
+        BrandRepository.getAllBrands = async () => {
+          throw error;
+        };
 
-})})})
+        try {
+          await BrandService.getAllBrands();
+          assert.fail('Should have thrown error');
+        } catch (e) {
+          assert.strictEqual(e, error);
+        }
+      });
+    });
+  });
+});

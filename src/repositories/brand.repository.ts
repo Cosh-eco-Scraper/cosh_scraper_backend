@@ -36,7 +36,7 @@ const BrandRepository = {
 
     brands = result.rows.map(mapper.mapBrandForList);
     return brands;
-  }
+  },
 };
 
 export default BrandRepository;

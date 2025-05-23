@@ -39,7 +39,7 @@ export const dtoMapper = {
     return {
       id: brand.id,
       name: brand.name,
-      label: brand.label
-    }
-  }
+      label: brand.label,
+    };
+  },
 };

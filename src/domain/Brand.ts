@@ -16,11 +16,10 @@ export type DatabaseBrand = {
   storeId: number;
 };
 
-
 export type DatabaseBrandForList = {
-    id: number;
-    name: string;
-    label: string;
+  id: number;
+  name: string;
+  label: string;
 };
 
 export type BrandDto = {
@@ -34,4 +33,4 @@ export type BrandForListDto = {
   id: number;
   name: string;
   label: string;
-}
+};

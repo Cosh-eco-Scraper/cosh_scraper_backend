@@ -7,6 +7,4 @@ export const brandQueries = {
                                                     VALUES ('${name}', '${label}');`,
 
   getAllBrands: () => `SELECT id, name, label FROM brands;`,
-                                                  
 };
-

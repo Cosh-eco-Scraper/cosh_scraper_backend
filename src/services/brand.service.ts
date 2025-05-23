@@ -14,12 +14,11 @@ const createBrand = async (name: string, label: string): Promise<Brand> => {
 const getAllBrands = async () => {
   const result = await BrandRepository.getAllBrands();
   return result;
-}
+};
 
 const BrandService = {
   updateBrand,
   createBrand,
   getAllBrands,
-
 };
 export default BrandService;

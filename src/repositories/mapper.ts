@@ -33,7 +33,6 @@ function mapBrand(databaseResult: any): DatabaseBrand {
   };
 }
 
-
 function mapBrandForList(databaseResult: any): DatabaseBrandForList {
   return {
     id: databaseResult.id,
@@ -69,8 +68,6 @@ function mapLocation(databaseResult: any): Location {
     updatedAt: databaseResult.updated_at,
   };
 }
-
-
 
 export const mapper = {
   mapStore: (databaseResult: any) => mapStore(databaseResult),

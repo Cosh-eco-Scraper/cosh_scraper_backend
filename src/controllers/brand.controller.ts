@@ -23,11 +23,10 @@ export async function updateBrand(req: Request, res: Response, next: NextFunctio
 }
 
 export async function getAllBrands(_req: Request, res: Response, next: NextFunction) {
-    try {
-      const brands = await BrandService.getAllBrands();
-      res.json(brands.map(dtoMapper.mapBrandsforAll));
-    } catch (error) {
-      next(error);
-    }
+  try {
+    const brands = await BrandService.getAllBrands();
+    res.json(brands.map(dtoMapper.mapBrandsforAll));
+  } catch (error) {
+    next(error);
+  }
 }
-
