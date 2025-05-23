@@ -30,9 +30,9 @@ async function getAllInternalLinks(page: Page): Promise<string[]> {
             .filter(Boolean)
     );
     const internalLinks = hrefs
-        .filter(href => href.startsWith(baseUrl))
-        .filter(href => !href.startsWith('mailto:') && !href.startsWith('tel:'))
-        .filter((href, i, arr) => arr.indexOf(href) === i);
+        .filter((href: string) => href.startsWith(baseUrl))
+        .filter((href: string) => !href.startsWith('mailto:') && !href.startsWith('tel:'))
+        .filter((href: string, i: number, arr: string[]) => arr.indexOf(href) === i);
     return internalLinks;
 }
 
@@ -51,26 +51,26 @@ async function extractRelevantSnippets(page: Page): Promise<string[]> {
     const keywordRegex = new RegExp(keywords.join('|'), 'i');
 
     const title = await page.title();
-    const metaDescription = await page.$eval('meta[name="description"]', el => el.getAttribute('content'), { timeout: 2000 }).catch(() => '');
+    const metaDescription = await page.$eval('meta[name="description"]', (el: Element) => (el as HTMLMetaElement).getAttribute('content'), { timeout: 2000 }).catch(() => '');
 
-    const blocks = await page.$$eval('section, article, div, ul, ol, li, tr', (elements, keywordRegexStr) => {
+    const blocks = await page.$$eval('section, article, div, ul, ol, li, tr', (elements: Element[], keywordRegexStr: string) => {
         const regex = new RegExp(keywordRegexStr, 'i');
         return elements
             .map(el => (el as HTMLElement).innerText?.trim() || '')
             .filter(Boolean)
-            .filter(text => regex.test(text) && text.length > 0 && text.length < 2000);
+            .filter((text: string) => regex.test(text) && text.length > 0 && text.length < 2000);
     }, keywordRegex.source);
 
-    const directSnippets = await page.$$eval('h1, h2, h3, h4, h5, h6, p, span, li, td, th, tr', (elements, keywordRegexStr) => {
+    const directSnippets = await page.$$eval('h1, h2, h3, h4, h5, h6, p, span, li, td, th, tr', (elements: Element[], keywordRegexStr: string) => {
         const regex = new RegExp(keywordRegexStr, 'i');
         return elements
             .map(el => el.textContent?.trim() || '')
             .filter(Boolean)
-            .filter(text => regex.test(text) && text.length > 0 && text.length < 500);
+            .filter((text: string) => regex.test(text) && text.length > 0 && text.length < 500);
     }, keywordRegex.source);
 
     const allSnippets = [title, metaDescription, ...blocks, ...directSnippets]
-        .map(s => (s ?? '').trim())
+        .map((s: string | null) => (s ?? '').trim())
         .filter(Boolean);
 
     return Array.from(new Set(allSnippets));
@@ -219,4 +219,3 @@ export async function scraper(url: string, location: string): Promise<ScrapedInf
     console.log(scrapedData);
 })();
 
-export { extractRelevantSnippets, getAllInternalLinks, gatherRelevantTexts, summarizeRelevantInfoWithAI };
