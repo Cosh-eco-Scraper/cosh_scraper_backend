@@ -87,22 +87,22 @@ export async function getStoreBrands(req: Request, res: Response, next: NextFunc
     next(error);
   }
 }
-
 export async function createCompleteStore(
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
-    const { name, URL } = req.body;
+    const { name, URL, location } = req.body;
 
     if (!name || !URL) {
       res.status(400).json({ message: 'Name and URL are required' });
+      return;
     }
 
-    await StoreService.createCompleteStore(name, URL);
+    const store = await StoreService.createCompleteStore(name, URL, location);
 
-    res.status(201).json({ message: 'Store created successfully' });
+    res.status(201).json({ id: store.id, message: 'Store created successfully' });
   } catch (error) {
     next(error);
   }

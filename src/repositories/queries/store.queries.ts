@@ -54,5 +54,6 @@ export const storeQueries = {
                                                        WHERE id = ${storeId};`,
   createStore: (name: string, location_id: number, description?: string) =>
     `INSERT INTO stores (name, location_id, description)
-                                                           VALUES ('${name}', '${location_id}', '${description}');`,
+                                                           VALUES ('${name}', '${location_id}', '${description}')
+                                                           RETURNING *;`,
 };

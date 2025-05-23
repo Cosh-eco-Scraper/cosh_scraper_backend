@@ -1,4 +1,5 @@
 import { LocationRepository } from '../repositories/location.repository';
+import { Location } from '../domain/Location';
 
 const updateLocation = async (
   locationId?: number,
@@ -22,17 +23,11 @@ const updateLocation = async (
 const createLocation = async (
   street: string,
   number: string,
-  postal_code: string,
+  postalCode: string,
   city: string,
   country: string,
 ): Promise<Location> => {
-  const result = await LocationRepository.createLocation(
-    street,
-    number,
-    postal_code,
-    city,
-    country,
-  );
+  const result = await LocationRepository.createLocation(street, number, postalCode, city, country);
   return result;
 };
 

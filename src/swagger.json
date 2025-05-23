@@ -46,9 +46,13 @@
                 "URL": {
                   "type": "string",
                   "example": "https://example.com"
+                },
+                "location": {
+                  "type": "string",
+                  "example": "Kasteelstraat 1, 3000 Leuven, Begië"
                 }
               },
-              "required": ["name", "URL"]
+              "required": ["name", "URL", "location"]
             }
           }
         ],
@@ -360,14 +364,12 @@
           "204": {
             "description": "No Content"
           },
-
           "500": {
             "description": "Internal server error."
           }
         }
       }
     },
-
     "/brands/{brandId}": {
       "put": {
         "tags": ["brands"],
