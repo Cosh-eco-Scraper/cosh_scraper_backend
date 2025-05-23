@@ -454,7 +454,7 @@
                   "type": "string",
                   "example": "123A"
                 },
-                "postal_code": {
+                "postalCode": {
                   "type": "string",
                   "example": "12345"
                 },
@@ -519,11 +519,11 @@
                   "type": "string",
                   "example": "monday"
                 },
-                "startTime": {
+                "openingAt": {
                   "type": "string",
                   "example": "09:00h"
                 },
-                "endTime": {
+                "closingAt": {
                   "type": "string",
                   "example": "17:30h"
                 },
