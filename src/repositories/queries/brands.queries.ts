@@ -3,4 +3,6 @@ export const brandQueries = {
                                                     SET name = '${name}',
                                                         label = '${label}'
                                                     WHERE id = '${brandId}';`,
+  createBrand: (name: string, label: string) => `INSERT INTO brands (name, label)
+                                                    VALUES ('${name}', '${label}');`,
 };

@@ -25,6 +25,71 @@
             "description": "Internal server error."
           }
         }
+      },
+      "post": {
+        "tags": ["stores"],
+        "summary": "Create a complete store",
+        "description": "Creates a new store with the provided name and URL.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Details of the store to create",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "New Store Name"
+                },
+                "URL": {
+                  "type": "string",
+                  "example": "https://example.com"
+                }
+              },
+              "required": ["name", "URL"]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Store created successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Store created successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or missing parameters.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Name and URL are required"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "An unexpected error occurred."
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/stores/{id}": {
