@@ -1,7 +1,5 @@
 import { Router } from 'express';
-import {
-    addBrandToStore
-} from '../controllers/storeBrand.controller';
+import { addBrandToStore } from '../controllers/storeBrand.controller';
 
 const router = Router();
 

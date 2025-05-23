@@ -30,7 +30,6 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/openinghours', openingHoursRoutes);
 app.use('/api/storebrands', storeBrandsRoutes);
 
-
 // Global error handler (should be after routes)
 app.use(errorHandler);
 

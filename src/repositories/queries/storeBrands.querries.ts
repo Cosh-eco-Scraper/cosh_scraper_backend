@@ -4,5 +4,5 @@ export const storeBrandsQueries = {
       INSERT INTO store_brands (store_id, brand_id)
       VALUES (${storeId}, ${brandId})
     `;
-  }
+  },
 };

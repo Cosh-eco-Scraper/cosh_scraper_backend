@@ -12,6 +12,4 @@ export const storeBrandsRepository = {
 
     return brandId;
   },
-
-
 };
