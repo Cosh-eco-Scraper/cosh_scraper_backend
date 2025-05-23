@@ -25,15 +25,8 @@ export const StoreRepository = {
     return result.rows.map(mapper.mapStore)[0] as Store;
   },
 
-  updateStore: async (
-    storeId?: number,
-    name?: string,
-    location_id?: number,
-    description?: string,
-  ) => {
-    const result = await databasePool.query(
-      storeQueries.updateStore(storeId, name, location_id, description),
-    );
+  updateStore: async (storeId?: number, name?: string, description?: string) => {
+    const result = await databasePool.query(storeQueries.updateStore(storeId, name, description));
 
     if (!result.rowCount) {
       throw new NotFoundError('Store not found');

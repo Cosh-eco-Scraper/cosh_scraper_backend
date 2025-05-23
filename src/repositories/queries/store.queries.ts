@@ -42,16 +42,15 @@ export const storeQueries = {
   },
   getBrandsByStoreId(id: number) {
     return `select b.id, b.name, b.label, sb.store_id
-                                                              from stores s
-                                                                     join store_brands sb on sb.store_id = s.id
-                                                                     join brands b on b.id = sb.brand_id
-                                                              WHERE s.id = ${id};`;
+            from stores s
+                   join store_brands sb on sb.store_id = s.id
+                   join brands b on b.id = sb.brand_id
+            WHERE s.id = ${id};`;
   },
-  updateStore: (storeId?: number, name?: string, location_id?: number, description?: string) =>
+  updateStore: (storeId?: number, name?: string, description?: string) =>
     `UPDATE stores
                                                        SET name = '${name}',
-                                                       description = '${description}',
-                                                       location_id = '${location_id}'
+                                                       description = '${description}'
                                                        WHERE id = ${storeId};`,
   createStore: (name: string, location_id: number, description?: string) =>
     `INSERT INTO stores (name, location_id, description)
