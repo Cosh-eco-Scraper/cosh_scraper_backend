@@ -491,7 +491,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "id": {
+                "storeId": {
                   "type": "integer",
                   "example": 1,
                   "description": "Store ID"

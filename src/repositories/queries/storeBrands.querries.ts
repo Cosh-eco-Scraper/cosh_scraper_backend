@@ -1,8 +1,8 @@
 export const storeBrandsQueries = {
-  addBrandToStore(storeId: number, brandId: number) {
+  addBrandToStore() {
     return `
       INSERT INTO store_brands (store_id, brand_id)
-      VALUES (${storeId}, ${brandId})
+      VALUES ($1, $2)
     `;
   },
 };
