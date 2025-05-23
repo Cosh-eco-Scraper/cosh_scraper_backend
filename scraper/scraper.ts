@@ -19,6 +19,7 @@ type ScrapedInfo = {
     };
     location: string;
     about: string;
+    retour: string;
 };
 
 async function getAllInternalLinks(page: Page): Promise<string[]> {
@@ -45,13 +46,14 @@ async function extractRelevantSnippets(page: Page): Promise<string[]> {
         'openingsuren', 'opening hours',
         'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
         'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag', 'gesloten',
+        'retour', 'retourneren', 'return', 'returns',
     ];
     const keywordRegex = new RegExp(keywords.join('|'), 'i');
 
     const title = await page.title();
     const metaDescription = await page.$eval('meta[name="description"]', el => el.getAttribute('content'), { timeout: 2000 }).catch(() => '');
 
-    const blocks = await page.$$eval('section, article, div, ul, ol', (elements, keywordRegexStr) => {
+    const blocks = await page.$$eval('section, article, div, ul, ol, li, tr', (elements, keywordRegexStr) => {
         const regex = new RegExp(keywordRegexStr, 'i');
         return elements
             .map(el => (el as HTMLElement).innerText?.trim() || '')
@@ -133,7 +135,7 @@ const sendPrompt = async (prompt: string): Promise<string | undefined> => {
     return response.text;
 }
 
-async function summarizeRelevantInfoWithAI(url: string, snippets: string[]): Promise<ScrapedInfo | null> {
+async function summarizeRelevantInfoWithAI(url: string, snippets: string[], location: string): Promise<ScrapedInfo | null> {
     const prompt = `
 The website URL is: ${url}
 
@@ -152,13 +154,16 @@ Given the following relevant text snippets from a shop website, extract and summ
     "sunday": {"open": string, "close": string } | null
   },
   "location": string,
-  "about": string
+  "about": string,
+  "retour": string
 }
 
 Instructions:
+- For all string fields, remove any line breaks (\n), plus signs (+), or other special characters. Return each string as a single, clean sentence or paragraph with normal spaces.
 - For "brands", extract all brand names mentioned in the snippets. If none are found, return an empty array.
-- For "openingHours", if a day is marked as "gesloten", "closed", or any other non-time value, set both "open" and "close" to "closed". Only use an object with "open" and "close" if there are actual times.
-- For "location" and "about", extract the relevant information.
+- For "openingHours", always return an object for each day ("monday" to "sunday") with "open" and "close" keys. If the time for a given day is not found, set both "open" and "close" to null. Do NOT use null for the whole day, always use the object format. if a day is marked as "gesloten", "closed" set both "open" and "close" to "closed".
+- For "openingHours" and "location", extract ONLY the information relevant to the store in "${location}". If there are multiple stores, pick the one matching "${location}" (case-insensitive, match city name).
+- For "about" and "retour", extract the general information for the whole shop, not store-specific.
 
 
 Snippets:
@@ -184,7 +189,7 @@ Respond ONLY with the JSON object.
     }
 }
 
-export async function scraper(url: string): Promise<ScrapedInfo | null> {
+export async function scraper(url: string, location: string): Promise<ScrapedInfo | null> {
     const browser = await chromium.launch();
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -194,7 +199,7 @@ export async function scraper(url: string): Promise<ScrapedInfo | null> {
 
         const snippets = await gatherRelevantTexts(page);
 
-        const aiSummary = await summarizeRelevantInfoWithAI(url, snippets);
+        const aiSummary = await summarizeRelevantInfoWithAI(url, snippets, location);
         return aiSummary;
 
     } catch (e) {
@@ -209,6 +214,9 @@ export async function scraper(url: string): Promise<ScrapedInfo | null> {
 
 (async () => {
     const url = 'https://www.blabloom.com/nl/'; // Here you can put the URL to test the scraper
-    const scrapedData = await scraper(url);
+    const location = 'Genk'
+    const scrapedData = await scraper(url, location);
     console.log(scrapedData);
 })();
+
+export { extractRelevantSnippets, getAllInternalLinks, gatherRelevantTexts, summarizeRelevantInfoWithAI };
