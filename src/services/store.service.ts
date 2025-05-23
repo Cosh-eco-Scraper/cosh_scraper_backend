@@ -1,5 +1,5 @@
 import { StoreRepository } from '../repositories/store.repository';
-import { scraper } from '../../scraper/scraper';
+import { scraper } from '../scraper/scraper';
 import BrandService from './brand.service';
 import OpeningHoursService from './openingshours.service';
 import LocationService from './location.service';
