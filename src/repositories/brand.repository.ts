@@ -1,4 +1,3 @@
-import { get } from 'http';
 import databasePool from '../config/dbConnectionConfig';
 import { Brand } from '../domain/Brand';
 import { mapper } from './mapper';
