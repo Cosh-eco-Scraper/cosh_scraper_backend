@@ -494,6 +494,59 @@
         }
       }
     },
+    "/storebrands": {
+      "post": {
+        "tags": ["storebrands"],
+        "summary": "Add a brand to a store",
+        "description": "Associates a brand with a specific store.",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Store ID and Brand ID to associate",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "storeId": {
+                  "type": "integer",
+                  "example": 1,
+                  "description": "Store ID"
+                },
+                "brandId": {
+                  "type": "integer",
+                  "example": 5,
+                  "description": "Brand ID"
+                }
+              },
+              "required": ["id", "brandId"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Brand successfully added to the store",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "example": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid parameters"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/openinghours/{id}": {
       "put": {
         "tags": ["openinghours"],

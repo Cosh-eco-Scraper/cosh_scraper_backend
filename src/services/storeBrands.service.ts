@@ -1,10 +1,11 @@
 import { storeBrandsRepository } from '../repositories/storeBrands.repository';
 
-const updateStoreBrands = async (storeId: number, brandId: number) => {
-  await storeBrandsRepository.updateStoreBrands(storeId, brandId);
+const addBrandToStore = async (storeId: number, brandId: number): Promise<number> => {
+  const result = await storeBrandsRepository.addBrandToStore(storeId, brandId);
+  return result;
 };
 
 const storeBrandsService = {
-  updateStoreBrands,
+  addBrandToStore,
 };
 export default storeBrandsService;
