@@ -5,4 +5,8 @@ export const brandQueries = {
                                                     WHERE id = '${brandId}';`,
   createBrand: (name: string, label: string) => `INSERT INTO brands (name, label)
                                                     VALUES ('${name}', '${label}');`,
+
+  getAllBrands: () => `SELECT id, name, label FROM brands;`,
+                                                  
 };
+

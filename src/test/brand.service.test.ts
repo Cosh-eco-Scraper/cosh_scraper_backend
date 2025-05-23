@@ -2,6 +2,8 @@ import sinon from 'sinon';
 import { Brand } from '../domain/Brand';
 import BrandRepository from '../repositories/brand.repository';
 import BrandService from '../services/brand.service';
+import assert from 'assert';
+
 
 describe('BrandService', () => {
   let expect: typeof import('chai').expect;
@@ -60,4 +62,50 @@ describe('BrandService', () => {
       }
     });
   });
-});
+
+  describe('getAllBrands', () => {
+    it('should return an array of brands', async () => {
+      // Arrange
+      const expectedBrands: Brand[] = [
+        {
+          id: 1,
+          name: 'Brand 1',
+          label: 'Label 1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          stores: [],
+        },
+        {
+          id: 2,
+          name: 'Brand 2',
+          label: 'Label 2',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          stores: [],
+        },
+      ];
+
+      sinon.stub(BrandRepository, 'getAllBrands').resolves(expectedBrands);
+
+      const brands = await BrandService.getAllBrands();
+
+      expect(brands).to.deep.equal(expectedBrands);
+    });
+
+    it('should throw an error if the repository fails', async () => {
+       it('should throw error when database operation fails', async () => {
+           const error = new Error('Database error');
+           BrandRepository.getAllBrands = async () => {
+             throw error;
+           };
+     
+           try {
+             await BrandService.getAllBrands();
+             assert.fail('Should have thrown error');
+           } catch (e) {
+             assert.strictEqual(e, error);
+           }
+  }
+  );
+
+})})})

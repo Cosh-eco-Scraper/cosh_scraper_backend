@@ -1,3 +1,4 @@
+import { get } from 'http';
 import databasePool from '../config/dbConnectionConfig';
 import { Brand } from '../domain/Brand';
 import { mapper } from './mapper';
@@ -28,6 +29,14 @@ const BrandRepository = {
     const brand = result.rows.map(mapper.mapBrand)[0] as Brand;
     return brand;
   },
+
+  getAllBrands: async () => {
+    const result = await databasePool.query(brandQueries.getAllBrands());
+    let brands: Brand[] = [];
+
+    brands = result.rows.map(mapper.mapBrandForList);
+    return brands;
+  }
 };
 
 export default BrandRepository;
