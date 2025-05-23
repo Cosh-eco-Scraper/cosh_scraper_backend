@@ -19,7 +19,7 @@ export const storeBrandsRepository = {
     // Check if association already exists
     const assocRes = await databasePool.query(
       'SELECT 1 FROM store_brands WHERE store_id = $1 AND brand_id = $2',
-      [storeId, brandId]
+      [storeId, brandId],
     );
     if (assocRes.rowCount > 0) {
       throw new Error('Brand is already associated with this store');
