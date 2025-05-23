@@ -1,4 +1,9 @@
 import { StoreRepository } from '../repositories/store.repository';
+import { scraper } from '../../scraper/scraper';
+import BrandService from './brand.service';
+import OpeningHoursService from './openingshours.service';
+import LocationService from './location.service';
+
 // import { LLMService } from './llm.service';
 
 export const StoreService = {
@@ -27,16 +32,62 @@ export const StoreService = {
     return brands;
   },
 
-  createCompleteStore: async (name: string, URL: string) => {
-    //to do: scraper takes the URL and returns the store name, description, brands, opening hours and location
-    // const { name, description, brands, opening_hours } = await scraper.scrapeStore(URL);
-    // await LLMService.sendPrompt(`Write a store description for ${name} located at ${URL}`); will write a description base on the sites scraped data
-    // const location = await locationService.createLocation(location);
-    // const store = await StoreRepository.createStore(name, location.id, description);
-    // await StoreRepository.createStoreBrands(store.id, brands);
-    // await StoreRepository.createStoreOpeningHours(store.id, opening_hours);
-    // return store;
-    console.log('Store name:', name);
-    console.log('Store URL:', URL);
+
+  createCompleteStore: async (name: string, URL: string, location: string) => {
+    const scrapedInfo = await scraper(URL, location);
+
+    if (!scrapedInfo) {
+      throw new Error('Failed to scrape store information');
+    }
+
+    const locationRegex = /^(.*?)(\d+)\s+(\d{4,5})\s+([A-Za-z\s]+)\s*\(?([A-Za-z]*)\)?$/;
+    const match = scrapedInfo.location.match(locationRegex);
+    let locationObj;
+    if (match) {
+      const [, street, number, postalCode, city, country] = match;
+      locationObj = await LocationService.createLocation(
+        street.trim(),
+        number.trim(),
+        postalCode.trim(),
+        city.trim(),
+        (country || 'Belgium').trim()
+      );
+      console.log('LocationService.createLocation result:', locationObj);
+    } else {
+      // fallback: just use the full string as city
+      locationObj = await LocationService.createLocation(
+        '', '', '', scrapedInfo.location, ''
+      );
+      console.log('LocationService.createLocation fallback result:', locationObj);
+    }
+
+    const store = await StoreRepository.createStore(
+      name,
+      locationObj.id,
+      scrapedInfo.about
+    );
+
+    if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
+      for (const brandName of scrapedInfo.brands) {
+        await BrandService.createBrand(brandName, null);
+      }
+    }
+
+    if (scrapedInfo.openingHours) {
+      for (const [day, hours] of Object.entries(scrapedInfo.openingHours)) {
+        if (hours) {
+          await OpeningHoursService.createOpeningHours(
+            day,
+            hours.open,
+            hours.close,
+            store.id
+          );
+        }
+      }
+    }
+
+    // Retour field still has to be handled
+
+    return store;
   },
 };

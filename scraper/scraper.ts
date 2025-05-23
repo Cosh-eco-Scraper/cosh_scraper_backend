@@ -258,9 +258,9 @@ export async function scraper(url: string, location: string): Promise<ScrapedInf
   }
 }
 
-(async () => {
-  const url = 'https://www.blabloom.com/nl/'; // Here you can put the URL to test the scraper
-  const location = 'Genk';
-  const scrapedData = await scraper(url, location);
-  console.log(scrapedData);
-})();
+// (async () => {
+//   const url = 'https://www.blabloom.com/nl/'; // Here you can put the URL to test the scraper
+//   const location = 'Genk';
+//   const scrapedData = await scraper(url, location);
+//   console.log(scrapedData);
+// })();

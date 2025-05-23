@@ -1,6 +1,7 @@
 import databasePool from '../config/dbConnectionConfig';
 import NotFoundError from '../domain/errors/NotFoundError';
 import { locationQuerries } from './queries/location.querries';
+import { Location } from '../domain/Location';
 import { mapper } from './mapper';
 
 export const LocationRepository = {
@@ -8,12 +9,12 @@ export const LocationRepository = {
     locationId?: number,
     street?: string,
     number?: string,
-    postal_code?: string,
+    postalCode?: string,
     city?: string,
     country?: string,
   ): Promise<number> => {
     const result = await databasePool.query(
-      locationQuerries.updateLocation(locationId, street, number, postal_code, city, country),
+      locationQuerries.updateLocation(locationId, street, number, postalCode, city, country),
     );
 
     if (!result.rowCount) {
@@ -26,12 +27,12 @@ export const LocationRepository = {
   createLocation: async (
     street: string,
     number: string,
-    postal_code: string,
+    postalCode: string,
     city: string,
     country: string,
   ): Promise<Location> => {
     const result = await databasePool.query(
-      locationQuerries.createLocation(street, number, postal_code, city, country),
+      locationQuerries.createLocation(street, number, postalCode, city, country),
     );
 
     if (!result.rowCount) {

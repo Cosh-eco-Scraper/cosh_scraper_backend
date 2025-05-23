@@ -1,12 +1,12 @@
 import { Brand } from '../domain/Brand';
 import BrandRepository from '../repositories/brand.repository';
 
-const updateBrand = async (brandId?: number, name?: string, label?: string): Promise<number> => {
+const updateBrand = async (brandId: number, name: string, label: string | null): Promise<number> => {
   const result = await BrandRepository.updateBrand(brandId, name, label);
   return result;
 };
 
-const createBrand = async (name: string, label: string): Promise<Brand> => {
+const createBrand = async (name: string, label: string | null): Promise<Brand> => {
   const result = await BrandRepository.createBrand(name, label);
   return result;
 };

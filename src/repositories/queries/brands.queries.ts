@@ -1,10 +1,10 @@
 export const brandQueries = {
-  updateBrand: (brandId?: number, name?: string, label?: string) => `UPDATE brands 
-                                                    SET name = '${name}',
-                                                        label = '${label}'
-                                                    WHERE id = '${brandId}';`,
-  createBrand: (name: string, label: string) => `INSERT INTO brands (name, label)
-                                                    VALUES ('${name}', '${label}');`,
-
+  updateBrand: () => `UPDATE brands 
+                        SET name = $1,
+                            label = $2
+                        WHERE id = $3 RETURNING *;`,
+  createBrand: () => `INSERT INTO brands (name, label)
+                        VALUES ($1, $2)
+                        RETURNING *;`,
   getAllBrands: () => `SELECT id, name, label FROM brands;`,
 };
