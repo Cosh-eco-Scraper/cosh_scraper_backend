@@ -32,7 +32,6 @@ export const StoreService = {
     return brands;
   },
 
-
   createCompleteStore: async (name: string, URL: string, location: string) => {
     const scrapedInfo = await scraper(URL, location);
 
@@ -50,22 +49,16 @@ export const StoreService = {
         number.trim(),
         postalCode.trim(),
         city.trim(),
-        (country || 'Belgium').trim()
+        (country || 'Belgium').trim(),
       );
       console.log('LocationService.createLocation result:', locationObj);
     } else {
       // fallback: just use the full string as city
-      locationObj = await LocationService.createLocation(
-        '', '', '', scrapedInfo.location, ''
-      );
+      locationObj = await LocationService.createLocation('', '', '', scrapedInfo.location, '');
       console.log('LocationService.createLocation fallback result:', locationObj);
     }
 
-    const store = await StoreRepository.createStore(
-      name,
-      locationObj.id,
-      scrapedInfo.about
-    );
+    const store = await StoreRepository.createStore(name, locationObj.id, scrapedInfo.about);
 
     if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
       for (const brandName of scrapedInfo.brands) {
@@ -76,12 +69,7 @@ export const StoreService = {
     if (scrapedInfo.openingHours) {
       for (const [day, hours] of Object.entries(scrapedInfo.openingHours)) {
         if (hours) {
-          await OpeningHoursService.createOpeningHours(
-            day,
-            hours.open,
-            hours.close,
-            store.id
-          );
+          await OpeningHoursService.createOpeningHours(day, hours.open, hours.close, store.id);
         }
       }
     }

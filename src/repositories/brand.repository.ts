@@ -5,18 +5,12 @@ import { brandQueries } from './queries/brands.queries';
 
 const BrandRepository = {
   createBrand: async (name: string, label: string | null) => {
-    const result = await databasePool.query(
-      brandQueries.createBrand(),
-      [name, label]
-    );
+    const result = await databasePool.query(brandQueries.createBrand(), [name, label]);
     return result.rows[0];
   },
 
   updateBrand: async (brandId: number, name: string, label: string | null) => {
-    const result = await databasePool.query(
-      brandQueries.updateBrand(),
-      [name, label, brandId]
-    );
+    const result = await databasePool.query(brandQueries.updateBrand(), [name, label, brandId]);
     return result.rows[0];
   },
 

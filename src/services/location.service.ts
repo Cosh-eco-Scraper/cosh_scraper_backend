@@ -27,13 +27,7 @@ const createLocation = async (
   city: string,
   country: string,
 ): Promise<Location> => {
-  const result = await LocationRepository.createLocation(
-    street,
-    number,
-    postalCode,
-    city,
-    country,
-  );
+  const result = await LocationRepository.createLocation(street, number, postalCode, city, country);
   return result;
 };
 
