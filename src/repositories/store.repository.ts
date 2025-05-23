@@ -28,11 +28,10 @@ export const StoreRepository = {
   updateStore: async (
     storeId?: number,
     name?: string,
-    location_id?: number,
     description?: string,
   ) => {
     const result = await databasePool.query(
-      storeQueries.updateStore(storeId, name, location_id, description),
+      storeQueries.updateStore(storeId, name, description),
     );
 
     if (!result.rowCount) {

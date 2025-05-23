@@ -8,13 +8,13 @@ export async function updateLocation(
 ): Promise<void> {
   try {
     const { locationId } = req.params;
-    const { street, number, postal_code, city, country } = req.body;
+    const { street, number, postalCode, city, country } = req.body;
 
     if (!locationId) {
       res.status(400).json({ message: 'Brand ID is required' });
     }
 
-    if (!street || !number || !postal_code || !city || !country) {
+    if (!street || !number || !postalCode || !city || !country) {
       res
         .status(400)
         .json({ message: 'Street, number, postal_code, city and country are required' });
@@ -24,7 +24,7 @@ export async function updateLocation(
       Number(locationId),
       street,
       number,
-      postal_code,
+      postalCode,
       city,
       country,
     );

@@ -34,7 +34,7 @@ export async function getStore(req: Request, res: Response, next: NextFunction) 
 export async function updateStore(req: Request, res: Response, next: NextFunction) {
   try {
     const storeId = req.params.id;
-    const { name, location_id, description } = req.body;
+    const { name, description } = req.body;
 
     if (!storeId) {
       res.status(400).json({ message: 'Store ID is required' });
@@ -43,7 +43,6 @@ export async function updateStore(req: Request, res: Response, next: NextFunctio
     const updatedStoreId = await StoreService.updateStore(
       parseInt(storeId),
       name,
-      location_id,
       description,
     );
 

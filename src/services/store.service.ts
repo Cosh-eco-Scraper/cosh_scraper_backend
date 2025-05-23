@@ -15,10 +15,9 @@ export const StoreService = {
   updateStore: async (
     storeId: number,
     name: string,
-    location_id: number,
     description?: string,
   ): Promise<number> => {
-    const result = await StoreRepository.updateStore(storeId, name, location_id, description);
+    const result = await StoreRepository.updateStore(storeId, name, description);
     return result;
   },
   getOpeningsHoursByStoreId: async (id: number) => {
