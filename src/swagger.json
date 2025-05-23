@@ -43,7 +43,7 @@
                   "type": "string",
                   "example": "New Store Name"
                 },
-                "URL": {
+                "url": {
                   "type": "string",
                   "example": "https://example.com"
                 },
@@ -52,7 +52,7 @@
                   "example": "Kasteelstraat 1, 3000 Leuven, Begië"
                 }
               },
-              "required": ["name", "URL", "location"]
+              "required": ["name", "url", "location"]
             }
           }
         ],

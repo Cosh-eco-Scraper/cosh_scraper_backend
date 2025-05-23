@@ -147,7 +147,7 @@ async function gatherRelevantTexts(page: Page): Promise<string[]> {
   let internalLinks: string[] = [];
   try {
     internalLinks = await getAllInternalLinks(page);
-  } catch  {
+  } catch {
     internalLinks = [];
   }
   const toVisit = [page.url(), ...internalLinks.filter((link) => link !== page.url())].slice(0, 10);
