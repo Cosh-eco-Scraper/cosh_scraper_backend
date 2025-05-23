@@ -13,6 +13,7 @@ export const dtoMapper = {
       city: store.location?.city ?? 'unknown',
       postalCode: store.location?.postalCode ?? 'unknown',
       country: store.location?.country ?? 'unknown',
+      locationId: store.location?.id,
     };
   },
 
