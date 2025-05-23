@@ -93,7 +93,11 @@ export async function getStoreBrands(req: Request, res: Response, next: NextFunc
   }
 }
 
-export async function createCompleteStore(req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function createCompleteStore(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
   try {
     const { name, URL } = req.body;
 
