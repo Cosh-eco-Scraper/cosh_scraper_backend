@@ -20,4 +20,5 @@ export type StoreDto = {
   postalCode: string;
   city: string;
   country: string;
+  locationId?: number;
 };
