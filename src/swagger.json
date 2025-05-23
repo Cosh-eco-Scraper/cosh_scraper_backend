@@ -7,13 +7,19 @@
   },
   "host": "localhost:3001",
   "basePath": "/api",
-  "schemes": ["http"],
+  "schemes": [
+    "http"
+  ],
   "paths": {
     "/stores": {
       "get": {
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "summary": "Returns all stores",
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -25,14 +31,88 @@
             "description": "Internal server error."
           }
         }
+      },
+      "post": {
+        "tags": [
+          "stores"
+        ],
+        "summary": "Create a complete store",
+        "description": "Creates a new store with the provided name and URL.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Details of the store to create",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "New Store Name"
+                },
+                "URL": {
+                  "type": "string",
+                  "example": "https://example.com"
+                }
+              },
+              "required": [
+                "name",
+                "URL"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Store created successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Store created successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or missing parameters.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Name and URL are required"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "An unexpected error occurred."
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/stores/{id}": {
       "get": {
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "summary": "Returns a single store by ID",
         "description": "Retrieves detailed information about a specific store.",
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -76,7 +156,9 @@
         }
       },
       "put": {
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "summary": "Update a store by ID",
         "description": "Updates the details of a store specified by id.",
         "parameters": [
@@ -137,10 +219,14 @@
     },
     "/stores/{id}/openingshours": {
       "get": {
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "summary": "Returns all opening hours for a single store by ID",
         "description": "Retrieves opening hours for a specific store.",
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -194,10 +280,14 @@
     },
     "/stores/{id}/brands": {
       "get": {
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "summary": "Returns all brands for a single store by ID",
         "description": "Retrieves brands for a specific store.",
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -242,11 +332,17 @@
     },
     "/llm": {
       "post": {
-        "tags": ["llm"],
+        "tags": [
+          "llm"
+        ],
         "summary": "Send a prompt to the LLM and get a response.",
         "description": "Sends a prompt string to the LLM and returns the generated response.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "in": "body",
@@ -261,7 +357,9 @@
                   "example": "Hello, AI!"
                 }
               },
-              "required": ["prompt"]
+              "required": [
+                "prompt"
+              ]
             }
           }
         ],
@@ -286,7 +384,9 @@
     },
     "/brands/{brandId}": {
       "put": {
-        "tags": ["brands"],
+        "tags": [
+          "brands"
+        ],
         "summary": "Update a brand by ID",
         "description": "Updates the details of a brand specified by brandId.",
         "parameters": [
@@ -343,7 +443,9 @@
     },
     "/locations/{id}": {
       "put": {
-        "tags": ["locations"],
+        "tags": [
+          "locations"
+        ],
         "summary": "Update a location by ID",
         "description": "Updates the details of a location specified by id.",
         "parameters": [
@@ -412,7 +514,9 @@
     },
     "/openinghours/{id}": {
       "put": {
-        "tags": ["openinghours"],
+        "tags": [
+          "openinghours"
+        ],
         "summary": "Update opening hours by ID",
         "description": "Updates the details of an opening hours entry specified by id.",
         "parameters": [

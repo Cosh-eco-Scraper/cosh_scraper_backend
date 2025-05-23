@@ -1,4 +1,5 @@
 import { StoreRepository } from '../repositories/store.repository';
+import { LLMService } from './llm.service';
 
 export const StoreService = {
   getAllStores: async () => {
@@ -34,6 +35,7 @@ export const StoreService = {
   createCompleteStore: async (name: string, URL: string) => {
     //to do: scraper takes the URL and returns the store name, description, brands, opening hours and location
     // const { name, description, brands, opening_hours } = await scraper.scrapeStore(URL);
+    // await LLMService.sendPrompt(`Write a store description for ${name} located at ${URL}`); will write a description base on the sites scraped data
     // const location = await locationService.createLocation(location);
     // const store = await StoreRepository.createStore(name, location.id, description);
     // await StoreRepository.createStoreBrands(store.id, brands);
