@@ -349,6 +349,25 @@
         }
       }
     },
+    "/brands/": {
+      "get": {
+        "tags": ["brands"],
+        "summary": "get all brands",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+
     "/brands/{brandId}": {
       "put": {
         "tags": ["brands"],

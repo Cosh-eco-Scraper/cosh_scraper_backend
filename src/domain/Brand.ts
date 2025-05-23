@@ -16,9 +16,21 @@ export type DatabaseBrand = {
   storeId: number;
 };
 
+export type DatabaseBrandForList = {
+  id: number;
+  name: string;
+  label: string;
+};
+
 export type BrandDto = {
   id: number;
   name: string;
   label: string;
   storeId: number;
+};
+
+export type BrandForListDto = {
+  id: number;
+  name: string;
+  label: string;
 };

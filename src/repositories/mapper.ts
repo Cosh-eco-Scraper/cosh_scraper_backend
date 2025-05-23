@@ -1,7 +1,7 @@
 import { Store } from '../domain/Store';
 import { Day } from '../domain/Day';
 import { DatabaseOpeningHours } from '../domain/OpeningHours';
-import { DatabaseBrand } from '../domain/Brand';
+import { DatabaseBrand, DatabaseBrandForList } from '../domain/Brand';
 import { Location } from '../domain/Location';
 
 function mapStore(databaseResult: any): Store {
@@ -29,6 +29,14 @@ function mapBrand(databaseResult: any): DatabaseBrand {
     id: databaseResult.id,
     name: databaseResult.name,
     storeId: databaseResult.store_id,
+    label: databaseResult.label,
+  };
+}
+
+function mapBrandForList(databaseResult: any): DatabaseBrandForList {
+  return {
+    id: databaseResult.id,
+    name: databaseResult.name,
     label: databaseResult.label,
   };
 }
@@ -66,4 +74,5 @@ export const mapper = {
   mapHour: (databaseResult: any) => mapHours(databaseResult),
   mapBrand: (databaseResult: any) => mapBrand(databaseResult),
   mapLocation: (databaseResult: any) => mapLocation(databaseResult),
+  mapBrandForList: (databaseResult: any) => mapBrandForList(databaseResult),
 };
