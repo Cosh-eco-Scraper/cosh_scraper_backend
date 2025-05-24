@@ -51,10 +51,6 @@ export const StoreRepository = {
 
     const result = await databasePool.query(storeQueries.getBrandsByStoreId(id));
 
-    if (!result.rows.length) {
-      throw new NotFoundError('Store not found');
-    }
-
     brands = result.rows.map(mapper.mapBrand);
 
     return brands;
