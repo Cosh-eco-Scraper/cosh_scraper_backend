@@ -3,6 +3,7 @@ import { scraper } from '../scraper/scraper';
 import BrandService from './brand.service';
 import OpeningHoursService from './openingshours.service';
 import LocationService from './location.service';
+import storeBrandsService from './storeBrands.service';
 
 // import { LLMService } from './llm.service';
 
@@ -39,24 +40,8 @@ export const StoreService = {
       throw new Error('Failed to scrape store information');
     }
 
-    const locationRegex = /^(.*?)(\d+)\s+(\d{4,5})\s+([A-Za-z\s]+)\s*\(?([A-Za-z]*)\)?$/;
-    const match = scrapedInfo.location.match(locationRegex);
-    let locationObj;
-    if (match) {
-      const [, street, number, postalCode, city, country] = match;
-      locationObj = await LocationService.createLocation(
-        street.trim(),
-        number.trim(),
-        postalCode.trim(),
-        city.trim(),
-        (country || 'Belgium').trim(),
-      );
-      console.log('LocationService.createLocation result:', locationObj);
-    } else {
-      // fallback: just use the full string as city
-      locationObj = await LocationService.createLocation('', '', '', scrapedInfo.location, '');
-      console.log('LocationService.createLocation fallback result:', locationObj);
-    }
+    const [street, number, postalCode, city, country] = (scrapedInfo.location || '').split(',').map(s => s.trim());
+    const locationObj = await LocationService.createLocation(street, number, postalCode, city, country);
 
     const store = await StoreRepository.createStore(name, locationObj.id, scrapedInfo.about);
 
@@ -71,6 +56,15 @@ export const StoreService = {
         if (hours) {
           await OpeningHoursService.createOpeningHours(day, hours.open, hours.close, store.id);
         }
+      }
+    }
+
+    if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
+      for (const brandName of scrapedInfo.brands) {
+        // Create or get the brand
+        const brand = await BrandService.createBrand(brandName, null);
+        // Associate the brand with the store
+        await storeBrandsService.addBrandToStore(store.id, brand.id);
       }
     }
 
