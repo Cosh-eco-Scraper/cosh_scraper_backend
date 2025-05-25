@@ -3,6 +3,7 @@ import { scraper } from '../scraper/scraper';
 import BrandService from './brand.service';
 import OpeningHoursService from './openingshours.service';
 import LocationService from './location.service';
+import storeBrandsService from './storeBrands.service';
 
 // import { LLMService } from './llm.service';
 
@@ -71,6 +72,15 @@ export const StoreService = {
         if (hours) {
           await OpeningHoursService.createOpeningHours(day, hours.open, hours.close, store.id);
         }
+      }
+    }
+
+    if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
+      for (const brandName of scrapedInfo.brands) {
+        // Create or get the brand
+        const brand = await BrandService.createBrand(brandName, null);
+        // Associate the brand with the store
+        await storeBrandsService.addBrandToStore(store.id, brand.id);
       }
     }
 
