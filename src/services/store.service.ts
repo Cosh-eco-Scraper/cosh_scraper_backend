@@ -44,19 +44,35 @@ export const StoreService = {
     const match = scrapedInfo.location.match(locationRegex);
     let locationObj;
     if (match) {
-      const [, street, number, postalCode, city, country] = match;
+      let [, street, number, postalCode, city, country] = match;
+      street = street.trim();
+      number = number.trim();
+      postalCode = postalCode.trim();
+      city = city.trim();
+      country = (country || '').trim();
+
+      // Fallback: if country is empty, try to extract from city
+      if (!country) {
+        const cityParts = city.split(' ');
+        if (cityParts.length > 1) {
+          country = cityParts.pop()!;
+          city = cityParts.join(' ');
+        }
+      }
+      if (!country) {
+        country = 'Belgium';
+      }
+
       locationObj = await LocationService.createLocation(
-        street.trim(),
-        number.trim(),
-        postalCode.trim(),
-        city.trim(),
-        (country || 'Belgium').trim(),
+        street,
+        number,
+        postalCode,
+        city,
+        country,
       );
-      console.log('LocationService.createLocation result:', locationObj);
     } else {
       // fallback: just use the full string as city
       locationObj = await LocationService.createLocation('', '', '', scrapedInfo.location, '');
-      console.log('LocationService.createLocation fallback result:', locationObj);
     }
 
     const store = await StoreRepository.createStore(name, locationObj.id, scrapedInfo.about);

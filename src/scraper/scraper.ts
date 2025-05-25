@@ -47,6 +47,26 @@ async function extractRelevantSnippets(page: Page): Promise<string[]> {
     'merken',
     'location',
     'locatie',
+    'adresse',         // German: address
+    'anschrift',       // German: address
+    'über uns',        // German: about us
+    'marke',           // German: brand
+    'marken',          // German: brands
+    'öffnungszeiten',  // German: opening hours
+    'geöffnet',        // German: open
+    'geschlossen',     // German: closed
+    'rückgabe',        // German: return
+    'retoure',         // German: return
+    'rücksendung',     // German: return
+    'standort',        // German: location
+    'montag',          // German: monday
+    'dienstag',        // German: tuesday
+    'mittwoch',        // German: wednesday
+    'donnerstag',      // German: thursday
+    'freitag',         // German: friday
+    'samstag',         // German: saturday
+    'sonntag',         // German: sunday
+    'adresse',
     'adres',
     'address',
     'open',
@@ -58,7 +78,6 @@ async function extractRelevantSnippets(page: Page): Promise<string[]> {
     'openingstijden',
     'opening hours',
     'openingsuren',
-    'opening hours',
     'monday',
     'tuesday',
     'wednesday',
@@ -219,7 +238,7 @@ Instructions:
 
   This means the location string must be in the format:  
   "<street> <number> <postalCode> <city> (<country>)"  
-  If country is missing, omit the parentheses. Use "Belgium" as the default country if not specified.  
+  If country is missing, omit the parentheses. Use the correct country for the city if possible (for example, "Amsterdam" = "Netherlands", "Antwerp" = "Belgium", etc.). If you cannot determine the country, use "Belgium" as the default.  
   If the full detailed address cannot be found, still return a location string that matches the regex with as much info as possible.
 - For "openingHours", always format the "open" and "close" times as "hh:mm" (24-hour format, zero-padded). If the time is not available, use null.
 
