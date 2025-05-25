@@ -213,6 +213,14 @@ Instructions:
 - For "openingHours", always return an object for each day ("monday" to "sunday") with "open" and "close" keys. If the time for a given day is not found, set both "open" and "close" to null. Do NOT use null for the whole day, always use the object format. if a day is marked as "gesloten", "closed" set both "open" and "close" to "closed".
 - For "openingHours" and "location", extract ONLY the information relevant to the store in "${location}". If there are multiple stores, pick the one matching "${location}" (case-insensitive, match city name).
 - For "about" and "retour", extract the general information for the whole shop, not store-specific.
+- IMPORTANT: Format the "location" string so it can be parsed by this regex pattern exactly:
+  
+  const locationRegex = /^(.*?)(\\d+)\\s+(\\d{4,5})\\s+([A-Za-z\\s]+)\\s*\\(?([A-Za-z]*)\\)?$/;
+
+  This means the location string must be in the format:  
+  "<street> <number> <postalCode> <city> (<country>)"  
+  If country is missing, omit the parentheses. Use "Belgium" as the default country if not specified.  
+  If the full detailed address cannot be found, still return a location string that matches the regex with as much info as possible.
 
 
 Snippets:
@@ -263,8 +271,8 @@ export async function scraper(url: string, location: string): Promise<ScrapedInf
 }
 
 // (async () => {
-//   const url = 'https://www.blabloom.com/nl/'; // Here you can put the URL to test the scraper
-//   const location = 'Genk';
+//   const url = 'https://inslag.gent/'; // Here you can put the URL to test the scraper
+//   const location = 'Gent';
 //   const scrapedData = await scraper(url, location);
 //   console.log(scrapedData);
 // })();
