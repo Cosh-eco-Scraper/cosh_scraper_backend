@@ -40,40 +40,8 @@ export const StoreService = {
       throw new Error('Failed to scrape store information');
     }
 
-    const locationRegex = /^(.*?)(\d+)\s+(\d{4,5})\s+([A-Za-z\s]+)\s*\(?([A-Za-z]*)\)?$/;
-    const match = scrapedInfo.location.match(locationRegex);
-    let locationObj;
-    if (match) {
-      let [, street, number, postalCode, city, country] = match;
-      street = street.trim();
-      number = number.trim();
-      postalCode = postalCode.trim();
-      city = city.trim();
-      country = (country || '').trim();
-
-      // Fallback: if country is empty, try to extract from city
-      if (!country) {
-        const cityParts = city.split(' ');
-        if (cityParts.length > 1) {
-          country = cityParts.pop()!;
-          city = cityParts.join(' ');
-        }
-      }
-      if (!country) {
-        country = 'Belgium';
-      }
-
-      locationObj = await LocationService.createLocation(
-        street,
-        number,
-        postalCode,
-        city,
-        country,
-      );
-    } else {
-      // fallback: just use the full string as city
-      locationObj = await LocationService.createLocation('', '', '', scrapedInfo.location, '');
-    }
+    const [street, number, postalCode, city, country] = (scrapedInfo.location || '').split(',').map(s => s.trim());
+    const locationObj = await LocationService.createLocation(street, number, postalCode, city, country);
 
     const store = await StoreRepository.createStore(name, locationObj.id, scrapedInfo.about);
 
