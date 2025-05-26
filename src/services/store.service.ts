@@ -40,8 +40,16 @@ export const StoreService = {
       throw new Error('Failed to scrape store information');
     }
 
-    const [street, number, postalCode, city, country] = (scrapedInfo.location || '').split(',').map(s => s.trim());
-    const locationObj = await LocationService.createLocation(street, number, postalCode, city, country);
+    const [street, number, postalCode, city, country] = (scrapedInfo.location || '')
+      .split(',')
+      .map((s) => s.trim());
+    const locationObj = await LocationService.createLocation(
+      street,
+      number,
+      postalCode,
+      city,
+      country,
+    );
 
     const store = await StoreRepository.createStore(name, locationObj.id, scrapedInfo.about);
 
