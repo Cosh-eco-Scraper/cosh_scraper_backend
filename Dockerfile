@@ -3,7 +3,6 @@
 ARG NODE_VERSION=20.10.0
 ARG PNPM_VERSION=10.11.0
 
-
 FROM node:${NODE_VERSION}-alpine as base
 WORKDIR /usr/src/app
 
