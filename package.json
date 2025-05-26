@@ -47,13 +47,13 @@
     "mocha": "^11.4.0",
     "nodemon": "^3.1.10",
     "npm": "^10.9.2",
-    "playwright": "^1.52.0",
     "prettier": "^3.5.3",
     "sinon": "^20.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "playwright": "^1.52.0",
     "@google/genai": "^0.14.0",
     "@types/express": "^5.0.1",
     "@types/js-yaml": "^4.0.9",
