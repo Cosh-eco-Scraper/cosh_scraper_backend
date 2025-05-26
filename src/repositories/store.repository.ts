@@ -78,7 +78,6 @@ export const StoreRepository = {
     const params = [name, location_id, description];
     const result = await databasePool.query(query, params);
 
-
     if (!result.rowCount) {
       throw new NotFoundError('Store not found');
     }
