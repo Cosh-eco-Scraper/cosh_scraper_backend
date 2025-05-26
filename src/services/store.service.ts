@@ -48,7 +48,7 @@ export const StoreService = {
       number,
       postalCode,
       city,
-      country,
+      country
     );
 
     const store = await StoreRepository.createStore(name, locationObj.id, scrapedInfo.about);
@@ -79,5 +79,5 @@ export const StoreService = {
     // Retour field still has to be handled
 
     return store;
-  },
+  }
 };

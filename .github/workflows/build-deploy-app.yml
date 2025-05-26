@@ -3,8 +3,8 @@ run-name: ${{ github.actor }} has pushed to main and is deploying the app to Doc
 
 on:
   push:
-    branches:
-      - main
+#    branches:
+#      - main
 
 jobs:
   build_test:
@@ -42,7 +42,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/cosh_scraper:backend --build-arg DIST_PATH=dist .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/cosh_scraper:backend --build-arg DIST_PATH=dist --build-arg AI_API_KEY=${{ secrets.AI_API_KEY }} --build-arg DB_PORT=${{ secrets.DB_PORT }} --build-arg DB_USER=${{ secrets.DB_USER }} --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} --build-arg DB_NAME=${{ secrets.DB_NAME }} --build-arg HOST=${{ secrets.HOST }} .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/cosh_scraper:backend
 
       - name: Save Docker image to tarball
