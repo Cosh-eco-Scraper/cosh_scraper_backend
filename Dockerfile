@@ -7,9 +7,34 @@ ARG PNPM_VERSION=10.11.0
 FROM node:${NODE_VERSION}-slim as base
 WORKDIR /usr/src/app
 
-# Chromium is usually included or can be installed with apt-get
-# You might not need this line if Playwright handles it, or use apt-get here
-# RUN apt-get update && apt-get install -y chromium
+# Install required dependencies for Playwright
+RUN apt-get update && \
+    apt-get install -y \
+    wget \
+    ca-certificates \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libatspi2.0-0 \
+    libcairo2 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
+    libglib2.0-0 \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
+    libx11-6 \
+    libxcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxrandr2 \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=cache,target=/root/.npm \
     npm install -g pnpm@${PNPM_VERSION}
@@ -30,10 +55,8 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install
 
 COPY . .
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-ENV PLAYWRIGHT_BROWSERS_PATH=/usr/bin
-# This command should now work
-RUN pnpm exec playwright install --with-deps
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=0
+RUN pnpm exec playwright install chromium
 RUN pnpm run build
 
 
@@ -42,7 +65,8 @@ FROM base as final
 
 ENV NODE_ENV=production
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-ENV PLAYWRIGHT_BROWSERS_PATH=/usr/bin
+COPY --from=build /root/.cache/ms-playwright /root/.cache/ms-playwright
+
 USER node
 WORKDIR /usr/src/app
 
