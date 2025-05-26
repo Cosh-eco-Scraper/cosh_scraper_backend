@@ -9,27 +9,23 @@ WORKDIR /usr/src/app
 RUN --mount=type=cache,target=/root/.npm \
     npm install -g pnpm@${PNPM_VERSION}
 
-
 ################################################################################
 FROM base as deps
 
-COPY package.json pnpm-lock.yaml* ./ # Copy lockfile to ensure reproducible builds
+COPY package.json ./
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --prod --ignore-scripts
-
 
 
 ################################################################################
 FROM base as build
 
-COPY package.json pnpm-lock.yaml* ./ # Copy lockfile to ensure reproducible builds
+COPY package.json ./
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install
 
 COPY . .
 RUN pnpm run build
-
-
 RUN pnpm exec playwright install --with-deps
 
 ################################################################################
@@ -42,7 +38,6 @@ WORKDIR /usr/src/app
 COPY package.json ./
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/dist ./dist
-
 
 EXPOSE 8080
 CMD ["pnpm", "start"]
