@@ -6,6 +6,8 @@ ARG PNPM_VERSION=10.11.0
 FROM node:${NODE_VERSION}-alpine as base
 WORKDIR /usr/src/app
 
+RUN apk add --no-cache chromium
+
 RUN --mount=type=cache,target=/root/.npm \
     npm install -g pnpm@${PNPM_VERSION}
 
@@ -25,13 +27,18 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install
 
 COPY . .
-RUN pnpm run build
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_BROWSERS_PATH=/usr/bin
 RUN pnpm exec playwright install --with-deps
+RUN pnpm run build
+
 
 ################################################################################
 FROM base as final
 
 ENV NODE_ENV=production
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_BROWSERS_PATH=/usr/bin
 USER node
 WORKDIR /usr/src/app
 
