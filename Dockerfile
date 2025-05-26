@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 RUN --mount=type=cache,target=/root/.npm \
     npm install -g pnpm@${PNPM_VERSION}
 
----
+
 ################################################################################
 FROM base as deps
 
@@ -18,7 +18,7 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --prod --ignore-scripts
 
 
----
+
 ################################################################################
 FROM base as build
 
@@ -32,7 +32,6 @@ RUN pnpm run build
 
 RUN pnpm exec playwright install --with-deps
 
----
 ################################################################################
 FROM base as final
 
