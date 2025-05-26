@@ -3,8 +3,8 @@ run-name: ${{ github.actor }} has pushed to main and is deploying the app to Doc
 
 on:
   push:
-    branches:
-      - main
+#    branches:
+#      - main
 
 jobs:
   build_test:
@@ -52,4 +52,3 @@ jobs:
         with:
           name: docker-image
           path: cosh_scraper_backend.tar
-
