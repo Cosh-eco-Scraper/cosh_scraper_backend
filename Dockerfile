@@ -2,17 +2,14 @@
 # This image comes with all necessary browser dependencies pre-installed.
 # You can specify a browser (e.g., mcr.microsoft.com/playwright/node:20-chromium)
 # or all browsers (mcr.microsoft.com/playwright/node:20)
-FROM mcr.microsoft.com/playwright/node:20
+FROM node:20-bookworm
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Install pnpm globally in the container
-# This makes the `pnpm` command available for subsequent steps.
 RUN npm install -g pnpm
+RUN npx -y playwright@1.52.0 install --with-deps
 
-# Copy package.json and pnpm-lock.yaml (or package-lock.json if you switch from npm to pnpm)
-# This allows Docker to cache the pnpm install step
 COPY package.json pnpm-lock.yaml ./
 
 # Install application dependencies using pnpm
