@@ -60,4 +60,5 @@ EXPOSE 3000
 
 # Define the command to run your application when the container starts.
 # Assuming 'server.js' is now directly in /app.
+CMD ["npx", "playwright","install"]
 CMD ["node", "server.js"]
