@@ -23,10 +23,6 @@ jobs:
         with:
           name: node-build-dist # Renamed artifact for clarity
           path: dist/ # Uploads the compiled dist folder
-      - uses: actions/upload-artifact@v4
-        with:
-          name: node-modules # Upload node_modules as a separate artifact
-          path: node_modules/
       - run: pnpm test
 
   deploy_to_docker:
