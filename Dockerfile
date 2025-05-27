@@ -8,16 +8,15 @@ WORKDIR /app
 # Install pnpm globally.
 RUN npm install -g pnpm
 
-# Copy package.json and pnpm-lock.yaml first.
-# This step leverages Docker's layer caching. If these files don't change,
-# Docker won't re-run the dependency installation step.
-# IMPORTANT: These files MUST be present in your Git repository and committed.
-COPY package.json pnpm-lock.yaml ./
+# Copy package.json only.
+# WARNING: pnpm-lock.yaml is NOT copied, meaning pnpm will resolve dependencies
+# dynamically. This can lead to non-reproducible builds.
+COPY package.json ./
 
 # Install project dependencies using pnpm.
-# --frozen-lockfile ensures that pnpm installs the exact versions specified
-# in pnpm-lock.yaml, leading to reproducible builds.
-RUN pnpm install --frozen-lockfile
+# WARNING: --frozen-lockfile is removed, allowing pnpm to potentially install
+# different dependency versions each time the image is built.
+RUN pnpm install
 
 # Install Playwright browsers and their dependencies.
 # This is crucial if your application uses Playwright for testing or automation.
