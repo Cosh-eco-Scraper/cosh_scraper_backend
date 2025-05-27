@@ -34,6 +34,7 @@ WORKDIR /app
 # Copy built application files from the builder stage
 COPY --from=builder /app/dist/ ./dist/
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/server.js ./
 COPY package.json ./
 
 # Expose the port the application listens on
