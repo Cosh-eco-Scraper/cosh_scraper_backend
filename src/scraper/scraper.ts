@@ -1,4 +1,4 @@
-import { Browser, chromium, firefox, Page } from 'playwright';
+import { Browser, chromium, Page } from 'playwright';
 import { GoogleGenAI } from '@google/genai';
 import * as dotenv from 'dotenv';
 
