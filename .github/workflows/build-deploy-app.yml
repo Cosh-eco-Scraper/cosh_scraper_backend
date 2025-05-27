@@ -15,8 +15,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-      - run: npm install pnpm
-      - run: pnpm ci
+      - run: npm install -g pnpm
+      - run: npm ci
       - run: pnpm i
       - run: pnpm run build --if-present
       - uses: actions/upload-artifact@v4
