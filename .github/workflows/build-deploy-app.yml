@@ -21,8 +21,12 @@ jobs:
       - run: npm run build --if-present
       - uses: actions/upload-artifact@v4
         with:
-          name: node-build
-          path: dist/
+          name: node-build-dist # Renamed artifact for clarity
+          path: dist/ # Uploads the compiled dist folder
+      - uses: actions/upload-artifact@v4
+        with:
+          name: node-modules # <--- NEW: Upload node_modules as a separate artifact
+          path: node_modules/
       - run: pnpm test
 
   deploy_to_docker:
@@ -32,9 +36,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: node-build
-          path: ./dist
-      # Build Docker image using local dist
+          name: node-build-dist
+          path: ./dist # Downloads dist into the current job's ./dist
+      - uses: actions/download-artifact@v4
+        with:
+          name: node-modules # <--- NEW: Download node_modules
+          path: ./node_modules # Downloads node_modules into the current job's ./node_modules
+      # Build Docker image using local dist and node_modules
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -42,8 +50,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
+        # The build context '.' will now include the downloaded 'dist/' and 'node_modules/'
+        # because we will remove them from .dockerignore.
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/cosh_scraper:backend --build-arg DIST_PATH=dist .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/cosh_scraper:backend .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/cosh_scraper:backend
 
       - name: Save Docker image to tarball

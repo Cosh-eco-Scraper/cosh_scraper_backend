@@ -13,7 +13,6 @@
 **/.settings
 **/.toolstarget
 **/.vs
-**/.vscode
 **/.next
 **/.cache
 **/*.*proj.user
@@ -23,15 +22,14 @@
 **/docker-compose*
 **/compose*
 **/Dockerfile*
-**/node_modules
+# **/node_modules  <-- COMMENT OUT OR REMOVE THIS LINE
 **/npm-debug.log
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/build
-**/dist
+# **/dist        <-- COMMENT OUT OR REMOVE THIS LINE
 LICENSE
 README.md
 
 npm-debug.log
-
