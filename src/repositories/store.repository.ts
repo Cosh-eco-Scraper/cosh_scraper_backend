@@ -65,9 +65,7 @@ export const StoreRepository = {
       throw new NotFoundError('Store type not found');
     }
     return result.rows.map(mapper.mapStoreType)[0];
-  }
-  ,
-
+  },
   createStore: async (name: string, location_id: number, description?: string): Promise<Store> => {
     const result = await databasePool.query(
       storeQueries.createStore(name, location_id, description),
