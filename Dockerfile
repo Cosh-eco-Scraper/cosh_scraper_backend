@@ -2,7 +2,9 @@
 FROM mcr.microsoft.com/playwright:v1.52.0-noble AS builder
 
 # Install Node.js and npm
-RUN apt-get update && apt-get install -y nodejs npm
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs
 
 WORKDIR /app
 
@@ -22,8 +24,10 @@ RUN npm run build
 # Stage 2: Runner
 FROM mcr.microsoft.com/playwright:v1.52.0-noble
 
-# Install Node.js and npm (if not already present in the base image, though it usually is for Playwright images)
-RUN apt-get update && apt-get install -y nodejs npm
+# Install Node.js and npm
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs
 
 WORKDIR /app
 
