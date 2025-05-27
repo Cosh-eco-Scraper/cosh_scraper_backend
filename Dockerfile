@@ -15,11 +15,12 @@ WORKDIR /app
 COPY dist/ ./dist/
 COPY node_modules/ ./node_modules/
 
-# Copy package.json (useful for context, though not strictly needed for runtime if dependencies are in node_modules)
+# Copy package.json (useful for context, though not strictly needed for runtime if dependencies are copied)
 COPY package.json ./
 
 # Expose the port the application listens on
 EXPOSE 3000
 
-# Command to run the application (assuming server.js is inside the dist folder)
-CMD ["node","dist/server.js"]
+# Command to run the application.
+# Based on the 'ls -lR ./dist' output, server.js is located at 'dist/src/server.js'.
+CMD ["node","dist/src/server.js"]
