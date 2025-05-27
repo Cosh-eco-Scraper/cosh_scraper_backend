@@ -14,7 +14,8 @@ COPY package.json ./
 
 # Install production dependencies only.
 # Removed --frozen-lockfile as we are no longer copying the lock file.
-RUN npm install --prod # <--- CHANGED: Removed --frozen-lockfile
+# Added --ignore-scripts to prevent execution of 'prepare' script (e.g., husky install)
+RUN npm install --prod --ignore-scripts # <--- CHANGED: Added --ignore-scripts
 
 # Copy the pre-built application files (dist) from the build context.
 # These files are downloaded by the GitHub Action's 'download-artifact' step.
