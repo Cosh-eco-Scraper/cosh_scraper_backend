@@ -34,10 +34,6 @@ jobs:
         with:
           name: node-build-dist
           path: ./dist # Downloads dist into the current job's ./dist
-      - uses: actions/download-artifact@v4
-        with:
-          name: node-modules # Download node_modules
-          path: ./node_modules # Downloads node_modules into the current job's ./node_modules
 
       - name: List contents of dist directory
         run: ls -lR ./dist # <--- THIS IS THE NEW DEBUGGING STEP YOU NEED TO ADD
