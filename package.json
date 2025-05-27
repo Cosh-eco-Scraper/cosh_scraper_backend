@@ -53,7 +53,6 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "playwright": "^1.52.0",
     "@google/genai": "^0.14.0",
     "@types/express": "^5.0.1",
     "@types/js-yaml": "^4.0.9",
@@ -65,6 +64,7 @@
     "express": "^5.1.0",
     "js-yaml": "^4.1.0",
     "pg": "^8.16.0",
+    "playwright": "^1.52.0",
     "swagger-ui-express": "^5.0.1"
   },
   "lint-staged": {

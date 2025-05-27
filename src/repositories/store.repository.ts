@@ -5,6 +5,7 @@ import { mapper } from './mapper';
 import NotFoundError from '../domain/errors/NotFoundError';
 import { DatabaseOpeningHours } from '../domain/OpeningHours';
 import { DatabaseBrand } from '../domain/Brand';
+import { getStore } from '../controllers/store.controller';
 
 export const StoreRepository = {
   getAllStores: async () => {
@@ -55,6 +56,17 @@ export const StoreRepository = {
 
     return brands;
   },
+
+  getStoreTypesByStoreId: async (id: number) => {
+    const query = storeQueries.getStoreTypesByStoreId();
+    const params = [id];
+    const result = await databasePool.query(query, params);
+    if (!result.rows.length) {
+      throw new NotFoundError('Store type not found');
+    }
+    return result.rows.map(mapper.mapStoreType)[0];
+  }
+  ,
 
   createStore: async (name: string, location_id: number, description?: string): Promise<Store> => {
     const result = await databasePool.query(

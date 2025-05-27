@@ -82,7 +82,23 @@ export async function getStoreBrands(req: Request, res: Response, next: NextFunc
       res.status(204).json({ message: 'No opening hours found' });
     }
 
-    res.json(brands.map(dtoMapper.mapBrand));
+    res.json(brands.map(dtoMapper.mapStoreType));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getStoreType(req: Request, res: Response, next: NextFunction) {
+  try {
+    const storeId = req.params.id;
+    if (!storeId) {
+      res.status(400).json({ message: 'Store ID is required' });
+    }
+    const storeType = await StoreService.getStoreTypesByStoreId(parseInt(storeId));
+    if (!storeType) {
+      res.status(404).json({ message: 'Store type not found' });
+    }
+    res.json(dtoMapper.mapStoreType(storeType));
   } catch (error) {
     next(error);
   }
