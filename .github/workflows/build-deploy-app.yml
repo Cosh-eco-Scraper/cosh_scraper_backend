@@ -18,7 +18,7 @@ jobs:
       - run: npm install -g pnpm
       - run: npm ci
       - run: pnpm i
-      - run: pnpm run build --if-present
+      - run: npm run build --if-present
       - uses: actions/upload-artifact@v4
         with:
           name: node-build
