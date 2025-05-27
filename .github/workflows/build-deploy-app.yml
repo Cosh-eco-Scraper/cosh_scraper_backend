@@ -15,14 +15,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-      - run: npm install
-      - run: npm ci
-      - run: npm run build --if-present
+      - run: npm install pnpm
+      - run: pnpm ci
+      - run: pnpm i
+      - run: pnpm run build --if-present
       - uses: actions/upload-artifact@v4
         with:
           name: node-build
           path: dist/
-      - run: npm test
+      - run: pnpm test
 
   deploy_to_docker:
     runs-on: ubuntu-latest
