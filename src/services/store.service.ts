@@ -39,14 +39,17 @@ export const StoreService = {
       throw new Error('Failed to scrape store information');
     }
 
-    const prompt = `Write a detailed store description between 300 and 500 words. 
-    Base the description strictly on the following two sources of information:
-      1. Store URL: ${URL}
-      2. About Info: "${scrapedInfo.about}
-      
-      make sure that (') is noted as ''.`;
+    const prompt = `Please write a detailed store description between 300 and 500 words.
 
-      
+        The description must be based *strictly* on the following two sources of information:
+        1. Store URL: ${URL}
+        2. About Info: "${scrapedInfo.about}"
+
+        Please ensure the description adheres to these rules:
+        - It must be written in the third person.
+        - Do not use semicolons (;).
+        - All single apostrophes (') must be represented as two single apostrophes ('').`;
+
     const largerDescription = await LLMService.sendPrompt(prompt);
     console.log('Larger description:', largerDescription);
 
