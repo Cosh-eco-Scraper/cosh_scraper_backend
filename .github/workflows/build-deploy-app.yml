@@ -35,7 +35,7 @@ jobs:
           name: node-build-dist
           path: ./dist
 
-      - name:  List contents of dist directory
+      - name: List contents of dist directory
         run: ls -lR ./dist # Keep this for now to confirm dist content
 
       - name: Login to Docker Hub
