@@ -15,14 +15,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-      - run: npm install -g pnpm
-      - run: npm ci
-      - run: pnpm i
+      - run: npm install -g pnpm # Keep pnpm install if you use it for other scripts (e.g., test)
+      - run: npm ci # This uses package-lock.json for clean install
+      - run: pnpm i # Keep pnpm i if you use it for other scripts
       - run: npm run build --if-present
       - uses: actions/upload-artifact@v4
         with:
-          name: node-build-dist # Renamed artifact for clarity
-          path: dist/ # Uploads the compiled dist folder
+          name: node-build-dist
+          path: dist/
       - run: pnpm test
 
   deploy_to_docker:
@@ -33,10 +33,13 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: node-build-dist
-          path: ./dist # Downloads dist into the current job's ./dist
+          path: ./dist
 
       - name: List contents of dist directory
-        run: ls -lR ./dist # <--- THIS IS THE NEW DEBUGGING STEP YOU NEED TO ADD
+        run: ls -lR ./dist # Keep this for now to confirm dist content
+
+      - name: Show Dockerfile content
+        run: cat Dockerfile # <--- NEW DEBUGGING STEP: This will print the Dockerfile being used
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
