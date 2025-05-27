@@ -6,7 +6,6 @@ import LocationService from './location.service';
 import storeBrandsService from './storeBrands.service';
 import { LLMService } from './llm.service';
 
-
 export const StoreService = {
   getAllStores: async () => {
     const stores = await StoreRepository.getAllStores();
@@ -40,15 +39,14 @@ export const StoreService = {
       throw new Error('Failed to scrape store information');
     }
 
-
     const prompt = `Write a detailed store description between 300 and 500 words. 
     Base the description strictly on the following two sources of information:
       1. Store URL: ${URL}
       2. About Info: "${scrapedInfo.about}
       
-      make sure that (') is noted as ''.`
-      ;
+      make sure that (') is noted as ''.`;
 
+      
     const largerDescription = await LLMService.sendPrompt(prompt);
     console.log('Larger description:', largerDescription);
 
@@ -63,8 +61,11 @@ export const StoreService = {
       country,
     );
 
-
-    const store = await StoreRepository.createStore(name, locationObj.id, largerDescription ? largerDescription : scrapedInfo.about);
+    const store = await StoreRepository.createStore(
+      name,
+      locationObj.id,
+      largerDescription ? largerDescription : scrapedInfo.about,
+    );
 
     if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
       for (const brandName of scrapedInfo.brands) {
