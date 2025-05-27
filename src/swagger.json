@@ -7,13 +7,19 @@
   },
   "host": "localhost:3001",
   "basePath": "/api",
-  "schemes": ["http"],
+  "schemes": [
+    "http"
+  ],
   "paths": {
     "/stores": {
       "get": {
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "summary": "Returns all stores",
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -27,7 +33,9 @@
         }
       },
       "post": {
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "summary": "Create a complete store",
         "description": "Creates a new store with the provided name and URL.",
         "parameters": [
@@ -52,7 +60,11 @@
                   "example": "Kasteelstraat 1, 3000 Leuven, Begië"
                 }
               },
-              "required": ["name", "url", "location"]
+              "required": [
+                "name",
+                "url",
+                "location"
+              ]
             }
           }
         ],
@@ -98,10 +110,14 @@
     },
     "/stores/{id}": {
       "get": {
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "summary": "Returns a single store by ID",
         "description": "Retrieves detailed information about a specific store.",
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -145,7 +161,9 @@
         }
       },
       "put": {
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "summary": "Update a store by ID",
         "description": "Updates the details of a store specified by id.",
         "parameters": [
@@ -206,10 +224,14 @@
     },
     "/stores/{id}/openingshours": {
       "get": {
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "summary": "Returns all opening hours for a single store by ID",
         "description": "Retrieves opening hours for a specific store.",
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -263,10 +285,14 @@
     },
     "/stores/{id}/brands": {
       "get": {
-        "tags": ["stores"],
+        "tags": [
+          "stores"
+        ],
         "summary": "Returns all brands for a single store by ID",
         "description": "Retrieves brands for a specific store.",
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -309,12 +335,16 @@
         }
       }
     },
-    "/stores/{id}/storeType": {
+    "/stores/{id}/types": {
       "get": {
-        "tags": ["stores"],
-        "summary": "Returns the type for a single store by ID",
+        "tags": [
+          "stores"
+        ],
+        "summary": "Returns the storeTypes for a single store by ID",
         "description": "Retrieves the type for a specific store.",
-        "produces": ["application/json"],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -363,11 +393,17 @@
     },
     "/llm": {
       "post": {
-        "tags": ["llm"],
+        "tags": [
+          "llm"
+        ],
         "summary": "Send a prompt to the LLM and get a response.",
         "description": "Sends a prompt string to the LLM and returns the generated response.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "in": "body",
@@ -382,7 +418,9 @@
                   "example": "Hello, AI!"
                 }
               },
-              "required": ["prompt"]
+              "required": [
+                "prompt"
+              ]
             }
           }
         ],
@@ -407,7 +445,9 @@
     },
     "/brands/": {
       "get": {
-        "tags": ["brands"],
+        "tags": [
+          "brands"
+        ],
         "summary": "get all brands",
         "responses": {
           "200": {
@@ -424,7 +464,9 @@
     },
     "/brands/{brandId}": {
       "put": {
-        "tags": ["brands"],
+        "tags": [
+          "brands"
+        ],
         "summary": "Update a brand by ID",
         "description": "Updates the details of a brand specified by brandId.",
         "parameters": [
@@ -481,7 +523,9 @@
     },
     "/locations/{id}": {
       "put": {
-        "tags": ["locations"],
+        "tags": [
+          "locations"
+        ],
         "summary": "Update a location by ID",
         "description": "Updates the details of a location specified by id.",
         "parameters": [
@@ -550,11 +594,17 @@
     },
     "/storebrands": {
       "post": {
-        "tags": ["storebrands"],
+        "tags": [
+          "storebrands"
+        ],
         "summary": "Add a brand to a store",
         "description": "Associates a brand with a specific store.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "in": "body",
@@ -575,7 +625,10 @@
                   "description": "Brand ID"
                 }
               },
-              "required": ["id", "brandId"]
+              "required": [
+                "id",
+                "brandId"
+              ]
             }
           }
         ],
@@ -603,7 +656,9 @@
     },
     "/openinghours/{id}": {
       "put": {
-        "tags": ["openinghours"],
+        "tags": [
+          "openinghours"
+        ],
         "summary": "Update opening hours by ID",
         "description": "Updates the details of an opening hours entry specified by id.",
         "parameters": [

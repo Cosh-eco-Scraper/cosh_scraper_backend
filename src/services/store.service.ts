@@ -34,8 +34,8 @@ export const StoreService = {
   },
 
   getStoreTypesByStoreId: async (id: number) => {
-    const storeType = await StoreRepository.getStoreTypesByStoreId(id);
-    return storeType;
+    const storeTypes = await StoreRepository.getStoreTypesByStoreId(id);
+    return storeTypes;
   },
 
   createCompleteStore: async (name: string, URL: string, location: string) => {

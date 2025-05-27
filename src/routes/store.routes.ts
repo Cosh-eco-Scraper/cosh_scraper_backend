@@ -16,6 +16,6 @@ router.get('/:id', getStore);
 router.put('/:id', updateStore);
 router.get('/:id/openingshours', getStoreOpeningsHours);
 router.get('/:id/brands', getStoreBrands);
-router.get('/:id/storeType', getStoreType);
+router.get('/:id/types', getStoreType);
 router.post('/', createCompleteStore);
 export default router;
