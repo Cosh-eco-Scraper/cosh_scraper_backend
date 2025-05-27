@@ -1,78 +1,72 @@
-# syntax=docker/dockerfile:1.4
+# Use a Node.js base image
+FROM node:20
 
-ARG NODE_VERSION=20.10.0
-ARG PNPM_VERSION=10.11.0
+# Set the working directory inside the container
+WORKDIR /app
 
-# Change base image from alpine to slim (Debian-based)
-FROM node:${NODE_VERSION}-slim as base
-WORKDIR /usr/src/app
+# Install pnpm
+RUN npm install -g pnpm
 
-# Install required dependencies for Playwright
-RUN apt-get update && \
-    apt-get install -y \
+# Install system dependencies required by Playwright browsers
+# These are for Debian-based systems (like the default Node.js images)
+# Check Playwright documentation for the most up-to-date list for your desired browser(s)
+# This example includes dependencies for Chromium, Firefox, and WebKit to be safe.
+RUN apt-get update && apt-get install -y \
     wget \
-    ca-certificates \
-    fonts-liberation \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libatspi2.0-0 \
-    libcairo2 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libglib2.0-0 \
-    libnspr4 \
+    gnupg \
+    procps \
     libnss3 \
-    libpango-1.0-0 \
-    libx11-6 \
-    libxcb1 \
+    libfontconfig1 \
+    libdbus-1-3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm-dev \
+    libgbm-dev \
+    libasound2 \
+    libxkbcommon0 \
     libxcomposite1 \
     libxdamage1 \
     libxext6 \
     libxfixes3 \
     libxrandr2 \
-    xvfb \
+    libxrender1 \
+    libxi6 \
+    libxss1 \
+    libxtst6 \
+    libgconf-2-4 \
+    libnotify4 \
+    libgdk-pixbuf2.0-0 \
+    libgtk-3-0 \
+    libgdk-pixbuf2.0-0 \
+    libexpat1 \
+    libjpeg-turbo8 \
+    libpangocairo-1.0-0 \
+    libxinerama1 \
+    libwebp-dev \
+    libharfbuzz-icu0 \
+    libegl1 \
+    libgles2 \
+    fonts-liberation \
+    --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-RUN --mount=type=cache,target=/root/.npm \
-    npm install -g pnpm@${PNPM_VERSION}
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-################################################################################
-FROM base as deps
+# Install application dependencies, including Playwright's browser binaries
+# `playwright install` downloads the browser binaries inside the container
+RUN pnpm install
+RUN npx playwright install --with-deps
 
-COPY package.json ./
-RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --prod --ignore-scripts
-
-
-################################################################################
-FROM base as build
-
-COPY package.json ./
-RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install
-
+# Copy the rest of the application code
 COPY . .
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=0
-RUN pnpm exec playwright install chromium
-RUN pnpm run build
 
+# Set environment variable to run browsers in headless mode by default
+ENV HEADLESS=true
 
-################################################################################
-FROM base as final
+# Expose the port your Express app listens on
+EXPOSE 3000
 
-ENV NODE_ENV=production
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-COPY --from=build /root/.cache/ms-playwright /root/.cache/ms-playwright
-
-USER node
-WORKDIR /usr/src/app
-
-COPY package.json ./
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/dist ./dist
-
-EXPOSE 8080
+# Command to run the application when the container starts
 CMD ["pnpm", "start"]
