@@ -49,6 +49,7 @@ WORKDIR /app
 # This ensures all compiled JavaScript files (like server.js and app.js)
 # are at the root level of /app, matching Node.js's require resolution.
 COPY --from=builder /app/dist/ .
+RUN apt-get update && apt-get install -y bash
 
 # If your backend application requires 'node_modules' at runtime (e.g., Express, etc.), copy them.
 # If your 'dist' already bundles everything, this might not be necessary.
@@ -57,8 +58,8 @@ COPY --from=builder /app/node_modules ./node_modules
 # Expose the port your application listens on.
 # Replace '3000' with the actual port your application uses.
 EXPOSE 3000
-
 # Define the command to run your application when the container starts.
 # Assuming 'server.js' is now directly in /app.
-CMD ["npx", "playwright","install"]
-CMD ["node", "server.js"]
+RUN echo '#!/bin/bash\nnpx playwright install\nnode server.js &\ntrap "pkill node" SIGINT SIGTERM EXIT\nwait' > /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+CMD ["/app/entrypoint.sh"]
