@@ -1,33 +1,39 @@
 # Stage 1: Builder
 FROM mcr.microsoft.com/playwright:v1.52.0-noble AS builder
-# If you need Node.js, you'll need to install it in this image
+
+# Install Node.js and npm
 RUN apt-get update && apt-get install -y nodejs npm
 
 WORKDIR /app
 
-# Install pnpm globally.
-RUN npm install -g pnpm
+# Copy package.json
+COPY package.json ./
 
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
+# Install project dependencies using npm
+# This will create a node_modules directory and a package-lock.json (if not present)
+RUN npm install
 
-# Install project dependencies using pnpm
-RUN pnpm install --frozen-lockfile
-
+# Copy the rest of the application code
 COPY . .
 
-RUN pnpm run build
+# Run the build command
+RUN npm run build
 
 # Stage 2: Runner
 FROM mcr.microsoft.com/playwright:v1.52.0-noble
+
+# Install Node.js and npm (if not already present in the base image, though it usually is for Playwright images)
 RUN apt-get update && apt-get install -y nodejs npm
 
 WORKDIR /app
 
+# Copy built application files from the builder stage
 COPY --from=builder /app/dist/ ./dist/
 COPY --from=builder /app/node_modules ./node_modules
 COPY package.json ./
 
+# Expose the port the application listens on
 EXPOSE 3000
 
+# Command to run the application
 CMD ["node","server.js"]
