@@ -1,6 +1,6 @@
 # Stage 1: Builder
 # Use a Node.js image suitable for building your application.
-FROM mcr.microsoft.com/playwright/chromium:latest
+FROM mcr.microsoft.com/playwright:v1.52.0-noble
 # If you need Node.js, you'll need to install it in this image
 RUN apt-get update && apt-get install -y nodejs npm
 
@@ -23,19 +23,11 @@ COPY . .
 
 RUN pnpm run build
 
-
-# Set the working directory for the production environment.
-WORKDIR /app
-
 COPY --from=builder /app/dist/ .
-
 
 COPY --from=builder /app/node_modules ./node_modules
 
-# Expose the port your application listens on.
-# Replace '3000' with the actual port your application uses.
+
 EXPOSE 3000
-# Define the command to run your application when the container starts.
-RUN echo '#!/bin/bash\nnode server.js &\ntrap "pkill node" SIGINT SIGTERM EXIT\nwait' > /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-CMD ["/app/entrypoint.sh"]
+
+CMD ["node","server.js"]
