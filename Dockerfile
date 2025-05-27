@@ -8,27 +8,22 @@ RUN apt-get update && apt-get install -y curl && \
 
 WORKDIR /app
 
-# Copy package.json and server.js directly to ensure they are available from the start
-# This assumes server.js is in the same directory as your Dockerfile.
+# Copy package.json to install dependencies first
 COPY package.json ./
-COPY server.js ./ # <--- ADDED THIS LINE
 
 # Install project dependencies using npm
-# This will create a node_modules directory and a package-lock.json (if not present)
 RUN npm install
 
-# Copy the rest of the application code
-# This will bring in your 'src/', 'dist/' (if pre-existing), 'config/', 'database/', etc.
+# Copy the rest of the application code (including your .ts source files in 'src/', etc.)
 COPY . .
 
-# Run the build command (e.g., transpiling TypeScript, bundling assets)
-# If 'npm run build' outputs a new server.js to 'dist/', you might need to adjust the runner stage.
+# Run the build command (this will compile your .ts files into .js, usually into a 'dist' folder)
 RUN npm run build
 
 # Stage 2: Runner
 FROM mcr.microsoft.com/playwright:v1.52.0-noble
 
-# Install Node.js and npm
+# Install Node.js and npm (same as builder, as this is a fresh stage)
 RUN apt-get update && apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs
@@ -36,13 +31,20 @@ RUN apt-get update && apt-get install -y curl && \
 WORKDIR /app
 
 # Copy built application files from the builder stage
+# Copy the entire 'dist' directory, which contains your compiled JavaScript files
 COPY --from=builder /app/dist/ ./dist/
+
+# Copy node_modules
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/server.js ./ # This line should now find server.js from the builder
+
+# Copy the compiled server.js file from 'dist' in the builder stage to the current directory (./server.js)
+COPY --from=builder /app/dist/server.js ./server.js # <--- CORRECTED LINE
+
+# Copy package.json (often useful for scripts or metadata, though not strictly required for execution if dependencies are copied)
 COPY package.json ./
 
 # Expose the port the application listens on
 EXPOSE 3000
 
-# Command to run the application
+# Command to run the application (assuming server.js is now directly in /app)
 CMD ["node","server.js"]
