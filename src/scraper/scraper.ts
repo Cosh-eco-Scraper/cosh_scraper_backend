@@ -1,4 +1,4 @@
-import {  firefox, Page } from 'playwright';
+import { Browser, chromium, firefox, Page } from 'playwright';
 import { GoogleGenAI } from '@google/genai';
 import * as dotenv from 'dotenv';
 
@@ -29,11 +29,11 @@ async function getAllInternalLinks(page: Page): Promise<string[]> {
       .map((a) => (a as HTMLAnchorElement).href)
       .filter(Boolean),
   );
-  const internalLinks = hrefs
+
+  return hrefs
     .filter((href: string) => href.startsWith(baseUrl))
     .filter((href: string) => !href.startsWith('mailto:') && !href.startsWith('tel:'))
     .filter((href: string, i: number, arr: string[]) => arr.indexOf(href) === i);
-  return internalLinks;
 }
 
 async function extractRelevantSnippets(page: Page): Promise<string[]> {
@@ -184,7 +184,6 @@ async function gatherRelevantTexts(page: Page): Promise<string[]> {
       snippets.push(...pageSnippets);
     } catch (e) {
       console.error(`Error visiting ${url}:`, e);
-      continue;
     }
   }
   return Array.from(new Set(snippets));
@@ -265,25 +264,39 @@ Respond ONLY with the JSON object.
 }
 
 export async function scraper(url: string, location: string): Promise<ScrapedInfo | null> {
-  const browser = await firefox.launch();
-  const context = await browser.newContext();
-  const page = await context.newPage();
-
+  let page: Page | undefined = undefined;
+  let browser: Browser | undefined = undefined;
+  let context: any = undefined;
+  let aiSummary: ScrapedInfo | null = null;
   try {
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    browser = await chromium.launch();
+    context = await browser.newContext();
+    page = await context.newPage();
 
-    const snippets = await gatherRelevantTexts(page);
+    await page?.goto(url, { waitUntil: 'domcontentloaded' });
 
-    const aiSummary = await summarizeRelevantInfoWithAI(url, snippets, location);
-    return aiSummary;
+    const snippets = await gatherRelevantTexts(page!);
+
+    aiSummary = await summarizeRelevantInfoWithAI(url, snippets, location);
   } catch (e) {
     console.error(`Error scraping ${url}:`, e);
-    return null;
   } finally {
-    await page.close();
-    await context.close();
-    await browser.close();
+    if (page) {
+      await page.close();
+    }
+    if (context) {
+      await context.close();
+    }
+    if (browser) {
+      await browser.close();
+    }
   }
+
+  if (!aiSummary) {
+    return null;
+  }
+
+  return aiSummary;
 }
 
 // (async () => {
