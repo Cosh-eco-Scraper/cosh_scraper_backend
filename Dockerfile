@@ -8,15 +8,16 @@ WORKDIR /app
 # Install pnpm globally.
 RUN npm install -g pnpm
 
-# Copy package.json only.
-# WARNING: pnpm-lock.yaml is NOT copied, meaning pnpm will resolve dependencies
-# dynamically. This can lead to non-reproducible builds.
-COPY package.json ./
+# Copy package.json and pnpm-lock.yaml first.
+# This step leverages Docker's layer caching. If these files don't change,
+# Docker won't re-run the dependency installation step.
+# IMPORTANT: These files MUST be present in your Git repository and committed.
+COPY package.json pnpm-lock.yaml ./
 
 # Install project dependencies using pnpm.
-# WARNING: --frozen-lockfile is removed, allowing pnpm to potentially install
-# different dependency versions each time the image is built.
-RUN pnpm install
+# --frozen-lockfile ensures that pnpm installs the exact versions specified
+# in pnpm-lock.yaml, leading to reproducible builds.
+RUN pnpm install --frozen-lockfile
 
 # Install Playwright browsers and their dependencies.
 # This is crucial if your application uses Playwright for testing or automation.
@@ -36,7 +37,6 @@ RUN pnpm run build
 # Stage 2: Production
 # Use a smaller, production-ready base image.
 # For a Node.js backend, 'node:20-slim' is often a good choice as it includes Node.js runtime.
-# For a static frontend, you might use 'nginx:alpine' or 'scratch' if you only serve static files.
 FROM node:20-slim AS production
 
 # Set the working directory for the production environment.
@@ -44,24 +44,21 @@ WORKDIR /app
 
 # Copy only the necessary files from the builder stage to the final image.
 # This keeps your final Docker image small and secure.
-# Adjust paths based on your project's build output and runtime needs.
-# Copy the built application (e.g., 'dist' folder for frontend or compiled backend).
-COPY --from=builder /app/dist ./dist
+
+# Copy the *contents* of the 'dist' directory from the builder stage
+# directly into the /app directory of the production stage.
+# This ensures all compiled JavaScript files (like server.js and app.js)
+# are at the root level of /app, matching Node.js's require resolution.
+COPY --from=builder /app/dist/ .
 
 # If your backend application requires 'node_modules' at runtime (e.g., Express, etc.), copy them.
 # If your 'dist' already bundles everything, this might not be necessary.
 COPY --from=builder /app/node_modules ./node_modules
-
-# Copy your main server entry point file.
-# IMPORTANT: Verify the correct path and filename of your main server entry point.
-# It might be 'index.js', 'app.js', or located in a build output directory like 'dist/server.js'.
-# Adjust '/app/server.js' to match the actual path in the builder stage.
-COPY --from=builder /app/dist/server.js .
 
 # Expose the port your application listens on.
 # Replace '3000' with the actual port your application uses.
 EXPOSE 3000
 
 # Define the command to run your application when the container starts.
-# Replace 'server.js' with your application's entry file.
+# Assuming 'server.js' is now directly in /app.
 CMD ["node", "server.js"]
