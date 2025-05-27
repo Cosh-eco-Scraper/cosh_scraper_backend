@@ -5,7 +5,6 @@ import { mapper } from './mapper';
 import NotFoundError from '../domain/errors/NotFoundError';
 import { DatabaseOpeningHours } from '../domain/OpeningHours';
 import { DatabaseBrand } from '../domain/Brand';
-import { getStore } from '../controllers/store.controller';
 
 export const StoreRepository = {
   getAllStores: async () => {
