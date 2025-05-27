@@ -1,4 +1,4 @@
-import { chromium, Page } from 'playwright';
+import {  firefox, Page } from 'playwright';
 import { GoogleGenAI } from '@google/genai';
 import * as dotenv from 'dotenv';
 
@@ -265,7 +265,7 @@ Respond ONLY with the JSON object.
 }
 
 export async function scraper(url: string, location: string): Promise<ScrapedInfo | null> {
-  const browser = await chromium.launch();
+  const browser = await firefox.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
 

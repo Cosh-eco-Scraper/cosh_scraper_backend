@@ -22,7 +22,6 @@ RUN pnpm install
 # This is crucial if your application uses Playwright for testing or automation.
 # Using 'npx playwright install --with-deps' ensures all necessary browser binaries
 # and system dependencies are installed.
-RUN npx playwright install-deps chromium
 RUN npx playwright install --with-deps
 
 # Copy the rest of your application source code.
