@@ -53,7 +53,9 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 
 # Copy your main server entry point file.
-# Replace 'server.js' with the actual name of your application's entry file.
+# IMPORTANT: Verify the correct path and filename of your main server entry point.
+# It might be 'index.js', 'app.js', or located in a build output directory like 'dist/server.js'.
+# Adjust '/app/server.js' to match the actual path in the builder stage.
 COPY --from=builder /app/server.js .
 
 # Expose the port your application listens on.
