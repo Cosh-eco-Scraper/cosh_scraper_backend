@@ -15,9 +15,10 @@ COPY package.json ./
 RUN npm install
 
 # Copy the rest of the application code (including your .ts source files in 'src/', etc.)
+# This is where your server.ts and src/ files get copied into the builder.
 COPY . .
 
-# Run the build command (this will compile your .ts files into .js, usually into a 'dist' folder)
+# Run the build command (this will now use your updated tsconfig.json to compile .ts to .js in 'dist')
 RUN npm run build
 
 # Stage 2: Runner
@@ -38,7 +39,7 @@ COPY --from=builder /app/dist/ ./dist/
 COPY --from=builder /app/node_modules ./node_modules
 
 # Copy the compiled server.js file from 'dist' in the builder stage to the current directory (./server.js)
-COPY --from=builder /app/dist/server.js ./server.js # <--- CORRECTED LINE
+COPY --from=builder /app/dist/server.js ./server.js
 
 # Copy package.json (often useful for scripts or metadata, though not strictly required for execution if dependencies are copied)
 COPY package.json ./
