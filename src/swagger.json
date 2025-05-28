@@ -309,6 +309,58 @@
         }
       }
     },
+    "/stores/{id}/types": {
+      "get": {
+        "tags": ["stores"],
+        "summary": "Returns the storeTypes for a single store by ID",
+        "description": "Retrieves the type for a specific store.",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the store to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "storeType found and returned",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": "1"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Fashion"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Fashion store type"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No storetype found"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Store not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/llm": {
       "post": {
         "tags": ["llm"],
