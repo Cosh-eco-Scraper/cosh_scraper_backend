@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+import { Pool } from 'pg';
 
 const databasePool = new Pool({
   user: process.env.DB_USER,
