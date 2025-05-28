@@ -88,6 +88,22 @@ export async function getStoreBrands(req: Request, res: Response, next: NextFunc
   }
 }
 
+export async function getStoreType(req: Request, res: Response, next: NextFunction) {
+  try {
+    const storeId = req.params.id;
+    if (!storeId) {
+      res.status(400).json({ message: 'Store ID is required' });
+    }
+    const storeTypes = await StoreService.getStoreTypesByStoreId(parseInt(storeId));
+    if (!storeTypes.length) {
+      res.status(204);
+    }
+    res.json(storeTypes.map(dtoMapper.mapStoreType));
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function createCompleteStore(
   req: Request,
   res: Response,

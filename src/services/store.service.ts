@@ -32,6 +32,11 @@ export const StoreService = {
     return brands;
   },
 
+  getStoreTypesByStoreId: async (id: number) => {
+    const storeTypes = await StoreRepository.getStoreTypesByStoreId(id);
+    return storeTypes;
+  },
+
   createCompleteStore: async (name: string, URL: string, location: string) => {
     const scrapedInfo = await run(URL, location);
 
