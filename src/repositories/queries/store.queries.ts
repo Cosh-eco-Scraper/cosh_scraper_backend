@@ -55,6 +55,14 @@ export const storeQueries = {
          WHERE s.id = $1;
        `,
 
+  getStoreTypesByStoreId() {
+    return `SELECT t.id, t.name, t.description
+                        FROM stores s
+                                  JOIN store_types st ON st.store_id = s.id
+                                  JOIN types t ON t.id = st.type_id
+                        WHERE s.id = $1;`;
+  },
+
   updateStore: () => `
          UPDATE stores
          SET name = $1,
