@@ -21,7 +21,7 @@ export const storeBrandsRepository = {
       'SELECT 1 FROM store_brands WHERE store_id = $1 AND brand_id = $2',
       [storeId, brandId],
     );
-    if (assocRes.rowCount > 0) {
+    if (assocRes && assocRes.rows.length > 0) {
       throw new Error('Brand is already associated with this store');
     }
 
@@ -31,6 +31,6 @@ export const storeBrandsRepository = {
     if (result.rowCount === 0) {
       throw new Error('Failed to associate brand with store');
     }
-    return result.rowCount;
+    return result.rowCount as number;
   },
 };
