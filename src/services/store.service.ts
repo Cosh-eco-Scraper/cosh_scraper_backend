@@ -7,10 +7,6 @@ import storeBrandsService from './storeBrands.service';
 import { LLMService } from './llm.service';
 
 export const StoreService = {
-
-  
-
-
   getAllStores: async () => {
     const stores = await StoreRepository.getAllStores();
 
@@ -47,7 +43,6 @@ export const StoreService = {
       return text.replace(/'/g, "''");
     }
 
-
     const prompt = `Write a flowing text in our usual writing style for this store ${URL} and ${scrapedInfo.about} based on the following criteria:
       * Approximately 225 words long
       * Title: name of the store
@@ -66,10 +61,9 @@ export const StoreService = {
       * Do not mention discounts, online shopping, or sales
       * Do NOT make green claims`;
 
-
     const largerDescription = await LLMService.sendPrompt(prompt);
-    console.log('prompt:', prompt)
-    const betterDescription =  escapeApostrophes(largerDescription ?? '');
+    console.log('prompt:', prompt);
+    const betterDescription = escapeApostrophes(largerDescription ?? '');
 
     const [street, number, postalCode, city, country] = (scrapedInfo.location || '')
       .split(',')
@@ -82,11 +76,7 @@ export const StoreService = {
       country,
     );
 
-    const store = await StoreRepository.createStore(
-      name,
-      locationObj.id,
-      betterDescription
-    );
+    const store = await StoreRepository.createStore(name, locationObj.id, betterDescription);
 
     if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
       for (const brandName of scrapedInfo.brands) {
