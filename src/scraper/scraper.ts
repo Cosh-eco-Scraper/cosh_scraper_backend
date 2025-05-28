@@ -1,6 +1,7 @@
-import { Browser, chromium, Page } from 'playwright';
+import { chromium, Page } from 'playwright';
 import { GoogleGenAI } from '@google/genai';
 import * as dotenv from 'dotenv';
+import { distance } from 'fastest-levenshtein';
 
 dotenv.config();
 const ai = new GoogleGenAI({ apiKey: process.env.AI_API_KEY });
@@ -22,18 +23,60 @@ type ScrapedInfo = {
   retour: string;
 };
 
-async function getAllInternalLinks(page: Page): Promise<string[]> {
-  const baseUrl = new URL(page.url()).origin;
-  const hrefs = await page.$$eval('a[href]', (anchors) =>
-    Array.from(anchors)
-      .map((a) => (a as HTMLAnchorElement).href)
-      .filter(Boolean),
-  );
+function rankSnippetsByKeywordMatch(snippets: string[], keywords: string[]): string[] {
+  const lowerKeywords = keywords.map((k) => k.toLowerCase());
 
-  return hrefs
-    .filter((href: string) => href.startsWith(baseUrl))
-    .filter((href: string) => !href.startsWith('mailto:') && !href.startsWith('tel:'))
-    .filter((href: string, i: number, arr: string[]) => arr.indexOf(href) === i);
+  const scored = snippets.map((snippet) => {
+    const lower = snippet.toLowerCase();
+    const keywordMatches = lowerKeywords.reduce((count, keyword) => {
+      const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+      const matches = lower.match(regex);
+      return count + (matches ? matches.length : 0);
+    }, 0);
+
+    return { snippet, score: keywordMatches };
+  });
+
+  scored.sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    }
+    return a.snippet.length - b.snippet.length;
+  });
+
+  return scored.map((s) => s.snippet);
+}
+
+function deduplicateSnippets(
+  snippets: string[],
+  similarityThreshold = 0.85,
+  maxChars = 1000000,
+): string[] {
+  const unique: string[] = [];
+
+  for (const snippet of snippets) {
+    const cleaned = snippet.replace(/\s+/g, ' ').trim();
+    if (!cleaned || cleaned.length < 30) {
+      continue;
+    }
+
+    const isSimilar = unique.some((existing) => {
+      const dist = distance(cleaned, existing);
+      const maxLen = Math.max(cleaned.length, existing.length);
+      return dist / maxLen < 1 - similarityThreshold;
+    });
+
+    if (!isSimilar) {
+      unique.push(cleaned);
+    }
+
+    const currentCharCount = unique.reduce((sum, s) => sum + s.length, 0);
+    if (currentCharCount > maxChars) {
+      break;
+    }
+  }
+
+  return unique;
 }
 
 async function extractRelevantSnippets(page: Page): Promise<string[]> {
@@ -47,25 +90,25 @@ async function extractRelevantSnippets(page: Page): Promise<string[]> {
     'merken',
     'location',
     'locatie',
-    'adresse', // German: address
-    'anschrift', // German: address
-    'über uns', // German: about us
-    'marke', // German: brand
-    'marken', // German: brands
-    'öffnungszeiten', // German: opening hours
-    'geöffnet', // German: open
-    'geschlossen', // German: closed
-    'rückgabe', // German: return
-    'retoure', // German: return
-    'rücksendung', // German: return
-    'standort', // German: location
-    'montag', // German: monday
-    'dienstag', // German: tuesday
-    'mittwoch', // German: wednesday
-    'donnerstag', // German: thursday
-    'freitag', // German: friday
-    'samstag', // German: saturday
-    'sonntag', // German: sunday
+    'adresse',
+    'anschrift',
+    'über uns',
+    'marke',
+    'marken',
+    'öffnungszeiten',
+    'geöffnet',
+    'geschlossen',
+    'rückgabe',
+    'retoure',
+    'rücksendung',
+    'standort',
+    'montag',
+    'dienstag',
+    'mittwoch',
+    'donnerstag',
+    'freitag',
+    'samstag',
+    'sonntag',
     'adresse',
     'adres',
     'address',
@@ -137,7 +180,11 @@ async function extractRelevantSnippets(page: Page): Promise<string[]> {
     .map((s: string | null) => (s ?? '').trim())
     .filter(Boolean);
 
-  return Array.from(new Set(allSnippets));
+  const uniqueSnippets = deduplicateSnippets(allSnippets);
+
+  const rankedSnippets = rankSnippetsByKeywordMatch(uniqueSnippets, keywords);
+
+  return rankedSnippets.slice(0, 150);
 }
 
 async function openDropdowns(page: Page) {
@@ -160,35 +207,10 @@ async function openDropdowns(page: Page) {
 }
 
 async function gatherRelevantTexts(page: Page): Promise<string[]> {
-  const visited = new Set<string>();
-  const snippets: string[] = [];
-
-  let internalLinks: string[] = [];
-  try {
-    internalLinks = await getAllInternalLinks(page);
-  } catch {
-    internalLinks = [];
-  }
-  const toVisit = [page.url(), ...internalLinks.filter((link) => link !== page.url())].slice(0, 10);
-
-  for (const url of toVisit) {
-    if (visited.has(url)) {
-      continue;
-    }
-    visited.add(url);
-
-    try {
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
-      await openDropdowns(page);
-      const pageSnippets = await extractRelevantSnippets(page);
-      snippets.push(...pageSnippets);
-    } catch (e) {
-      console.error(`Error visiting ${url}:`, e);
-    }
-  }
-  return Array.from(new Set(snippets));
+  await openDropdowns(page);
+  const snippets = await extractRelevantSnippets(page);
+  return snippets;
 }
-
 const sendPrompt = async (prompt: string): Promise<string | undefined> => {
   const response = await ai.models.generateContent({
     model: 'gemini-2.0-flash',
@@ -198,7 +220,7 @@ const sendPrompt = async (prompt: string): Promise<string | undefined> => {
   return response.text;
 };
 
-async function summarizeRelevantInfoWithAI(
+export async function summarizeRelevantInfoWithAI(
   url: string,
   snippets: string[],
   location: string,
@@ -263,45 +285,33 @@ Respond ONLY with the JSON object.
   }
 }
 
-export async function scraper(url: string, location: string): Promise<ScrapedInfo | null> {
-  let page: Page | undefined = undefined;
-  let browser: Browser | undefined = undefined;
-  let context: any = undefined;
-  let aiSummary: ScrapedInfo | null = null;
+export async function scraper(
+  url: string,
+  _location: string,
+): Promise<{ snippets: string[] } | null> {
+  console.log(`Scraping URL: ${url}`);
+  const browser = await chromium.launch({ headless: true });
   try {
-    browser = await chromium.launch();
-    context = await browser.newContext();
-    page = await context.newPage();
+    const page = await browser.newPage();
+    await page.goto(url, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(2000);
 
-    await page?.goto(url, { waitUntil: 'domcontentloaded' });
+    const snippets = await gatherRelevantTexts(page);
+    console.log(`Extracted ${snippets.length} snippets.`);
 
-    const snippets = await gatherRelevantTexts(page!);
+    return { snippets }; // only snippets now
+  } catch (error) {
+    console.error('Error scraping URL:', url, error);
 
-    aiSummary = await summarizeRelevantInfoWithAI(url, snippets, location);
-  } catch (e) {
-    console.error(`Error scraping ${url}:`, e);
-  } finally {
-    if (page) {
-      await page.close();
-    }
-    if (context) {
-      await context.close();
-    }
-    if (browser) {
-      await browser.close();
-    }
-  }
-
-  if (!aiSummary) {
     return null;
+  } finally {
+    await browser.close();
   }
-
-  return aiSummary;
 }
 
 // (async () => {
-//   const url = 'https://www.blabloom.com/nl/'; // Here you can put the URL to test the scraper
-//   const location = 'Genk';
+//   const url = 'https://www.asadventure.com/nl.html'; // Here you can put the URL to test the scraper
+//   const location = 'Brugge'; // Here you can put the location to test the scraper
 //   const scrapedData = await scraper(url, location);
 //   console.log(scrapedData);
 // })();
