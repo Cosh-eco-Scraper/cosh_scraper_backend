@@ -47,7 +47,7 @@ export const StoreService = {
       return text.replace(/\n+$/, '');
     }
 
-    const prompt = `Write a one continuous text without paragraphs in our usual writing style for this store ${URL} and ${scrapedInfo.about} based on the following criteria:
+    const prompt = `Write a one continuous text without paragraphs in our usual writing style for this store ${URL} and based on the following criteria:
       * Approximately 225 words long
       * explanation of a few words + city where the store is located
       * Description: summarize in 110 characters what the store does and what it stands for.
