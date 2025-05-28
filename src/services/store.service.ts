@@ -43,6 +43,10 @@ export const StoreService = {
       return text.replace(/'/g, "''");
     }
 
+    function removeTrailingNewline(text: string): string {
+      return text.replace(/\n+$/, '');
+    }
+
     const prompt = `Write a one continuous text without paragraphs in our usual writing style for this store ${URL} and ${scrapedInfo.about} based on the following criteria:
       * Approximately 225 words long
       * explanation of a few words + city where the store is located
@@ -59,11 +63,13 @@ export const StoreService = {
       * The entire text must be presented as one continuous block of text, without any paragraph breaks.
       * Make sure that apostrophe is noted as ('')
       * Do not mention discounts, online shopping, or sales
+      * The final generated text must NOT end with a newline character.
       * Do NOT make green claims`;
 
     const largerDescription = await LLMService.sendPrompt(prompt);
     console.log('prompt:', prompt);
-    const betterDescription = escapeApostrophes(largerDescription ?? '');
+    const apostropheRemoved = escapeApostrophes(largerDescription ?? '');
+    const betterDescription = removeTrailingNewline(apostropheRemoved);
 
     const [street, number, postalCode, city, country] = (scrapedInfo.location || '')
       .split(',')
