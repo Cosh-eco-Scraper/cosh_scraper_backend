@@ -96,7 +96,7 @@ export async function getStoreType(req: Request, res: Response, next: NextFuncti
     }
     const storeTypes = await StoreService.getStoreTypesByStoreId(parseInt(storeId));
     if (!storeTypes.length) {
-      res.status(400).json({ message: 'No store types found' });
+      res.status(204);
     }
     res.json(storeTypes.map(dtoMapper.mapStoreType));
   } catch (error) {
