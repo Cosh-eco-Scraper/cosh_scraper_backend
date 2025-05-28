@@ -665,6 +665,32 @@
           }
         }
       }
+    },
+    "/statements": {
+      "get": {
+        "tags": ["statements"],
+        "summary": "Get a random statement",
+        "description": "Returns a randomly selected statement.",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "A random statement",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer", "example": 1 },
+                "text": { "type": "string", "example": "This is a random statement." }
+              }
+            }
+          },
+          "404": {
+            "description": "No statements found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
     }
   }
 }
