@@ -66,11 +66,9 @@ export const StoreRepository = {
     return types;
   },
   createStore: async (name: string, location_id: number, description?: string): Promise<Store> => {
-
     const querry = storeQueries.createStore();
     const params = [name, location_id, description];
     const result = await databasePool.query(querry, params);
-
 
     const store = result.rows.map(mapper.mapStore)[0] as Store;
     return store;
