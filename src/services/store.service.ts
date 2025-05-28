@@ -51,7 +51,6 @@ export const StoreService = {
       
       make sure that (') is noted as ''.`;
 
-      
     const largerDescription = await LLMService.sendPrompt(prompt);
     console.log('Larger description:', largerDescription);
 
