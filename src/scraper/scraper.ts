@@ -1,4 +1,4 @@
-import { Browser, chromium, Page } from 'playwright';
+import { chromium, Page } from 'playwright';
 import { GoogleGenAI } from '@google/genai';
 import * as dotenv from 'dotenv';
 import { distance } from 'fastest-levenshtein';
