@@ -43,10 +43,9 @@ export const StoreService = {
       return text.replace(/'/g, "''");
     }
 
-    const prompt = `Write a flowing text in our usual writing style for this store ${URL} and ${scrapedInfo.about} based on the following criteria:
+    const prompt = `Write a one continuous text without paragraphs in our usual writing style for this store ${URL} and ${scrapedInfo.about} based on the following criteria:
       * Approximately 225 words long
-      * Title: name of the store
-      * Subtitle: explanation of a few words + city where the store is located
+      * explanation of a few words + city where the store is located
       * Description: summarize in 110 characters what the store does and what it stands for.
       * The concept of the store
       * The main products they sell. Make this as concrete as possible (e.g., Not "fashion" but "elegant women's fashion", "quality dresses and refined jackets"), ...
@@ -57,6 +56,7 @@ export const StoreService = {
       * 1 sentence about "find the brands they sell below" (for multi-brands and possibly flagships, NOT for second-hand, workshops, ...)
       * Use third-person
       * Do not use semicolons
+      * The entire text must be presented as one continuous block of text, without any paragraph breaks.
       * Make sure that apostrophe is noted as ('')
       * Do not mention discounts, online shopping, or sales
       * Do NOT make green claims`;
