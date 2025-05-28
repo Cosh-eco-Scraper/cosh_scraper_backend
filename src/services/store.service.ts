@@ -1,5 +1,5 @@
 import { StoreRepository } from '../repositories/store.repository';
-import { scraper } from '../scraper/scraper';
+import { run } from '../scraper/app';
 import BrandService from './brand.service';
 import OpeningHoursService from './openingshours.service';
 import LocationService from './location.service';
@@ -33,7 +33,7 @@ export const StoreService = {
   },
 
   createCompleteStore: async (name: string, URL: string, location: string) => {
-    const scrapedInfo = await scraper(URL, location);
+    const scrapedInfo = await run(URL, location);
 
     if (!scrapedInfo) {
       throw new Error('Failed to scrape store information');
@@ -46,7 +46,6 @@ export const StoreService = {
       
       make sure that (') is noted as ''.`;
 
-      
     const largerDescription = await LLMService.sendPrompt(prompt);
     console.log('Larger description:', largerDescription);
 
