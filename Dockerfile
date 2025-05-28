@@ -1,42 +1,29 @@
-# syntax=docker/dockerfile:1.4
+# Stage 1: Runtime
+FROM mcr.microsoft.com/playwright:v1.52.0-noble
 
-ARG NODE_VERSION=20.10.0
-ARG PNPM_VERSION=10.11.0
+# Install Node.js and npm (needed for 'node' command and dependency management)
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs
 
-FROM node:${NODE_VERSION}-alpine as base
-WORKDIR /usr/src/app
+WORKDIR /app
 
-RUN --mount=type=cache,target=/root/.npm \
-    npm install -g pnpm@${PNPM_VERSION}
-
-################################################################################
-FROM base as deps
-
+# Copy package.json to install dependencies.
+# We are removing the lock file copy due to persistent build errors.
 COPY package.json ./
-RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --prod --ignore-scripts
 
+# Install production dependencies only.
+# Removed --frozen-lockfile as we are no longer copying the lock file.
+# Added --ignore-scripts to prevent execution of 'prepare' script (e.g., husky install)
+RUN npm install --omit=dev --ignore-scripts # <--- CHANGED: Added --ignore-scripts
 
-################################################################################
-FROM base as build
+# Copy the pre-built application files (dist) from the build context.
+# These files are downloaded by the GitHub Action's 'download-artifact' step.
+COPY dist/ ./dist/
 
-COPY package.json ./
-RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install
+# Expose the port the application listens on
+EXPOSE 3000
 
-COPY . .
-RUN pnpm run build
-
-################################################################################
-FROM base as final
-
-ENV NODE_ENV=production
-USER node
-WORKDIR /usr/src/app
-
-COPY package.json ./
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/dist ./dist
-
-EXPOSE 8080
-CMD ["pnpm", "start"]
+# Command to run the application.
+# Based on the 'ls -lR ./dist' output, server.js is located at 'dist/src/server.js'.
+CMD ["node","dist/src/server.js"]
