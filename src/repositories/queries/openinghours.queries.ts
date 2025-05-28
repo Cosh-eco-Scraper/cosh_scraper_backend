@@ -1,21 +1,16 @@
 export const openingHoursQueries = {
-  updateOpeningHours: (
-    openingHoursId?: number,
-    day?: string,
-    startTime?: string,
-    endTime?: string,
-    storeId?: number,
-  ) => `UPDATE opening_hours
-                                                    SET day = '${day}',
-                                                        openingat = '${startTime}',
-                                                        closingat = '${endTime}',
-                                                        store_id = '${storeId}'
-                                                    WHERE id = '${openingHoursId}';`,
-  createOpeningHours: (
-    day: string,
-    startTime: string,
-    endTime: string,
-    storeId: number,
-  ) => `INSERT INTO opening_hours (day, openingat, closingat, store_id)
-                                                    VALUES ('${day}', '${startTime}', '${endTime}', '${storeId}');`,
+  updateOpeningHours: () => `
+    UPDATE opening_hours
+    SET day = $1,
+        openingat = $2,
+        closingat = $3,
+        store_id = $4
+    WHERE id = $5;
+  `,
+
+  createOpeningHours: () => `
+    INSERT INTO opening_hours (day, openingat, closingat, store_id)
+    VALUES ($1, $2, $3, $4)
+    RETURNING *;
+  `,
 };
