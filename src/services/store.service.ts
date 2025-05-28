@@ -7,6 +7,10 @@ import storeBrandsService from './storeBrands.service';
 import { LLMService } from './llm.service';
 
 export const StoreService = {
+
+  
+
+
   getAllStores: async () => {
     const stores = await StoreRepository.getAllStores();
 
@@ -39,19 +43,33 @@ export const StoreService = {
       throw new Error('Failed to scrape store information');
     }
 
-    const prompt = `Please write a detailed store description between 300 and 500 words.
+    function escapeApostrophes(text: string): string {
+      return text.replace(/'/g, "''");
+    }
 
-        The description must be based *strictly* on the following two sources of information:
-        1. Store URL: ${URL}
-        2. About Info: "${scrapedInfo.about}"
 
-        Please ensure the description adheres to these rules:
-        - It must be written in the third person.
-        - Do not use semicolons (;).
-        - All single apostrophes (') must be represented as two single apostrophes ('').`;
+    const prompt = `Write a flowing text in our usual writing style for this store ${URL} and ${scrapedInfo.about} based on the following criteria:
+      * Approximately 225 words long
+      * Title: name of the store
+      * Subtitle: explanation of a few words + city where the store is located
+      * Description: summarize in 110 characters what the store does and what it stands for.
+      * The concept of the store
+      * The main products they sell. Make this as concrete as possible (e.g., Not "fashion" but "elegant women's fashion", "quality dresses and refined jackets"), ...
+      * What makes the store unique compared to other stores without specifically mentioning that this makes the store unique. Just write about something unique about the store.
+      * What makes the store more sustainable
+      * Any additional sustainability factors if these are mentioned on the website. If not, omit this sentence.
+          * Resell system, takeback system, repair, do they rent, ...
+      * 1 sentence about "find the brands they sell below" (for multi-brands and possibly flagships, NOT for second-hand, workshops, ...)
+      * Use third-person
+      * Do not use semicolons
+      * Make sure that apostrophe is noted as ('')
+      * Do not mention discounts, online shopping, or sales
+      * Do NOT make green claims`;
+
 
     const largerDescription = await LLMService.sendPrompt(prompt);
-    console.log('Larger description:', largerDescription);
+    console.log('prompt:', prompt)
+    const betterDescription =  escapeApostrophes(largerDescription ?? '');
 
     const [street, number, postalCode, city, country] = (scrapedInfo.location || '')
       .split(',')
@@ -67,7 +85,7 @@ export const StoreService = {
     const store = await StoreRepository.createStore(
       name,
       locationObj.id,
-      largerDescription ? largerDescription : scrapedInfo.about,
+      betterDescription
     );
 
     if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
