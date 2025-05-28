@@ -9,7 +9,7 @@ async function runTasksWithLimit<T>(tasks: (() => Promise<T>)[], limit: number):
     let index = 0;
     let completed = 0;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         function runNext() {
             if (index === tasks.length && running === 0) {
                 resolve(results);

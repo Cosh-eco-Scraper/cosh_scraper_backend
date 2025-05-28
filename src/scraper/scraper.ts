@@ -38,7 +38,9 @@ function rankSnippetsByKeywordMatch(snippets: string[], keywords: string[]): str
   });
 
   scored.sort((a, b) => {
-    if (b.score !== a.score) { return b.score - a.score };
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    }
     return a.snippet.length - b.snippet.length;
   });
 
@@ -54,7 +56,9 @@ function deduplicateSnippets(
 
   for (const snippet of snippets) {
     const cleaned = snippet.replace(/\s+/g, ' ').trim();
-    if (!cleaned || cleaned.length < 30) { continue };
+    if (!cleaned || cleaned.length < 30) {
+      continue;
+    }
 
     const isSimilar = unique.some((existing) => {
       const dist = distance(cleaned, existing);
@@ -67,7 +71,9 @@ function deduplicateSnippets(
     }
 
     const currentCharCount = unique.reduce((sum, s) => sum + s.length, 0);
-    if (currentCharCount > maxChars) { break };
+    if (currentCharCount > maxChars) {
+      break;
+    }
   }
 
   return unique;
@@ -281,7 +287,7 @@ Respond ONLY with the JSON object.
 
 export async function scraper(
   url: string,
-  location: string,
+  _location: string,
 ): Promise<{ snippets: string[] } | null> {
   console.log(`Scraping URL: ${url}`);
   const browser = await chromium.launch({ headless: true });
@@ -296,6 +302,7 @@ export async function scraper(
     return { snippets }; // only snippets now
   } catch (error) {
     console.error('Error scraping URL:', url, error);
+
     return null;
   } finally {
     await browser.close();
