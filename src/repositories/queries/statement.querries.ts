@@ -1,5 +1,3 @@
-import { get } from 'axios';
-
 export const statementQueries = {
   getAllStatements: () => `
     SELECT "statement" FROM statements;
