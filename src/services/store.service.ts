@@ -67,7 +67,6 @@ export const StoreService = {
         * Make sure that apostrophe is noted as ('')
         * Do not mention discounts, online shopping, or sales
         * The final generated text must NOT end with a newline character.`;
-      
 
     const largerDescription = await LLMService.sendPrompt(prompt);
     console.log('prompt:', prompt);
