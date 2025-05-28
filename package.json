@@ -11,8 +11,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint --fix \"src/**/*.ts\"",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "prepare": "husky install"
+    "format:check": "prettier --check ."
   },
   "repository": {
     "type": "git",
@@ -53,7 +52,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "playwright": "^1.52.0",
+    "playwright": "1.52.0",
     "@google/genai": "^0.14.0",
     "@types/express": "^5.0.1",
     "@types/js-yaml": "^4.0.9",
