@@ -1,8 +1,0 @@
-PORT=3001
-NODE_ENV=development
-DB_HOST: localhost
-DB_PORT: 5433
-DB_USER: devUser
-DB_PASSWORD: devPassword
-DB_NAME: ScraperDB
-AI_API_KEY=AIzaSyA2dYJVOQNBmh9Ne2b3lnuO-Fbw7oSAV6U
