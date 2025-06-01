@@ -1,4 +1,4 @@
-import { chromium, Page } from 'playwright';
+import { Page } from 'playwright';
 import { GoogleGenAI } from '@google/genai';
 import * as dotenv from 'dotenv';
 import { distance } from 'fastest-levenshtein';
@@ -10,6 +10,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.AI_API_KEY });
 
 type ScrapedInfo = {
   url: string;
+  name: string;
   brands: string[];
   openingHours: {
     monday: { open: string; close: string } | null;
@@ -146,29 +147,8 @@ async function extractRelevantSnippets(page: Page, language: string): Promise<st
   return rankedSnippets.slice(0, 150);
 }
 
-async function openDropdowns(page: Page) {
-  const dropdownSelectors = ['button', 'a', '[role="button"]', '[aria-haspopup="true"]'];
-  for (const selector of dropdownSelectors) {
-    const elements = await page.$$(selector);
-    for (const el of elements) {
-      const text = (await el.innerText().catch(() => ''))?.toLowerCase() || '';
-      const aria = (await el.getAttribute('aria-label').catch(() => ''))?.toLowerCase() || '';
-      if (text.includes('brand') || aria.includes('brand')) {
-        try {
-          await el.click({ force: true });
-          await page.waitForTimeout(500);
-        } catch (e) {
-          console.error(`Failed to click on dropdown: ${e}`);
-        }
-      }
-    }
-  }
-}
-
 async function gatherRelevantTexts(page: Page, language: string): Promise<string[]> {
-  await openDropdowns(page);
-  const snippets = await extractRelevantSnippets(page, language);
-  return snippets;
+  return await extractRelevantSnippets(page, language);
 }
 
 const sendPrompt = async (prompt: string): Promise<string | undefined> => {
@@ -209,24 +189,29 @@ export async function summarizeRelevantInfoWithAI(
 export async function scraper(
   url: string,
   _location: string,
+  page: Page, // Accept page as an argument
 ): Promise<{ snippets: string[] } | null> {
   console.log(`Scraping URL: ${url}`);
-  const browser = await chromium.launch({ headless: true });
+
   try {
-    const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2000);
+    await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 }); // Added timeout for robustness
+    await page.waitForLoadState('domcontentloaded'); // Stronger wait than just networkidle
+    await page.waitForTimeout(2000); // Consider if this timeout is always necessary
 
     const language = await detectLanguage(page);
     const snippets = await gatherRelevantTexts(page, language);
     console.log(`Extracted ${snippets.length} snippets.`);
 
-    return { snippets }; // only snippets now
+    return { snippets };
   } catch (error) {
     console.error('Error scraping URL:', url, error);
-
     return null;
   } finally {
-    await browser.close();
+    // This is correct: the page is closed after each task, which is then re-opened by the worker for the next task.
+    if (page && !page.isClosed()) {
+      // Add check for !page.isClosed() to prevent errors if already closed
+      await page.close();
+      console.log(`Scraper: Page for ${url} closed.`);
+    }
   }
 }
