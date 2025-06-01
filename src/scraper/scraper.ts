@@ -3,6 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import * as dotenv from 'dotenv';
 import { distance } from 'fastest-levenshtein';
 import getPrompt from './prompt/prompt';
+import getKeywords from './keywords';
 
 dotenv.config();
 const ai = new GoogleGenAI({ apiKey: process.env.AI_API_KEY });
@@ -23,6 +24,23 @@ type ScrapedInfo = {
   about: string;
   retour: string;
 };
+
+async function detectLanguage(page: Page): Promise<string> {
+  const htmlLang = await page.$eval('html', (el) => el.getAttribute('lang') || '');
+  if (htmlLang) {
+    return htmlLang.split('-')[0].toLowerCase();
+  }
+
+  const metaLang = await page
+    .$eval('meta[http-equiv="content-language"]', (el) => el.getAttribute('content') || '')
+    .catch(() => '');
+
+  if (metaLang) {
+    return metaLang.split('-')[0].toLowerCase();
+  }
+
+  return 'en'; // Default to English if no language detected
+}
 
 function rankSnippetsByKeywordMatch(snippets: string[], keywords: string[]): string[] {
   const lowerKeywords = keywords.map((k) => k.toLowerCase());
@@ -80,35 +98,8 @@ function deduplicateSnippets(
   return unique;
 }
 
-async function extractRelevantSnippets(page: Page): Promise<string[]> {
-  const keywords = [
-    'about',
-    'about us',
-    'intro',
-    'brand',
-    'brands',
-    'location',
-    'address',
-    'open',
-    'opening',
-    'hour',
-    'hours',
-    'time',
-    'times',
-    'opening hours',
-    'monday',
-    'tuesday',
-    'wednesday',
-    'thursday',
-    'friday',
-    'saturday',
-    'sunday',
-    'closed',
-    'return',
-    'returns',
-    'contact',
-    'contacts',
-  ];
+async function extractRelevantSnippets(page: Page, language: string): Promise<string[]> {
+  const keywords = getKeywords(language);
   const keywordRegex = new RegExp(keywords.join('|'), 'i');
 
   const title = await page.title();
@@ -174,9 +165,9 @@ async function openDropdowns(page: Page) {
   }
 }
 
-async function gatherRelevantTexts(page: Page): Promise<string[]> {
+async function gatherRelevantTexts(page: Page, language: string): Promise<string[]> {
   await openDropdowns(page);
-  const snippets = await extractRelevantSnippets(page);
+  const snippets = await extractRelevantSnippets(page, language);
   return snippets;
 }
 
@@ -226,7 +217,8 @@ export async function scraper(
     await page.goto(url, { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
 
-    const snippets = await gatherRelevantTexts(page);
+    const language = await detectLanguage(page);
+    const snippets = await gatherRelevantTexts(page, language);
     console.log(`Extracted ${snippets.length} snippets.`);
 
     return { snippets }; // only snippets now
@@ -238,10 +230,3 @@ export async function scraper(
     await browser.close();
   }
 }
-
-// (async () => {
-//   const url = 'https://www.asadventure.com/nl.html'; // Here you can put the URL to test the scraper
-//   const location = 'Brugge'; // Here you can put the location to test the scraper
-//   const scrapedData = await scraper(url, location);
-//   console.log(scrapedData);
-// })();
