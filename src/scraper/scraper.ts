@@ -83,45 +83,19 @@ function deduplicateSnippets(
 async function extractRelevantSnippets(page: Page): Promise<string[]> {
   const keywords = [
     'about',
-    'over ons',
     'about us',
     'intro',
     'brand',
-    'merk',
-    'merken',
+    'brands',
     'location',
-    'locatie',
-    'adresse',
-    'anschrift',
-    'über uns',
-    'marke',
-    'marken',
-    'öffnungszeiten',
-    'geöffnet',
-    'geschlossen',
-    'rückgabe',
-    'retoure',
-    'rücksendung',
-    'standort',
-    'montag',
-    'dienstag',
-    'mittwoch',
-    'donnerstag',
-    'freitag',
-    'samstag',
-    'sonntag',
-    'adresse',
-    'adres',
     'address',
     'open',
     'opening',
     'hour',
-    'uur',
-    'tijd',
+    'hours',
     'time',
-    'openingstijden',
+    'times',
     'opening hours',
-    'openingsuren',
     'monday',
     'tuesday',
     'wednesday',
@@ -129,18 +103,11 @@ async function extractRelevantSnippets(page: Page): Promise<string[]> {
     'friday',
     'saturday',
     'sunday',
-    'maandag',
-    'dinsdag',
-    'woensdag',
-    'donderdag',
-    'vrijdag',
-    'zaterdag',
-    'zondag',
-    'gesloten',
-    'retour',
-    'retourneren',
+    'closed',
     'return',
     'returns',
+    'contact',
+    'contacts',
   ];
   const keywordRegex = new RegExp(keywords.join('|'), 'i');
 
@@ -228,9 +195,9 @@ export async function summarizeRelevantInfoWithAI(
   location: string,
 ): Promise<ScrapedInfo | null> {
   const prompt = getPrompt(url, snippets, location);
-  console.log('Prompt:', prompt); // Remove this if you don't want see the whole prompt
   const aiResponse = await sendPrompt(prompt);
   if (!aiResponse) {
+    console.error('AI response is empty');
     return null;
   }
 
