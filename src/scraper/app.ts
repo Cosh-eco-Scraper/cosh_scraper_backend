@@ -1,12 +1,12 @@
 import { Worker } from 'worker_threads';
-import { getAllInternalLinks } from './links';
 import path from 'path';
 import { summarizeRelevantInfoWithAI } from './scraper';
+import { getAllValidUrls } from './linkCrawler/linkCrawler';
 
 const MAX_WORKERS = 4;
 
 export async function run(baseURL: string, location: string) {
-  const allLinks = await getAllInternalLinks(baseURL);
+  const allLinks = await getAllValidUrls(new URL(baseURL).toString());
   console.log(`Discovered total ${allLinks.length} internal links.`);
 
   const chunkSize = Math.ceil(allLinks.length / MAX_WORKERS);
