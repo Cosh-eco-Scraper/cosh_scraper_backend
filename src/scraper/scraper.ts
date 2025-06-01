@@ -2,6 +2,7 @@ import { chromium, Page } from 'playwright';
 import { GoogleGenAI } from '@google/genai';
 import * as dotenv from 'dotenv';
 import { distance } from 'fastest-levenshtein';
+import getPrompt from './prompt/prompt';
 
 dotenv.config();
 const ai = new GoogleGenAI({ apiKey: process.env.AI_API_KEY });
@@ -211,6 +212,7 @@ async function gatherRelevantTexts(page: Page): Promise<string[]> {
   const snippets = await extractRelevantSnippets(page);
   return snippets;
 }
+
 const sendPrompt = async (prompt: string): Promise<string | undefined> => {
   const response = await ai.models.generateContent({
     model: 'gemini-2.0-flash',
@@ -225,50 +227,7 @@ export async function summarizeRelevantInfoWithAI(
   snippets: string[],
   location: string,
 ): Promise<ScrapedInfo | null> {
-  const prompt = `
-The website URL is: ${url}
-
-Given the following relevant text snippets from a shop website, extract and summarize the following fields as a JSON object:
-
-{
-  "url": string,
-  "brands": string[],
-  "openingHours": {
-    "monday": {"open": string, "close": string } | null,
-    "tuesday": {"open": string, "close": string } | null,
-    "wednesday": {"open": string, "close": string } | null,
-    "thursday": {"open": string, "close": string } | null,
-    "friday": {"open": string, "close": string } | null,
-    "saturday": {"open": string, "close": string } | null,
-    "sunday": {"open": string, "close": string } | null
-  },
-  "location": string,
-  "about": string,
-  "retour": string
-}
-
-Instructions:
-- For all string fields, remove any line breaks (\n), plus signs (+), or other special characters. Return each string as a single, clean sentence or paragraph with normal spaces.
-- For "brands", extract all brand names mentioned in the snippets. If none are found, return an empty array.
-- For "brands", remove any duplicates.
-- For "brands", sort the array alphabetically.
-- For "brands", use the official brand name that is used on the brands website. If there is no official brand name, use one name of the brand as it is written in the snippets.
-- For "brands", start all brand names with a capital letter.
-- For "openingHours", always return an object for each day ("monday" to "sunday") with "open" and "close" keys. If the time for a given day is not found, set both "open" and "close" to "closed". Do NOT use null for the whole day, always use the object format. If a day is marked as "gesloten" or "closed", set both "open" and "close" to "closed".
-- For "openingHours" and "location", extract ONLY the information relevant to the store in "${location}". If there are multiple stores, pick the one matching "${location}" (case-insensitive, match city name). if no country is present add one that matches the location.
-- For "about" and "retour", extract the general information for the whole shop, not store-specific.
-- For "location", always return the address in this exact format:
-  "<street>,<number>,<postalCode>,<city>,<country>"
-  For example: "Burgemeester de Vlugtlaan,125,1063,Amsterdam,Netherlands"
-  If any part is missing, leave it empty but keep the commas (e.g. ",,1063,Amsterdam,Netherlands").
-- For "openingHours", always format the "open" and "close" times as "hh:mm" (24-hour format, zero-padded).
-
-
-Snippets:
-${snippets.map((s, i) => `[${i + 1}] ${s}`).join('\n')}
-
-Respond ONLY with the JSON object.
-    `.trim();
+  const prompt = getPrompt(url, snippets, location);
   console.log('Prompt:', prompt); // Remove this if you don't want see the whole prompt
   const aiResponse = await sendPrompt(prompt);
   if (!aiResponse) {
