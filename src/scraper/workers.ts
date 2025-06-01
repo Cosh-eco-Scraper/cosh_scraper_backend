@@ -1,7 +1,5 @@
-import { workerData, parentPort } from 'worker_threads';
+import { parentPort, workerData } from 'worker_threads';
 import { scraper } from './scraper';
-
-const CONCURRENT_SCRAPES = 4;
 
 async function runTasksWithLimit<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
   const results: T[] = [];
@@ -24,12 +22,14 @@ async function runTasksWithLimit<T>(tasks: (() => Promise<T>)[], limit: number):
         tasks[currentIndex]()
           .then((res) => {
             results[currentIndex] = res;
+            running--;
+            completed++;
+            parentPort?.postMessage({ type: 'progress', count: completed });
+            runNext();
           })
           .catch((err) => {
             results[currentIndex] = null as any;
             console.error('Error in scraping:', err);
-          })
-          .finally(() => {
             running--;
             completed++;
             parentPort?.postMessage({ type: 'progress', count: completed });
@@ -37,6 +37,7 @@ async function runTasksWithLimit<T>(tasks: (() => Promise<T>)[], limit: number):
           });
       }
     }
+
     runNext();
   });
 }
@@ -57,7 +58,9 @@ async function runTasksWithLimit<T>(tasks: (() => Promise<T>)[], limit: number):
     }
   });
 
-  const results = await runTasksWithLimit<ScraperResult | null>(tasks, CONCURRENT_SCRAPES);
+  const numberOfScrapers = parseInt(process.env.CONCURRENT_SCRAPERS as string);
+
+  const results = await runTasksWithLimit<ScraperResult | null>(tasks, numberOfScrapers);
 
   // Flatten snippets from all pages scraped by this worker
   const allSnippets = results
