@@ -284,6 +284,10 @@ Given the following relevant text snippets from a shop website, extract and summ
 Instructions:
 - For all string fields, remove any line breaks (\n), plus signs (+), or other special characters. Return each string as a single, clean sentence or paragraph with normal spaces.
 - For "brands", extract all brand names mentioned in the snippets. If none are found, return an empty array.
+- For "brands", remove any duplicates.
+- For "brands", sort the array alphabetically.
+- For "brands", use the official brand name that is used on the brands website. If there is no official brand name, use one name of the brand as it is written in the snippets.
+- For "brands", start all brand names with a capital letter.
 - For "openingHours", always return an object for each day ("monday" to "sunday") with "open" and "close" keys. If the time for a given day is not found, set both "open" and "close" to "closed". Do NOT use null for the whole day, always use the object format. If a day is marked as "gesloten" or "closed", set both "open" and "close" to "closed".
 - For "openingHours" and "location", extract ONLY the information relevant to the store in "${location}". If there are multiple stores, pick the one matching "${location}" (case-insensitive, match city name). if no country is present add one that matches the location.
 - For "openingHours", if the store is open 24 hours, return "open" and "close" as "00:00" and "23:59".
