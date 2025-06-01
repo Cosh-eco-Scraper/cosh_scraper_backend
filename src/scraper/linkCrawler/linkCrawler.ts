@@ -2,7 +2,8 @@ import getRobotParser, { Robot } from '../robot/robot';
 import { delay } from '../misc/misc';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-
+import dotenv from 'dotenv';
+dotenv.config();
 export async function getAllValidUrls(url: string) {
   const robot = await getRobotParser(url);
   let currentLevel = 1;

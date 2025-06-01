@@ -1,6 +1,8 @@
 import axios from 'axios';
 import robotsParser from 'robots-parser';
-import { URL } from 'url'; // Explicitly import URL if not already global
+import { URL } from 'url';
+import dotenv from 'dotenv'; // Explicitly import URL if not already global
+dotenv.config();
 
 export interface Robot {
   isAllowed(url: string, ua?: string): boolean | undefined;
