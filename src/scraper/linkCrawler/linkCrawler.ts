@@ -37,23 +37,25 @@ async function getUrlsFromPage(
   const isAllowed = robot.isAllowed(baseUrl);
   const isNotAllowed = robot.isDisallowed(baseUrl);
   const containsImage = isImage(baseUrl);
+  const isHigherLevel = currentLevel > maxLevel;
+  const alreadyVisited = visitedUrls.has(baseUrl);
 
-  if (currentLevel > maxLevel) {
-    console.warn('[getUrlsFromPage] Reached max level, skipping subpages: ', url);
-    return result;
+  switch (true) {
+    case isHigherLevel:
+      console.warn('[getUrlsFromPage] Reached max level, skipping subpages: ', url);
+      return result;
+    case isNotAllowed:
+      console.warn('[getUrlsFromPage] Disallowed by robots.txt, skipping subpages: ', url);
+      return result;
+    case containsImage:
+      console.warn('[getUrlsFromPage] Image, skipping subpages: ', url);
+      return result;
+    case alreadyVisited:
+      console.warn('[getUrlsFromPage] Already visited skipping page: ', url);
+      return result;
   }
 
-  if (isNotAllowed) {
-    console.warn('[getUrlsFromPage] Disallowed by robots.txt, skipping subpages: ', url);
-    return result;
-  }
-
-  if (containsImage) {
-    console.warn('[getUrlsFromPage] Image, skipping subpages: ', url);
-    return result;
-  }
-
-  if (isAllowed && !visitedUrls.has(baseUrl)) {
+  if (isAllowed && !alreadyVisited) {
     const validUrl = addValidUrl(baseUrl, result);
     let childUrls = await getUrlsFromUrl(validUrl);
     await logDelay(delayMs);
@@ -106,10 +108,6 @@ async function getUrlsFromUrl(url: string) {
       timeout: 10000,
       responseType: 'text',
     });
-    console.log(`[getUrlsFromUrl] ${url} status: ${res.status}`);
-    console.log(`[getUrlsFromUrl] ${url} content-type: ${res.headers['content-type']}`);
-    console.log(`[getUrlsFromUrl] ${url} content: ${res.data.slice(0, 100)}...`);
-
     if (!res.headers['content-type']?.includes('text/html')) {
       return [];
     }

@@ -113,7 +113,7 @@ async function extractRelevantSnippets(page: Page, language: string): Promise<st
     .catch(() => '');
 
   const blocks = await page.$$eval(
-    'section, article, div, ul, ol, li, tr',
+    'section, article, div, ul, ol, li, tr, span',
     (elements: Element[], keywordRegexStr: string) => {
       const regex = new RegExp(keywordRegexStr, 'i');
       return elements
