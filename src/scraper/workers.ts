@@ -120,11 +120,13 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
       } as WorkerToMainMessage);
     }
     if (browser) {
+      console.log(`Worker (ID: ${process.pid}) closing browser on unhandled error.`);
       await browser.close();
     }
     process.exit(1);
   }
 })();
+//just a little change
 
 // Handle worker exit to ensure browser is closed if something goes wrong
 if (parentPort) {

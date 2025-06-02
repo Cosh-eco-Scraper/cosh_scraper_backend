@@ -251,7 +251,7 @@ export async function summarizeRelevantInfoWithAI(
   const prompt = getPrompt(url, snippets, location);
   let attempts = 0;
   const maxAttempts = 5;
-  const baseDelay = 1000;
+  const baseDelay = 1500;
 
   while (attempts < maxAttempts) {
     try {
