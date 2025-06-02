@@ -17,8 +17,13 @@ export const StoreService = {
 
     return store;
   },
-  updateStore: async (storeId: number, name: string, description?: string): Promise<number> => {
-    const result = await StoreRepository.updateStore(storeId, name, description);
+  updateStore: async (
+    storeId: number,
+    name: string,
+    retour: string,
+    description?: string,
+  ): Promise<number> => {
+    const result = await StoreRepository.updateStore(storeId, name, description, retour);
     return result;
   },
   getOpeningsHoursByStoreId: async (id: number) => {
@@ -69,6 +74,7 @@ export const StoreService = {
       name,
       locationObj.id,
       largerDescription ? largerDescription : scrapedInfo.about,
+      scrapedInfo.retour,
     );
 
     if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
@@ -93,8 +99,6 @@ export const StoreService = {
         await storeBrandsService.addBrandToStore(store.id, brand.id);
       }
     }
-
-    // Retour field still has to be handled
 
     return store;
   },

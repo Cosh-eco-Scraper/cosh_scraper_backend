@@ -10,6 +10,7 @@ function mapStore(databaseResult: any): Store {
     id: databaseResult.id,
     name: databaseResult.name,
     description: databaseResult.description,
+    retour: databaseResult.retour,
     createdAt: databaseResult.created_at,
     updatedAt: databaseResult.updated_at,
     location: {
