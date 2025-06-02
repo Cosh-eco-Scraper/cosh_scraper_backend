@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { StoreService } from '../services/store.service';
 import { dtoMapper } from './dtoMapper';
+import { send } from 'process';
 
 export async function getAllStores(_req: Request, res: Response, next: NextFunction) {
   try {
@@ -121,27 +122,20 @@ export async function createCompleteStore(
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    res.write(`data: Starting to create store...\n\n`);
+    const sendSSE = (msg: string) => res.write(`data: ${msg}\n\n`);
 
-    const store = await StoreService.createCompleteStore(name, url, location);
+    sendSSE('Starting to create store...');
 
-    res.write(`data: Store creation in progress...\n\n`);
-    res.write(`data: Scraping data from URL: ${url}\n\n`);
-
-    // setTimeout(() => {
-    //   res.write(`data: Store creation completed successfully!\n\n`);
-    //   res.end();
-    // }, 2000);
+    const store = await StoreService.createCompleteStore(name, url, location, sendSSE);
 
     res.status(201).json({ id: store.id, message: 'Store created successfully' });
 
-    if (res.status(201)) {
-      res.write(`data: Store created successfully with ID: ${store.id}\n\n`);
-      res.end();
-    }
+    sendSSE('Store creation completed successfully!');
+    res.write(`data: Store created successfully with ID: ${store.id}\n\n`);
+    res.end();
   } catch (error) {
     res.write(`data: Error occurred: ${error}\n\n`);
-    res.end(); // Close the SSE connection
+    res.end();
     next(error);
   }
 }

@@ -37,8 +37,13 @@ export const StoreService = {
     return storeTypes;
   },
 
-  createCompleteStore: async (name: string, URL: string, location: string) => {
-    const scrapedInfo = await run(URL, location);
+  createCompleteStore: async (
+    name: string,
+    URL: string,
+    location: string,
+    onProgress?: (msg: string) => void,
+  ) => {
+    const scrapedInfo = await run(URL, location, onProgress);
 
     if (!scrapedInfo) {
       throw new Error('Failed to scrape store information');

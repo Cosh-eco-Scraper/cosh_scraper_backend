@@ -5,9 +5,10 @@ import { summarizeRelevantInfoWithAI } from './scraper';
 
 const MAX_WORKERS = 4;
 
-export async function run(baseURL: string, location: string) {
+export async function run(baseURL: string, location: string, onProgress?: (msg: string) => void) {
   const allLinks = await getAllInternalLinks(baseURL);
   console.log(`Discovered total ${allLinks.length} internal links.`);
+  onProgress?.(`Discovered total ${allLinks.length} internal links.`);
 
   const chunkSize = Math.ceil(allLinks.length / MAX_WORKERS);
   const linkChunks = Array.from({ length: MAX_WORKERS }, (_, i) =>
@@ -26,9 +27,11 @@ export async function run(baseURL: string, location: string) {
 
       worker.on('message', (msg) => {
         if (msg.type === 'progress') {
-          console.log(`Worker ${i + 1}: Scraped ${msg.count} / ${links.length} pages.`);
+          const progressMsg = `Worker ${i + 1}: Scraped ${msg.count} / ${links.length} pages.`;
+          onProgress?.(progressMsg);
         } else if (msg.type === 'done') {
-          console.log(`Worker ${i + 1} done, received ${msg.snippets.length} snippets.`);
+          const doneMsg = `Worker ${i + 1} done, received ${msg.snippets.length} snippets.`;
+          onProgress?.(doneMsg);
           resolve(msg.snippets);
         }
       });
@@ -47,6 +50,7 @@ export async function run(baseURL: string, location: string) {
   const combinedSnippets = allWorkersSnippets.flat();
 
   console.log(`All workers done. Total combined snippets: ${combinedSnippets.length}`);
+  onProgress?.(`All workers done. Total combined snippets: ${combinedSnippets.length}`);
 
   // Now do ONE AI call with combined snippets and location
   const MAX_TOKENS = 250000;
@@ -59,5 +63,6 @@ export async function run(baseURL: string, location: string) {
 
   const finalSummary = await summarizeRelevantInfoWithAI(baseURL, limitedSnippets, location);
   console.log('Final combined summary:', finalSummary);
+  onProgress?.('Final combined summary generated.');
   return finalSummary;
 }
