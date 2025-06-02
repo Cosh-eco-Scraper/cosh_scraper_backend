@@ -15,6 +15,11 @@ const app = express();
 app.use(cors({ origin: '*' })); // Allow any origin
 app.use(express.json());
 
+app.use((req, res, next) => {
+  console.log(`Request received: ${req.method} ${req.url}`);
+  next(); // IMPORTANT: Don't forget to call next() to pass control to subsequent middleware/routes
+});
+
 if (process.env.NODE_ENV === 'development') {
   swaggerDocument.host = 'localhost:' + process.env.PORT;
 } else {
