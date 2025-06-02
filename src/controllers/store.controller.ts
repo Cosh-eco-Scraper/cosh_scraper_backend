@@ -128,11 +128,17 @@ export async function createCompleteStore(
     res.write(`data: Store creation in progress...\n\n`);
     res.write(`data: Scraping data from URL: ${url}\n\n`);
 
-    setTimeout(() => {
-      res.write(`data: Store creation completed successfully!\n\n`);
-      res.end();
-    }, 2000);
+    // setTimeout(() => {
+    //   res.write(`data: Store creation completed successfully!\n\n`);
+    //   res.end();
+    // }, 2000);
+
     res.status(201).json({ id: store.id, message: 'Store created successfully' });
+
+    if (res.status(201)) {
+      res.write(`data: Store created successfully with ID: ${store.id}\n\n`);
+      res.end();
+    }
   } catch (error) {
     res.write(`data: Error occurred: ${error}\n\n`);
     res.end(); // Close the SSE connection
