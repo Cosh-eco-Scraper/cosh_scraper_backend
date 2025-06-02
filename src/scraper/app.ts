@@ -3,6 +3,7 @@ import path from 'path';
 import { summarizeRelevantInfoWithAI } from './scraper';
 import { getAllValidUrls } from './linkCrawler/linkCrawler';
 import dotenv from 'dotenv';
+import getRobotParser from './robot/robot';
 
 dotenv.config();
 
@@ -38,6 +39,11 @@ type WorkerToMainMessage =
     };
 
 export async function run(baseURL: string, location: string) {
+  const host = new URL(baseURL).host;
+  const robot = await getRobotParser(`https://${host}`);
+  const crawlDelay = robot.getCrawlDelay(host) ?? 0;
+  const delayMs = crawlDelay * 1000 || parseInt(process.env.SCRAPER_DELAY as string) || 1000;
+
   const allLinks = await getAllValidUrls(new URL(baseURL).toString());
   console.log(`Discovered total ${allLinks.length} internal links.`);
 
@@ -80,6 +86,7 @@ export async function run(baseURL: string, location: string) {
     const worker = new Worker(workerPath, {
       workerData: {
         location,
+        delayMs,
       },
       execArgv: ['-r', 'ts-node/register'],
     });

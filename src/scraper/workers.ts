@@ -36,7 +36,7 @@ type WorkerToMainMessage =
       type: 'worker_terminated'; // NEW: Worker confirms it has terminated gracefully
     };
 
-const { location } = workerData;
+const { location, delayMs } = workerData;
 
 let browser: Browser | null = null;
 let isShuttingDown = false; // Flag to prevent new tasks during shutdown
@@ -62,12 +62,6 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
 
       if (msg.type === 'new_task') {
         const url = msg.url;
-        const MIN_CRAWLER_DELAY = parseInt(process.env.MIN_CRAWLER_DELAY || '1', 10);
-
-        if (MIN_CRAWLER_DELAY > 0) {
-          // eslint-disable-next-line no-undef
-          await new Promise((resolve) => setTimeout(resolve, MIN_CRAWLER_DELAY));
-        }
 
         console.log(`Worker (ID: ${process.pid}) scraping URL: ${url}`);
         let currentPage = null;
@@ -75,6 +69,9 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
           currentPage = await browser!.newPage(); // Create new page for each task
 
           const result = await scraper(url, location, currentPage);
+
+          // eslint-disable-next-line no-undef
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
 
           parentPort!.postMessage({
             type: 'task_complete',
