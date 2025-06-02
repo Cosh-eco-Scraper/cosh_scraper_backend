@@ -24,13 +24,48 @@ function getSchemaDefinition(): string {
   name: string;
   brands: string[];
   openingHours: {
-    monday: { open: string; close: string } | null;
-    tuesday: { open: string; close: string } | null;
-    wednesday: { open: string; close: string } | null;
-    thursday: { open: string; close: string } | null;
-    friday: { open: string; close: string } | null;
-    saturday: { open: string; close: string } | null;
-    sunday: { open: string; close: string } | null;
+    monday: {
+      open: string;
+      close: string;
+      openAfterNoon: string | null;
+      closeAfterNoon: string | null;
+    } | null;
+    tuesday: {
+      open: string;
+      close: string;
+      openAfterNoon: string | null;
+      closeAfterNoon: string | null;
+    } | null;
+    wednesday: {
+      open: string;
+      close: string;
+      openAfterNoon: string | null;
+      closeAfterNoon: string | null;
+    } | null;
+    thursday: {
+      open: string;
+      close: string;
+      openAfterNoon: string | null;
+      closeAfterNoon: string | null;
+    } | null;
+    friday: {
+      open: string;
+      close: string;
+      openAfterNoon: string | null;
+      closeAfterNoon: string | null;
+    } | null;
+    saturday: {
+      open: string;
+      close: string;
+      openAfterNoon: string | null;
+      closeAfterNoon: string | null;
+    } | null;
+    sunday: {
+      open: string;
+      close: string;
+      openAfterNoon: string | null;
+      closeAfterNoon: string | null;
+    } | null;
   };
   location: string;
   about: string;
@@ -50,12 +85,13 @@ function getInstructions(location: string): string {
 - For "brands", use the official brand name used on the brands website. If there is no official brand name, use one name of the brand as it is written in the snippets.
 - For "brands", start all brand names with a capital letter.
 - For "openingHours", always return an object for each day ("monday" to "sunday") with "open" and "close" keys.
-- For "openingHours", if the store is closed on a given day, return "closed" for the "open" and "close" values.
+- For "openingHours", if the store is closed on a given day, return "closed" for the "open" and "close" values, and null for the "openAfterNoon" and "closeAfterNoon" values.
 - For "openingHours", if the store is open on a given day, return the opening and closing times as "hh:mm" (24-hour format, zero-padded).
-- For "OpeningHours", if the store doesn't mention a day it is default to "closed" for values "close" and "open".
+- For "OpeningHours", if the store doesn't mention a day it is default to "closed" for values "close" and "open" and "closeAfterNoon" and "openAfterNoon" to null..
 - For "openingHours" and "location", extract ONLY the information relevant to the store in "${location}". If there are multiple stores, pick the one matching "${location}" (case-insensitive, match city name).
-- For "openingHours" if a value should be null, return {"open": "closed", "close": "closed"}.
+- For "openingHours" if a value should be null, return {"open": "closed", "close": "closed", openAfterNoon: null, closeAfterNoon: null}.
 - For "openingHours", if you don't know the opening hours, first look it up on google.com using the store name and the city name and look for openingshours. If you don't find any results, return {"open": "closed", "close": "closed"}. 
+- For "openingHours", if there is a break in the opening hours, for example '09:30 - 12:30 & 13:30 - 18:30' So during 12:30 till 13:30 is break time then put it like {open: '09:30', close: '12:30', openAfterNoon: '13:30', closeAfterNoon: '18:30'}
 - For "location" get the location that matches the store in "${location}". If there are multiple stores, pick the one matching "${location}" (case-insensitive, match city name).
 - For "about" and "retour", extract the general information for the whole shop, not store-specific.
 - For "about", make sure the text is correct and complete in english.
