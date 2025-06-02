@@ -24,6 +24,7 @@ type ScrapedInfo = {
   location: string;
   about: string;
   retour: string;
+  type: string[];
 };
 
 async function detectLanguage(page: Page): Promise<string> {
@@ -114,22 +115,37 @@ async function extractRelevantSnippets(page: Page, language: string): Promise<st
     )
     .catch(() => ''); // Handle case where meta description is not found
 
+  // Define these values in your Node.js environment
+  const minSnippetLength = parseInt((process.env.MIN_SNIPPET_LENGTH as string) ?? '0');
+  const maxSnippetLength = parseInt((process.env.MAX_SNIPPET_LENGTH as string) ?? '500');
+
+  // Create a single object to pass all necessary data to the browser context
+  const evalArgs = {
+    keywordRegexSource: keywordRegex.source,
+    minLen: minSnippetLength,
+    maxLen: maxSnippetLength,
+  };
+
   // Extract text from larger structural blocks
   const blocks = await page.$$eval(
     'section, article, div, ul, ol, li, tr, span',
-    (elements: Element[], keywordRegexStr: string) => {
-      const regex = new RegExp(keywordRegexStr, 'i');
+    (
+      elements: Element[],
+      // The second argument of the pageFunction will be the single object we pass
+      args: { keywordRegexSource: string; minLen: number; maxLen: number },
+    ) => {
+      const regex = new RegExp(args.keywordRegexSource, 'i'); // Access properties from the args object
       return elements
         .map((el) => (el as HTMLElement).innerText?.trim() || '')
         .filter(Boolean) // Remove empty strings
         .filter(
           (text: string) =>
             regex.test(text) &&
-            text.length > parseInt((process.env.MIN_SNIPPET_LENGTH as string) ?? '0') &&
-            text.length < parseInt((process.env.MAX_SNIPPET_LENGTH as string) ?? '500'),
+            text.length > args.minLen && // Use the passed argument from the object
+            text.length < args.maxLen, // Use the passed argument from the object
         ); // Filter by keyword and length
     },
-    keywordRegex.source, // Pass regex source to the browser context
+    evalArgs, // Pass the single object here as the third argument to $$eval
   );
 
   // Extract text from direct content elements
@@ -140,9 +156,9 @@ async function extractRelevantSnippets(page: Page, language: string): Promise<st
       return elements
         .map((el) => el.textContent?.trim() || '')
         .filter(Boolean)
-        .filter((text: string) => regex.test(text) && text.length > 0 && text.length < 500); // Filter by keyword and length
+        .filter((text: string) => regex.test(text) && text.length > 0 && text.length < 1000); // Filter by keyword and length
     },
-    keywordRegex.source,
+    keywordRegex.source, // This remains the same as it only needs one argument
   );
 
   const allSnippets = [title, metaDescription, ...blocks, ...directSnippets]
@@ -204,9 +220,7 @@ export async function scraper(
   console.log(`Scraping URL: ${url}`);
 
   try {
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 }); // Added timeout for robustness
-    await page.waitForLoadState('domcontentloaded'); // Stronger wait than just networkidle
-    await page.waitForTimeout(2000); // Consider if this timeout is always necessary
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     const language = await detectLanguage(page);
     const snippets = await gatherRelevantTexts(page, language);

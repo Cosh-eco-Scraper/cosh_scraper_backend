@@ -3,7 +3,6 @@ import { delay } from '../misc/misc';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import dotenv from 'dotenv';
-import { excludedKeywords } from './excludedKeywords';
 
 dotenv.config();
 
@@ -15,7 +14,7 @@ export async function getAllValidUrls(url: string) {
   let delayMs = crawlerDelay * 1000 || parseInt(process.env.SCRAPER_DELAY as string) || 1000;
 
   return await getUrlsFromPage(
-    new URL(url.toLowerCase()).toString(),
+    new URL(`${url.toLowerCase()}`).toString(),
     currentLevel,
     maxLevel,
     delayMs,
@@ -40,7 +39,11 @@ async function getUrlsFromPage(
   const containsImage = isImage(baseUrl);
   const isHigherLevel = currentLevel > maxLevel;
   const alreadyVisited = visitedUrls.has(baseUrl);
-  const hasExcludedKeywords = includesExcludedKeywords(baseUrl);
+
+  visitedUrls.add(baseUrl);
+  console.log(`[getUrlsFromPage] Processing page: ${baseUrl}`);
+  console.log(`[getUrlsFromPage] pages visited: ${visitedUrls.size}`);
+  console.log(`[getUrlsFromPage] for url ${baseUrl} level ${currentLevel}/${maxLevel}`);
 
   switch (true) {
     case isHigherLevel:
@@ -55,10 +58,8 @@ async function getUrlsFromPage(
     case alreadyVisited:
       console.warn('[getUrlsFromPage] Already visited skipping page: ', url);
       return result;
-    case hasExcludedKeywords:
-      console.warn('[getUrlsFromPage] Excluded keywords, skipping page: ', url);
-      return result;
   }
+
 
   if (isAllowed && !alreadyVisited) {
     const validUrl = addValidUrl(baseUrl, result);
@@ -145,10 +146,4 @@ function isImage(url: string) {
   } catch {
     return false;
   }
-}
-
-function includesExcludedKeywords(url: string) {
-  const urlObj = new URL(url);
-  const path = urlObj.pathname.toLowerCase();
-  return excludedKeywords.some((keyword) => path.includes(keyword));
 }
