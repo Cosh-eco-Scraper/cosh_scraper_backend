@@ -3,7 +3,9 @@ import { delay } from '../misc/misc';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import dotenv from 'dotenv';
+
 dotenv.config();
+
 export async function getAllValidUrls(url: string) {
   const robot = await getRobotParser(url);
   let currentLevel = 1;
@@ -34,6 +36,7 @@ async function getUrlsFromPage(
   const baseUrl = url.toLowerCase();
   const isAllowed = robot.isAllowed(baseUrl);
   const isNotAllowed = robot.isDisallowed(baseUrl);
+  const containsImage = isImage(baseUrl);
 
   if (currentLevel > maxLevel) {
     console.warn('[getUrlsFromPage] Reached max level, skipping subpages: ', url);
@@ -45,17 +48,21 @@ async function getUrlsFromPage(
     return result;
   }
 
-  if ((isAllowed || !isNotAllowed) && !visitedUrls.has(baseUrl)) {
-    visitedUrls.add(baseUrl);
+  if (containsImage) {
+    console.warn('[getUrlsFromPage] Image, skipping subpages: ', url);
+    return result;
+  }
+
+  if (isAllowed && !visitedUrls.has(baseUrl)) {
     const validUrl = addValidUrl(baseUrl, result);
     let childUrls = await getUrlsFromUrl(validUrl);
     await logDelay(delayMs);
     const validUrls = await Promise.all(
       Array.from(new Set(childUrls)).map(async (url) => {
         try {
-          const childUrl = new URL(url, validUrl).toString();
+          const childUrl = new URL(url, validUrl).toString(); // `validUrl` is the parent URL
           if (
-            new URL(childUrl).origin === new URL(validUrl).origin &&
+            new URL(childUrl).origin === new URL(validUrl).origin && // Check for same origin
             !visitedUrls.has(childUrl.toLowerCase())
           ) {
             return await getUrlsFromPage(
@@ -82,7 +89,7 @@ async function getUrlsFromPage(
 
 function addValidUrl(url: string, result: string[]) {
   console.log(`[getUrlsFromPage] Visiting page: ${url}`);
-  result.push(url);
+  result.push(url); // <-- Pushes the current URL to the result
   console.log(`[getUrlsFromPage] added: ${url}`);
   return url;
 }
@@ -93,18 +100,46 @@ async function logDelay(delayMs: number) {
 }
 
 async function getUrlsFromUrl(url: string) {
-  const res = await axios.get(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LinkCrawler/1.0)' },
-    timeout: 10000,
-    responseType: 'text',
-  });
-  if (!res.headers['content-type']?.includes('text/html')) {
-    return [];
-  }
+  try {
+    const res = await axios.get(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LinkCrawler/1.0)' },
+      timeout: 10000,
+      responseType: 'text',
+    });
+    console.log(`[getUrlsFromUrl] ${url} status: ${res.status}`);
+    console.log(`[getUrlsFromUrl] ${url} content-type: ${res.headers['content-type']}`);
+    console.log(`[getUrlsFromUrl] ${url} content: ${res.data.slice(0, 100)}...`);
 
-  const $ = cheerio.load(res.data);
-  return $('a[href]')
-    .map((_, el) => $(el).attr('href'))
-    .get()
-    .filter(Boolean) as string[];
+    if (!res.headers['content-type']?.includes('text/html')) {
+      return [];
+    }
+
+    const $ = cheerio.load(res.data);
+    const baseUrl = new URL(url);
+    return $('a[href]')
+      .map((_, el) => {
+        const href = $(el).attr('href');
+        if (href && href.startsWith('/')) {
+          return new URL(href, baseUrl).toString();
+        }
+        return href;
+      })
+      .get()
+      .filter(Boolean) as string[];
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      return [];
+    }
+    throw error;
+  }
+}
+
+function isImage(url: string) {
+  try {
+    const urlObj = new URL(url);
+    const path = urlObj.pathname.toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].some((ext) => path.includes(ext));
+  } catch {
+    return false;
+  }
 }
