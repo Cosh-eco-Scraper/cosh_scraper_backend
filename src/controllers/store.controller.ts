@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { StoreService } from '../services/store.service';
 import { dtoMapper } from './dtoMapper';
-import { send } from 'process';
 
 export async function getAllStores(_req: Request, res: Response, next: NextFunction) {
   try {
