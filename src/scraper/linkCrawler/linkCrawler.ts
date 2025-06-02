@@ -3,6 +3,7 @@ import { delay } from '../misc/misc';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import dotenv from 'dotenv';
+import { excludedKeywords } from './excludedKeywords';
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ async function getUrlsFromPage(
   const containsImage = isImage(baseUrl);
   const isHigherLevel = currentLevel > maxLevel;
   const alreadyVisited = visitedUrls.has(baseUrl);
+  const hasExcludedKeywords = includesExcludedKeywords(baseUrl);
 
   switch (true) {
     case isHigherLevel:
@@ -52,6 +54,9 @@ async function getUrlsFromPage(
       return result;
     case alreadyVisited:
       console.warn('[getUrlsFromPage] Already visited skipping page: ', url);
+      return result;
+    case hasExcludedKeywords:
+      console.warn('[getUrlsFromPage] Excluded keywords, skipping page: ', url);
       return result;
   }
 
@@ -140,4 +145,10 @@ function isImage(url: string) {
   } catch {
     return false;
   }
+}
+
+function includesExcludedKeywords(url: string) {
+  const urlObj = new URL(url);
+  const path = urlObj.pathname.toLowerCase();
+  return excludedKeywords.some((keyword) => path.includes(keyword));
 }

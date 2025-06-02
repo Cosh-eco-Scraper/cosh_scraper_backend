@@ -59,9 +59,9 @@ function rankSnippetsByKeywordMatch(snippets: string[], keywords: string[]): str
 
   scored.sort((a, b) => {
     if (b.score !== a.score) {
-      return b.score - a.score;
+      return b.score - a.score; // Higher score first
     }
-    return a.snippet.length - b.snippet.length;
+    return a.snippet.length - b.snippet.length; // Shorter snippet first for tie-breaking
   });
 
   return scored.map((s) => s.snippet);
@@ -70,26 +70,30 @@ function rankSnippetsByKeywordMatch(snippets: string[], keywords: string[]): str
 function deduplicateSnippets(
   snippets: string[],
   similarityThreshold = 0.85,
-  maxChars = 1000000,
+  maxChars = 1000000, // Default to a very large number if not specified
 ): string[] {
   const unique: string[] = [];
 
   for (const snippet of snippets) {
-    const cleaned = snippet.replace(/\s+/g, ' ').trim();
+    const cleaned = snippet.replace(/\s+/g, ' ').trim(); // Normalize whitespace
     if (!cleaned || cleaned.length < 30) {
+      // Filter out very short or empty snippets
       continue;
     }
 
     const isSimilar = unique.some((existing) => {
       const dist = distance(cleaned, existing);
       const maxLen = Math.max(cleaned.length, existing.length);
-      return dist / maxLen < 1 - similarityThreshold;
+      // Calculate similarity: 1 - (distance / max_length)
+      // If similarity is above threshold, they are considered similar
+      return 1 - dist / maxLen > similarityThreshold;
     });
 
     if (!isSimilar) {
       unique.push(cleaned);
     }
 
+    // Check total character count to prevent sending excessively large prompts
     const currentCharCount = unique.reduce((sum, s) => sum + s.length, 0);
     if (currentCharCount > maxChars) {
       break;
@@ -100,30 +104,35 @@ function deduplicateSnippets(
 }
 
 async function extractRelevantSnippets(page: Page, language: string): Promise<string[]> {
-  const keywords = getKeywords(language);
-  const keywordRegex = new RegExp(keywords.join('|'), 'i');
+  const keywords = getKeywords(language); // Get keywords for the detected language
+  const keywordRegex = new RegExp(keywords.join('|'), 'i'); // Create a regex for all keywords
 
   const title = await page.title();
   const metaDescription = await page
-    .$eval(
-      'meta[name="description"]',
-      (el: Element) => (el as HTMLMetaElement).getAttribute('content'),
-      { timeout: 2000 },
+    .$eval('meta[name="description"]', (el: Element) =>
+      (el as HTMLMetaElement).getAttribute('content'),
     )
-    .catch(() => '');
+    .catch(() => ''); // Handle case where meta description is not found
 
+  // Extract text from larger structural blocks
   const blocks = await page.$$eval(
     'section, article, div, ul, ol, li, tr, span',
     (elements: Element[], keywordRegexStr: string) => {
       const regex = new RegExp(keywordRegexStr, 'i');
       return elements
         .map((el) => (el as HTMLElement).innerText?.trim() || '')
-        .filter(Boolean)
-        .filter((text: string) => regex.test(text) && text.length > 0 && text.length < 2000);
+        .filter(Boolean) // Remove empty strings
+        .filter(
+          (text: string) =>
+            regex.test(text) &&
+            text.length > parseInt((process.env.MIN_SNIPPET_LENGTH as string) ?? '0') &&
+            text.length < parseInt((process.env.MAX_SNIPPET_LENGTH as string) ?? '500'),
+        ); // Filter by keyword and length
     },
-    keywordRegex.source,
+    keywordRegex.source, // Pass regex source to the browser context
   );
 
+  // Extract text from direct content elements
   const directSnippets = await page.$$eval(
     'h1, h2, h3, h4, h5, h6, p, span, li, td, th, tr',
     (elements: Element[], keywordRegexStr: string) => {
@@ -131,19 +140,20 @@ async function extractRelevantSnippets(page: Page, language: string): Promise<st
       return elements
         .map((el) => el.textContent?.trim() || '')
         .filter(Boolean)
-        .filter((text: string) => regex.test(text) && text.length > 0 && text.length < 500);
+        .filter((text: string) => regex.test(text) && text.length > 0 && text.length < 500); // Filter by keyword and length
     },
     keywordRegex.source,
   );
 
   const allSnippets = [title, metaDescription, ...blocks, ...directSnippets]
     .map((s: string | null) => (s ?? '').trim())
-    .filter(Boolean);
+    .filter(Boolean); // Ensure no nulls and trim all
 
   const uniqueSnippets = deduplicateSnippets(allSnippets);
 
   const rankedSnippets = rankSnippetsByKeywordMatch(uniqueSnippets, keywords);
 
+  // Return a limited number of top-ranked snippets to manage prompt size
   return rankedSnippets.slice(0, 150);
 }
 
