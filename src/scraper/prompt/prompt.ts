@@ -20,21 +20,22 @@ Given the following relevant text snippets from a shop website, extract and summ
 
 function getSchemaDefinition(): string {
   return `{
-  "url": string,
-  "name": string,
-  "brands": string[],
-  "openingHours": {
-    "monday": {"open": string, "close": string } | null,
-    "tuesday": {"open": string, "close": string } | null, 
-    "wednesday": {"open": string, "close": string } | null,
-    "thursday": {"open": string, "close": string } | null,
-    "friday": {"open": string, "close": string } | null,
-    "saturday": {"open": string, "close": string } | null,
-    "sunday": {"open": string, "close": string } | null
-  },
-  "location": string,
-  "about": string,
-  "retour": string
+  url: string;
+  name: string;
+  brands: string[];
+  openingHours: {
+    monday: { open: string; close: string } | null;
+    tuesday: { open: string; close: string } | null;
+    wednesday: { open: string; close: string } | null;
+    thursday: { open: string; close: string } | null;
+    friday: { open: string; close: string } | null;
+    saturday: { open: string; close: string } | null;
+    sunday: { open: string; close: string } | null;
+  };
+  location: string;
+  about: string;
+  retour: string;
+  type: string[];
 }`;
 }
 
@@ -62,10 +63,46 @@ function getInstructions(location: string): string {
 - For "location", always return the address in this exact format:
   "<street>,<number>,<postalCode>,<city>,<country>"
   For example: "Burgemeester de Vlugtlaan,125,1063,Amsterdam,Netherlands"
-  If any part is missing, first search it up on google and fill it in, search for example for <name> <city>, if you dont find any results for that store use the data you know of from the site and leave the rest empty: (e.g. ",,1063,Amsterdam,Netherlands").`;
+  If any part is missing, first search it up on google and fill it in, search for example for <name> <city>, if you dont find any results for that store use the data you know of from the site and leave the rest empty: (e.g. ",,1063,Amsterdam,Netherlands"))
+- For "Location" Make sure the capitalization of a country is correct (e.g. "Netherlands" not "netherlands").
+- For "Location" Make sure the capitalization of a city is correct (e.g. "Antwerpen" not "antwerpen").
+- For "type", extract the business types of the shop, use ${getBussinessTypes()} as a reference.
+`;
 }
 
 function getSnippets(snippets: string[]): string {
   return `Snippets:
 ${snippets.map((s, i) => `[${i + 1}] ${s}`).join('\n')}`;
+}
+
+function getBussinessTypes() {
+  const businessTypes: string[] = [
+    'Repair',
+    'Second-Hand',
+    'Clothing',
+    'Footwear',
+    'Accessories',
+    'Grocery',
+    'Specialty Food & Drink',
+    'Home Goods',
+    'Hardware & Garden',
+    'Pet Supplies',
+    'Book & Media',
+    'Hobby & Toy',
+    'Health & Beauty',
+    'General Merchandise',
+    'Service Provider',
+    'Bags & Luggage',
+    'Jewelry',
+    'Electronics',
+    'Sports & Outdoor',
+    'Art & Craft',
+    'Office Supplies',
+    'Wellness & Fitness',
+    'Baby & Kids',
+    'Decor',
+    'Gifts & Lifestyle',
+  ];
+
+  return businessTypes;
 }
