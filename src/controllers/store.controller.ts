@@ -117,10 +117,25 @@ export async function createCompleteStore(
       return;
     }
 
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    res.write(`data: Starting to create store...\n\n`);
+
     const store = await StoreService.createCompleteStore(name, url, location);
 
+    res.write(`data: Store creation in progress...\n\n`);
+    res.write(`data: Scraping data from URL: ${url}\n\n`);
+
+    setTimeout(() => {
+      res.write(`data: Store creation completed successfully!\n\n`);
+      res.end();
+    }, 2000);
     res.status(201).json({ id: store.id, message: 'Store created successfully' });
   } catch (error) {
+    res.write(`data: Error occurred: ${error}\n\n`);
+    res.end(); // Close the SSE connection
     next(error);
   }
 }
