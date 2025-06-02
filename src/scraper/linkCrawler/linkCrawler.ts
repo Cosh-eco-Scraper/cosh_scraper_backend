@@ -39,6 +39,8 @@ async function getUrlsFromPage(
   const containsImage = isImage(baseUrl);
   const isHigherLevel = currentLevel > maxLevel;
   const alreadyVisited = visitedUrls.has(baseUrl);
+  const hasQuestionMark = baseUrl.includes('?');
+  const hasHash = baseUrl.includes('#');
 
   visitedUrls.add(baseUrl);
   console.log(`[getUrlsFromPage] Processing page: ${baseUrl}`);
@@ -58,8 +60,13 @@ async function getUrlsFromPage(
     case alreadyVisited:
       console.warn('[getUrlsFromPage] Already visited skipping page: ', url);
       return result;
+    case hasQuestionMark:
+      console.warn('[getUrlsFromPage] has query parameters in url skipping page: ', url);
+      return result;
+    case hasHash:
+      console.warn('[getUrlsFromPage] has hash in url skipping page: ', url);
+      return result;
   }
-
 
   if (isAllowed && !alreadyVisited) {
     const validUrl = addValidUrl(baseUrl, result);
@@ -70,7 +77,7 @@ async function getUrlsFromPage(
         try {
           const childUrl = new URL(url, validUrl).toString(); // `validUrl` is the parent URL
           if (
-            new URL(childUrl).origin === new URL(validUrl).origin && // Check for same origin
+            new URL(childUrl).origin === new URL(validUrl).origin && // Check for the same origin
             !visitedUrls.has(childUrl.toLowerCase())
           ) {
             return await getUrlsFromPage(

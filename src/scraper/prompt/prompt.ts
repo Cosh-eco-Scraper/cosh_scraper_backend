@@ -55,7 +55,7 @@ function getInstructions(location: string): string {
 - For "OpeningHours", if the store doesn't mention a day it is default to "closed" for values "close" and "open".
 - For "openingHours" and "location", extract ONLY the information relevant to the store in "${location}". If there are multiple stores, pick the one matching "${location}" (case-insensitive, match city name).
 - For "openingHours" if a value should be null, return {"open": "closed", "close": "closed"}.
-- For "openingHours", if you don't know the opening hours, first look it up on google if you dont find anything default to {"open": "closed", "close": "closed"}.'
+- For "openingHours", if you don't know the opening hours, first look it up on google.com using the store name and the city name and look for openingshours. If you don't find any results, return {"open": "closed", "close": "closed"}. 
 - For "location" get the location that matches the store in "${location}". If there are multiple stores, pick the one matching "${location}" (case-insensitive, match city name).
 - For "about" and "retour", extract the general information for the whole shop, not store-specific.
 - For "about", make sure the text is correct and complete in english.

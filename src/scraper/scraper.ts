@@ -44,27 +44,49 @@ async function detectLanguage(page: Page): Promise<string> {
   return 'en'; // Default to English if no language detected
 }
 
-function rankSnippetsByKeywordMatch(snippets: string[], keywords: string[]): string[] {
+function rankSnippetsByKeywordMatch(
+  snippets: string[],
+  keywords: string[],
+  minPerKeyword: number = 10,
+): string[] {
   const lowerKeywords = keywords.map((k) => k.toLowerCase());
 
+  const keywordSnippets: Map<string, string[]> = new Map();
+  lowerKeywords.forEach((keyword) => keywordSnippets.set(keyword, []));
+
+  snippets.forEach((snippet) => {
+    const lower = snippet.toLowerCase();
+    lowerKeywords.forEach((keyword) => {
+      const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+      if (regex.test(lower)) {
+        keywordSnippets.get(keyword)?.push(snippet);
+      }
+    });
+  });
+
+  const selectedSnippets = new Set<string>();
+  keywordSnippets.forEach((snippetsForKeyword) => {
+    snippetsForKeyword.slice(0, minPerKeyword).forEach((snippet) => selectedSnippets.add(snippet));
+  });
+
+  const remainingSnippets = snippets.filter((s) => !selectedSnippets.has(s));
+  const rankedRemaining = rankByScore(remainingSnippets, lowerKeywords);
+
+  return [...selectedSnippets, ...rankedRemaining];
+}
+
+function rankByScore(snippets: string[], keywords: string[]): string[] {
   const scored = snippets.map((snippet) => {
     const lower = snippet.toLowerCase();
-    const keywordMatches = lowerKeywords.reduce((count, keyword) => {
+    const score = keywords.reduce((count, keyword) => {
       const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
       const matches = lower.match(regex);
       return count + (matches ? matches.length : 0);
     }, 0);
-
-    return { snippet, score: keywordMatches };
+    return { snippet, score };
   });
 
-  scored.sort((a, b) => {
-    if (b.score !== a.score) {
-      return b.score - a.score; // Higher score first
-    }
-    return a.snippet.length - b.snippet.length; // Shorter snippet first for tie-breaking
-  });
-
+  scored.sort((a, b) => b.score - a.score);
   return scored.map((s) => s.snippet);
 }
 
@@ -170,7 +192,7 @@ async function extractRelevantSnippets(page: Page, language: string): Promise<st
   const rankedSnippets = rankSnippetsByKeywordMatch(uniqueSnippets, keywords);
 
   // Return a limited number of top-ranked snippets to manage prompt size
-  return rankedSnippets.slice(0, 150);
+  return rankedSnippets.slice(0, 500);
 }
 
 async function gatherRelevantTexts(page: Page, language: string): Promise<string[]> {
@@ -192,24 +214,60 @@ export async function summarizeRelevantInfoWithAI(
   location: string,
 ): Promise<ScrapedInfo | null> {
   const prompt = getPrompt(url, snippets, location);
-  const aiResponse = await sendPrompt(prompt);
-  if (!aiResponse) {
-    console.error('AI response is empty');
-    return null;
+  let attempts = 0;
+  const maxAttempts = 5;
+  const baseDelay = 1000;
+
+  while (attempts < maxAttempts) {
+    try {
+      const aiResponse = await sendPrompt(prompt);
+
+      if (!aiResponse) {
+        console.error('AI response is empty');
+        attempts++;
+        const delay = baseDelay * Math.pow(2, attempts);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+
+      try {
+        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const jsonString = jsonMatch[0];
+          const parsed = JSON.parse(jsonString) as ScrapedInfo;
+          if (!parsed.name || !parsed.openingHours || !parsed.type || !parsed.brands) {
+            throw new Error('Invalid JSON structure');
+          }
+          return parsed;
+        }
+        throw new Error('No JSON found in response');
+      } catch (err) {
+        console.error('Failed to parse AI response as JSON:', err);
+        attempts++;
+        const delay = baseDelay * Math.pow(2, attempts);
+        // eslint-disable-next-line no-undef
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    } catch (error) {
+      let err = error as any;
+
+      if ((err.statusCode === 429 || err.statusCode === 503) && attempts < maxAttempts - 1) {
+        attempts++;
+        const delay = baseDelay * Math.pow(2, attempts);
+        // eslint-disable-next-line no-undef
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+      console.error('Failed to backoff from AI api: ', err.message);
+      attempts++;
+      const delay = baseDelay * Math.pow(2, attempts);
+      // eslint-disable-next-line no-undef
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
   }
 
-  try {
-    const jsonStart = aiResponse.indexOf('{');
-    const jsonEnd = aiResponse.lastIndexOf('}');
-    if (jsonStart !== -1 && jsonEnd !== -1) {
-      const jsonString = aiResponse.substring(jsonStart, jsonEnd + 1);
-      return JSON.parse(jsonString) as ScrapedInfo;
-    }
-    return null;
-  } catch (err) {
-    console.error('Failed to parse AI response as JSON:', err);
-    return null;
-  }
+  console.error('Failed to get valid AI response after maximum attempts');
+  return null;
 }
 
 export async function scraper(
