@@ -7,7 +7,7 @@ export const variables = {
 
 export async function sendMessage(message: string) {
   try {
-    const connection = await amqp.connect(variables.connectionUrl); // Replace with your RabbitMQ URL
+    const connection = await amqp.connect(variables.connectionUrl);
     const channel = await connection.createChannel();
 
     await channel.assertQueue(variables.queue, { durable: true });

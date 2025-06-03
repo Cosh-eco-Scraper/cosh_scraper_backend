@@ -16,6 +16,10 @@ module.exports = [
         ecmaVersion: 2024,
         sourceType: 'module',
       },
+      env: {
+        node: true, // Enable Node.js environment
+        es2021: true, // Enable ES2021 features
+      },
       globals: {
         process: 'readonly',
         __dirname: 'readonly',
