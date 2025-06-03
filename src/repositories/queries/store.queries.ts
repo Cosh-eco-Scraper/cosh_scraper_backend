@@ -3,6 +3,7 @@ export const storeQueries = {
          SELECT s.id,
                 s.name,
                 s.description,
+                s.retour,
                 l.street,
                 l.id         as location_id,
                 l.street,
@@ -66,13 +67,14 @@ export const storeQueries = {
   updateStore: () => `
          UPDATE stores
          SET name = $1,
-             description = $2
-         WHERE id = $3;
+             description = $2,
+             retour = $3
+         WHERE id = $4;
        `,
 
   createStore: () => `
-         INSERT INTO stores (name, location_id, description)
-         VALUES ($1, $2, $3)
+         INSERT INTO stores (name, location_id, description, retour)
+         VALUES ($1, $2, $3, $4)
          RETURNING *;
        `,
 };

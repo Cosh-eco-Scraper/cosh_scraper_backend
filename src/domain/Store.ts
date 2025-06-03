@@ -5,6 +5,7 @@ export type Store = {
   id: number;
   name: string;
   description?: string;
+  retour: string;
   createdAt: Date;
   updatedAt: Date;
   location?: Location;
@@ -15,6 +16,7 @@ export type StoreDto = {
   id: number;
   name: string;
   description?: string;
+  retour: string;
   street: string;
   number: string;
   postalCode: string;

@@ -60,6 +60,7 @@ describe('StoreService', () => {
     it('should return store when store exists', async () => {
       const expectedStore: Store = {
         id: 1,
+        retour: '30 days return policy',
         name: 'Store 1',
         updatedAt: new Date(),
         createdAt: new Date(),
