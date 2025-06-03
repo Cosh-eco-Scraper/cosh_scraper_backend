@@ -4,6 +4,7 @@ import { summarizeRelevantInfoWithAI } from './scraper';
 import { getAllValidUrls } from './linkCrawler/linkCrawler';
 import dotenv from 'dotenv';
 import getRobotParser from './robot/robot';
+import RabbitMQMiddleware from '../middlewares/rabbitMQ';
 
 dotenv.config();
 
@@ -38,7 +39,7 @@ type WorkerToMainMessage =
       type: 'worker_terminated'; // NEW: Worker confirms it has terminated gracefully
     };
 
-export async function run(baseURL: string, location: string, onProgress?: (msg: string) => void) {
+export async function run(baseURL: string, location: string) {
   const host = new URL(baseURL).host;
   const robot = await getRobotParser(`https://${host}`);
   const crawlDelay = robot.getCrawlDelay(host) ?? 0;
@@ -46,7 +47,7 @@ export async function run(baseURL: string, location: string, onProgress?: (msg: 
 
   const allLinks = await getAllValidUrls(new URL(baseURL).toString());
   console.log(`Discovered total ${allLinks.length} internal links.`);
-  onProgress?.(`Discovered total ${allLinks.length} internal links.`);
+  RabbitMQMiddleware.sendMessage(`Discovered total ${allLinks.length} internal links.`);
 
   const numberOfWorkers = parseInt(process.env.CONCURRENT_WORKERS || '4', 10);
   const taskQueue: string[] = [...allLinks];
@@ -61,6 +62,9 @@ export async function run(baseURL: string, location: string, onProgress?: (msg: 
   const workerPromises: Promise<void>[] = [];
 
   console.log(`Starting ${numberOfWorkers} workers to process tasks dynamically.`);
+  RabbitMQMiddleware.sendMessage(
+    `Starting ${numberOfWorkers} workers to process tasks dynamically.`,
+  );
 
   // Function to check if all tasks are done and workers should terminate
   const checkCompletionAndTerminateWorkers = () => {
@@ -76,6 +80,8 @@ export async function run(baseURL: string, location: string, onProgress?: (msg: 
         // Check if worker is still active (e.g., has not explicitly exited yet)
         // This is tricky, often best to just send terminate and let them handle it.
         worker.postMessage({ type: 'terminate' } as MainToWorkerMessage);
+        console.log(`Main: Sent terminate signal to Worker ${worker.threadId}.`);
+        RabbitMQMiddleware.sendMessage(`Sent terminate signal to Worker ${worker.threadId}.`);
       });
     }
   };
@@ -118,6 +124,9 @@ export async function run(baseURL: string, location: string, onProgress?: (msg: 
             console.log(
               `Main: Worker ${workerId} is ready. Total active workers: ${workersReadyCount}.`,
             );
+            RabbitMQMiddleware.sendMessage(
+              `Worker ${workerId} is ready. Total active workers: ${workersReadyCount}.`,
+            );
             // Immediately try to dispatch if tasks are available, or check for completion
             if (taskQueue.length > 0) {
               const nextUrl = taskQueue.shift();
@@ -126,6 +135,9 @@ export async function run(baseURL: string, location: string, onProgress?: (msg: 
                 worker.postMessage({ type: 'new_task', url: nextUrl } as MainToWorkerMessage);
                 console.log(
                   `Main: Sent task for ${nextUrl} to Worker ${workerId}. Queue size: ${taskQueue.length}`,
+                );
+                RabbitMQMiddleware.sendMessage(
+                  `Sent task for ${nextUrl} to Worker ${workerId}. Queue size: ${taskQueue.length}`,
                 );
               }
             } else {
@@ -142,6 +154,9 @@ export async function run(baseURL: string, location: string, onProgress?: (msg: 
                 console.log(
                   `Main: Sent task for ${nextUrl} to Worker ${workerId}. Queue size: ${taskQueue.length}`,
                 );
+                RabbitMQMiddleware.sendMessage(
+                  `Sent task for ${nextUrl} to Worker ${workerId}. Queue size: ${taskQueue.length}`,
+                );
               }
             } else {
               checkCompletionAndTerminateWorkers(); // No tasks left, check if time to terminate
@@ -152,16 +167,27 @@ export async function run(baseURL: string, location: string, onProgress?: (msg: 
             console.log(
               `Main: Worker ${workerId} completed ${msg.url}. Total processed: ${tasksProcessed}/${allLinks.length}.`,
             );
+
+            RabbitMQMiddleware.sendMessage(
+              `Worker ${workerId} completed ${msg.url}. Total processed: ${tasksProcessed}/${allLinks.length}.`,
+            );
             checkCompletionAndTerminateWorkers(); // Task done, check if time to terminate or dispatch next
           } else if (msg.type === 'task_error') {
             tasksProcessed++; // Count errors as processed to advance overall process
             console.error(`Main: Worker ${workerId} reported error for ${msg.url}: ${msg.message}`);
+            RabbitMQMiddleware.sendMessage(
+              `Worker ${workerId} reported error for ${msg.url}: ${msg.message}`,
+            );
             checkCompletionAndTerminateWorkers(); // Task errored, check if time to terminate or dispatch next
           } else if (msg.type === 'worker_terminated') {
             // NEW
             workersTerminatedCount++;
             console.log(
               `Main: Worker ${workerId} confirmed termination. Total terminated: ${workersTerminatedCount}/${numberOfWorkers}.`,
+            );
+
+            RabbitMQMiddleware.sendMessage(
+              `Worker ${workerId} confirmed termination. Total terminated: ${workersTerminatedCount}/${numberOfWorkers}.`,
             );
             safeResolve(); // This worker's promise is now definitively fulfilled
           }
@@ -181,6 +207,7 @@ export async function run(baseURL: string, location: string, onProgress?: (msg: 
             safeReject(new Error(errorMessage)); // Reject if exited with error code
           } else {
             console.log(`Main: Worker ${workerId} exited gracefully.`);
+            RabbitMQMiddleware.sendMessage(`Worker ${workerId} exited gracefully.`);
             // If the worker exited with 0 but didn't send 'worker_terminated' (e.g., a race condition),
             // ensure its promise is resolved.
             safeResolve();
@@ -200,13 +227,22 @@ export async function run(baseURL: string, location: string, onProgress?: (msg: 
     console.warn(
       `Warning: Not all workers confirmed graceful termination. Expected ${numberOfWorkers}, received ${workersTerminatedCount}.`,
     );
+
+    RabbitMQMiddleware.sendMessage(
+      `Warning: Not all workers confirmed graceful termination. Expected ${numberOfWorkers}, received ${workersTerminatedCount}.`,
+    );
     // You might add a process.exit(1) here if this is considered a critical failure
   }
 
   console.log(
     `All workers have completed or exited. Total tasks processed: ${tasksProcessed}/${allLinks.length}`,
   );
+
+  RabbitMQMiddleware.sendMessage(
+    `All workers have completed or exited. Total tasks processed: ${tasksProcessed}/${allLinks.length}`,
+  );
   console.log(`Total combined snippets collected: ${collectedSnippets.length}`);
+  RabbitMQMiddleware.sendMessage(`Total combined snippets collected: ${collectedSnippets.length}`);
 
   // No main browser to close here.
 
@@ -241,6 +277,6 @@ export async function run(baseURL: string, location: string, onProgress?: (msg: 
     location,
   );
   console.log('Final combined summary:', finalSummary);
-  onProgress?.('Final combined summary generated.');
+  RabbitMQMiddleware.sendMessage('Final combined summary generated.');
   return finalSummary;
 }

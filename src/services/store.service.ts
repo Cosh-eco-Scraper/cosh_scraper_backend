@@ -37,15 +37,10 @@ export const StoreService = {
     return storeTypes;
   },
 
-  createCompleteStore: async (
-    name: string,
-    URL: string,
-    location: string,
-    onProgress?: (msg: string) => void,
-  ) => {
+  createCompleteStore: async (name: string, URL: string, location: string) => {
     // eslint-disable-next-line no-undef
     const startTime = performance.now();
-    const scrapedInfo = await run(URL, location, onProgress);
+    const scrapedInfo = await run(URL, location);
     // eslint-disable-next-line no-undef
     const endTime = performance.now();
     const executionTime = endTime - startTime;

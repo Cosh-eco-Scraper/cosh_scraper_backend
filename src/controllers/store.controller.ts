@@ -117,24 +117,10 @@ export async function createCompleteStore(
       return;
     }
 
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-
-    const sendSSE = (msg: string) => res.write(`data: ${msg}\n\n`);
-
-    sendSSE('Starting to create store...');
-
-    const store = await StoreService.createCompleteStore(name, url, location, sendSSE);
+    const store = await StoreService.createCompleteStore(name, url, location);
 
     res.status(201).json({ id: store.id, message: 'Store created successfully' });
-
-    sendSSE('Store creation completed successfully!');
-    res.write(`data: Store created successfully with ID: ${store.id}\n\n`);
-    res.end();
   } catch (error) {
-    res.write(`data: Error occurred: ${error}\n\n`);
-    res.end();
     next(error);
   }
 }
