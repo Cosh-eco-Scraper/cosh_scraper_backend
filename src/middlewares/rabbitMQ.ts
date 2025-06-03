@@ -1,4 +1,5 @@
 var amqp = require('amqplib/callback_api');
+import { Buffer } from 'buffer';
 
 export const variables = {
   queue: 'scraper_updates',
