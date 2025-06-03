@@ -1,9 +1,11 @@
 import { Worker } from 'worker_threads';
 import path from 'path';
-import { summarizeRelevantInfoWithAI } from './scraper';
 import { getAllValidUrls } from './linkCrawler/linkCrawler';
 import dotenv from 'dotenv';
 import getRobotParser from './robot/robot';
+import { smallSumerize } from './prompt/smallSumerize';
+import { LLMService } from '../services/llm.service';
+import { summarizeRelevantInfoWithAI } from './scraper';
 
 dotenv.config();
 
@@ -20,8 +22,8 @@ type MainToWorkerMessage =
 type WorkerToMainMessage =
   | {
       type: 'task_complete';
-      url: string; // Report which URL was completed
-      snippets: string[];
+      url: string;
+      keywordContexts: Record<string, string[]> | null;
     }
   | {
       type: 'task_error';
@@ -32,10 +34,10 @@ type WorkerToMainMessage =
       type: 'request_task';
     }
   | {
-      type: 'worker_ready'; // Worker signals it's ready to receive tasks
+      type: 'worker_ready';
     }
   | {
-      type: 'worker_terminated'; // NEW: Worker confirms it has terminated gracefully
+      type: 'worker_terminated';
     };
 
 export async function run(baseURL: string, location: string) {
@@ -50,30 +52,24 @@ export async function run(baseURL: string, location: string) {
   const numberOfWorkers = parseInt(process.env.CONCURRENT_WORKERS || '4', 10);
   const taskQueue: string[] = [...allLinks];
 
-  const collectedSnippets: string[] = [];
-  let tasksDispatched = 0; // Number of tasks sent to workers
-  let tasksProcessed = 0; // Number of tasks reported back (complete or error)
-  let workersReadyCount = 0; // Number of workers that have sent 'worker_ready'
-  let workersTerminatedCount = 0; // NEW: Number of workers that have confirmed termination
+  const collectedKeywordContexts: Record<string, string[]> = {};
+  let tasksDispatched = 0;
+  let tasksProcessed = 0;
+  let workersReadyCount = 0;
+  let workersTerminatedCount = 0;
 
   const workers: Worker[] = [];
   const workerPromises: Promise<void>[] = [];
 
   console.log(`Starting ${numberOfWorkers} workers to process tasks dynamically.`);
 
-  // Function to check if all tasks are done and workers should terminate
   const checkCompletionAndTerminateWorkers = () => {
-    // Only proceed if all workers are initially ready
     if (workersReadyCount < numberOfWorkers) {
       return;
     }
 
     if (taskQueue.length === 0 && tasksDispatched === tasksProcessed) {
-      // All tasks are assigned and processed/errored.
-      // Send terminate signal to all workers that are still active.
       workers.forEach((worker) => {
-        // Check if worker is still active (e.g., has not explicitly exited yet)
-        // This is tricky, often best to just send terminate and let them handle it.
         worker.postMessage({ type: 'terminate' } as MainToWorkerMessage);
       });
     }
@@ -95,7 +91,7 @@ export async function run(baseURL: string, location: string) {
 
     workerPromises.push(
       new Promise<void>((resolve, reject) => {
-        let hasWorkerResolvedOrRejected = false; // Flag to ensure promise resolves/rejects only once
+        let hasWorkerResolvedOrRejected = false;
 
         const safeResolve = () => {
           if (!hasWorkerResolvedOrRejected) {
@@ -117,7 +113,6 @@ export async function run(baseURL: string, location: string) {
             console.log(
               `Main: Worker ${workerId} is ready. Total active workers: ${workersReadyCount}.`,
             );
-            // Immediately try to dispatch if tasks are available, or check for completion
             if (taskQueue.length > 0) {
               const nextUrl = taskQueue.shift();
               if (nextUrl) {
@@ -128,11 +123,9 @@ export async function run(baseURL: string, location: string) {
                 );
               }
             } else {
-              // Worker is ready but no tasks in queue. Check global completion.
               checkCompletionAndTerminateWorkers();
             }
           } else if (msg.type === 'request_task') {
-            // This worker just finished a task or initialized, ready for next
             if (taskQueue.length > 0) {
               const nextUrl = taskQueue.shift();
               if (nextUrl) {
@@ -143,33 +136,40 @@ export async function run(baseURL: string, location: string) {
                 );
               }
             } else {
-              checkCompletionAndTerminateWorkers(); // No tasks left, check if time to terminate
+              checkCompletionAndTerminateWorkers();
             }
           } else if (msg.type === 'task_complete') {
             tasksProcessed++;
-            collectedSnippets.push(...msg.snippets);
+            if (msg.keywordContexts) {
+              for (const keyword in msg.keywordContexts) {
+                if (Object.prototype.hasOwnProperty.call(msg.keywordContexts, keyword)) {
+                  if (!collectedKeywordContexts[keyword]) {
+                    collectedKeywordContexts[keyword] = [];
+                  }
+                  collectedKeywordContexts[keyword].push(...msg.keywordContexts[keyword]);
+                }
+              }
+            }
             console.log(
               `Main: Worker ${workerId} completed ${msg.url}. Total processed: ${tasksProcessed}/${allLinks.length}.`,
             );
-            checkCompletionAndTerminateWorkers(); // Task done, check if time to terminate or dispatch next
+            checkCompletionAndTerminateWorkers();
           } else if (msg.type === 'task_error') {
-            tasksProcessed++; // Count errors as processed to advance overall process
+            tasksProcessed++;
             console.error(`Main: Worker ${workerId} reported error for ${msg.url}: ${msg.message}`);
-            checkCompletionAndTerminateWorkers(); // Task errored, check if time to terminate or dispatch next
+            checkCompletionAndTerminateWorkers();
           } else if (msg.type === 'worker_terminated') {
-            // NEW
             workersTerminatedCount++;
             console.log(
               `Main: Worker ${workerId} confirmed termination. Total terminated: ${workersTerminatedCount}/${numberOfWorkers}.`,
             );
-            safeResolve(); // This worker's promise is now definitively fulfilled
+            safeResolve();
           }
         });
 
         worker.on('error', (err) => {
           console.error(`Main: Unhandled error in Worker ${workerId}:`, err);
-          safeReject(err); // This worker failed critically
-          // Also try to terminate it, though it might be crashing anyway
+          safeReject(err);
           worker.postMessage({ type: 'terminate' } as MainToWorkerMessage);
         });
 
@@ -177,11 +177,9 @@ export async function run(baseURL: string, location: string) {
           if (code !== 0) {
             const errorMessage = `Main: Worker ${workerId} stopped with exit code ${code}.`;
             console.error(errorMessage);
-            safeReject(new Error(errorMessage)); // Reject if exited with error code
+            safeReject(new Error(errorMessage));
           } else {
             console.log(`Main: Worker ${workerId} exited gracefully.`);
-            // If the worker exited with 0 but didn't send 'worker_terminated' (e.g., a race condition),
-            // ensure its promise is resolved.
             safeResolve();
           }
         });
@@ -189,56 +187,56 @@ export async function run(baseURL: string, location: string) {
     );
   }
 
-  // --- Wait for all workers to finish ---
-  // Using Promise.allSettled to ensure we collect all outcomes.
-  // The 'run' function will only return after all workerPromises resolve/reject.
   await Promise.allSettled(workerPromises);
 
-  // Final check to see if all workers truly terminated
   if (workersTerminatedCount < numberOfWorkers) {
     console.warn(
       `Warning: Not all workers confirmed graceful termination. Expected ${numberOfWorkers}, received ${workersTerminatedCount}.`,
     );
-    // You might add a process.exit(1) here if this is considered a critical failure
   }
 
   console.log(
     `All workers have completed or exited. Total tasks processed: ${tasksProcessed}/${allLinks.length}`,
   );
-  console.log(`Total combined snippets collected: ${collectedSnippets.length}`);
 
-  // No main browser to close here.
+  const totalContexts = Object.values(collectedKeywordContexts).reduce(
+    (sum, contexts) => sum + contexts.length,
+    0,
+  );
+  console.log(`Total keywords found: ${Object.keys(collectedKeywordContexts).length}`);
+  console.log(`Total combined contexts collected: ${totalContexts}`);
 
-  const MAX_TOKENS = 250000;
-  const TOKEN_ESTIMATE_PER_CHAR = 0.25;
-  const MAX_CHARS = Math.floor(MAX_TOKENS / TOKEN_ESTIMATE_PER_CHAR);
+  let summaries: string[] = [];
+  const chunkedContexts: Record<string, string[]>[] = [];
+  let currentChunk: Record<string, string[]> = {};
+  let currentCharCount = 0;
 
-  const combinedText = collectedSnippets.join('\n\n');
-  let finalSnippetsToSummarize: string[] = [];
-
-  if (combinedText.length > MAX_CHARS) {
-    const limitedText = combinedText.slice(0, MAX_CHARS);
-    const lastNewlineIndex = limitedText.lastIndexOf('\n\n');
-    if (lastNewlineIndex !== -1) {
-      finalSnippetsToSummarize = limitedText
-        .substring(0, lastNewlineIndex)
-        .split('\n\n')
-        .filter(Boolean);
-    } else {
-      finalSnippetsToSummarize = [limitedText];
+  for (const [keyword, contexts] of Object.entries(collectedKeywordContexts)) {
+    const contextsString = contexts.join(' ');
+    if (currentCharCount + contextsString.length > 240000) {
+      chunkedContexts.push(currentChunk);
+      currentChunk = {};
+      currentCharCount = 0;
     }
-    console.warn(
-      `Text for AI summary truncated from ${combinedText.length} to ${limitedText.length} characters.`,
-    );
-  } else {
-    finalSnippetsToSummarize = collectedSnippets;
+    currentChunk[keyword] = contexts;
+    currentCharCount += contextsString.length;
+  }
+  if (Object.keys(currentChunk).length > 0) {
+    chunkedContexts.push(currentChunk);
   }
 
-  const finalSummary = await summarizeRelevantInfoWithAI(
-    baseURL,
-    finalSnippetsToSummarize,
-    location,
-  );
+  for (const chunk of chunkedContexts) {
+    const smallPrompt = smallSumerize(chunk);
+    const summary = await LLMService.sendPrompt(smallPrompt);
+
+    if (summary) {
+      summaries.push(summary);
+      // Wait for a response before sending next prompt
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  }
+
+  const finalSummary = summarizeRelevantInfoWithAI(baseURL, summaries, location);
   console.log('Final combined summary:', finalSummary);
   return finalSummary;
 }

@@ -1,7 +1,7 @@
 import { parentPort, workerData } from 'worker_threads';
 import dotenv from 'dotenv';
 import { Browser, chromium } from 'playwright';
-import { scraper } from './scraper';
+import { scraper, ScraperResult } from './scraper'; // Assuming ScraperResult is correctly imported from scraper.ts
 
 dotenv.config();
 
@@ -19,7 +19,8 @@ type WorkerToMainMessage =
   | {
       type: 'task_complete';
       url: string;
-      snippets: string[];
+      // Corrected to match the main thread's expected property name
+      keywordContexts: ScraperResult;
     }
   | {
       type: 'task_error';
@@ -52,7 +53,7 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
     console.log(`Worker (ID: ${process.pid}) started and ready.`);
 
     // Signal to the main thread that this worker is ready for a task
-    parentPort.postMessage({ type: 'worker_ready' } as WorkerToMainMessage); // Changed to 'worker_ready'
+    parentPort.postMessage({ type: 'worker_ready' } as WorkerToMainMessage);
 
     parentPort.on('message', async (msg: MainToWorkerMessage) => {
       if (isShuttingDown) {
@@ -68,15 +69,17 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
         try {
           currentPage = await browser!.newPage(); // Create new page for each task
 
-          const result = await scraper(url, location, currentPage);
+          // The scraper function returns ScraperResult (Record<string, string[]> | null)
+          const result: ScraperResult = await scraper(url, location, currentPage);
 
           // eslint-disable-next-line no-undef
           await new Promise((resolve) => setTimeout(resolve, delayMs));
 
+          // Send the result back using the 'keywordContexts' property name
           parentPort!.postMessage({
             type: 'task_complete',
             url: url,
-            snippets: result ? result.snippets : [],
+            keywordContexts: result, // Corrected property name
           } as WorkerToMainMessage);
         } catch (e: any) {
           console.error(`Worker (ID: ${process.pid}) error scraping ${url}:`, e);
@@ -90,6 +93,7 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
             await currentPage.close();
             console.log(`Worker (ID: ${process.pid}) closed page for ${url}.`);
           }
+          // Request next task after current one is processed (or errored)
           parentPort!.postMessage({ type: 'request_task' } as WorkerToMainMessage);
         }
       } else if (msg.type === 'terminate') {
@@ -102,7 +106,7 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
           await browser.close();
           console.log(`Worker (ID: ${process.pid}) browser closed.`);
         }
-        // NEW: Confirm termination to the main thread
+        // Confirm termination to the main thread
         parentPort!.postMessage({ type: 'worker_terminated' } as WorkerToMainMessage);
         process.exit(0); // Exit gracefully
       }
@@ -126,7 +130,6 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
     process.exit(1);
   }
 })();
-//just a little change
 
 // Handle worker exit to ensure browser is closed if something goes wrong
 if (parentPort) {
