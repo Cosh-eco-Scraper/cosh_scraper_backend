@@ -67,6 +67,7 @@
     "js-yaml": "^4.1.0",
     "pg": "^8.16.0",
     "playwright": "^1.52.0",
+    "puppeteer": "^24.10.0",
     "robots-parser": "^3.0.1",
     "swagger-ui-express": "^5.0.1"
   },

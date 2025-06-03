@@ -3,13 +3,19 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 const ai = new GoogleGenAI({ apiKey: process.env.AI_API_KEY });
-
 const sendPrompt = async (prompt: string): Promise<string | undefined> => {
+  const maxRPM = 10;
+  const minDelay = Math.ceil(60000 / maxRPM);
+
+  console.log(`[AI] waiting for ${minDelay}ms before sending prompt.`);
+  // Add delay to ensure we don't exceed maxRPM
+  // eslint-disable-next-line no-undef
+  await new Promise((resolve) => setTimeout(resolve, minDelay));
+
   const response = await ai.models.generateContent({
     model: 'gemini-2.0-flash',
     contents: prompt,
   });
-  console.log(response.text);
 
   return response.text;
 };

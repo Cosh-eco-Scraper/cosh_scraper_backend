@@ -1,13 +1,10 @@
 import { Page } from 'playwright';
-import { GoogleGenAI } from '@google/genai';
 import * as dotenv from 'dotenv';
-import { distance } from 'fastest-levenshtein';
 import getPrompt from './prompt/prompt';
 import getKeywords from './keywords';
+import { LLMService } from '../services/llm.service';
 
 dotenv.config();
-const ai = new GoogleGenAI({ apiKey: process.env.AI_API_KEY });
-
 type ScrapedInfo = {
   url: string;
   name: string;
@@ -62,6 +59,16 @@ type ScrapedInfo = {
   type: string[];
 };
 
+// Define the return type for the modified scraper function
+// It now directly returns the dictionary of keyword contexts
+export type ScraperResult = Record<string, string[]> | null;
+
+/**
+ * Detects the language of the page by checking the 'lang' attribute of the html tag
+ * or the 'content-language' meta tag. Defaults to 'en' if not found.
+ * @param {Page} page - The Playwright Page object.
+ * @returns {Promise<string>} The detected language code (e.g., 'en', 'fr').
+ */
 async function detectLanguage(page: Page): Promise<string> {
   const htmlLang = await page.$eval('html', (el) => el.getAttribute('lang') || '');
   if (htmlLang) {
@@ -79,170 +86,13 @@ async function detectLanguage(page: Page): Promise<string> {
   return 'en'; // Default to English if no language detected
 }
 
-function rankSnippetsByKeywordMatch(
-  snippets: string[],
-  keywords: string[],
-  minPerKeyword: number = 10,
-): string[] {
-  const lowerKeywords = keywords.map((k) => k.toLowerCase());
-
-  const keywordSnippets: Map<string, string[]> = new Map();
-  lowerKeywords.forEach((keyword) => keywordSnippets.set(keyword, []));
-
-  snippets.forEach((snippet) => {
-    const lower = snippet.toLowerCase();
-    lowerKeywords.forEach((keyword) => {
-      const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-      if (regex.test(lower)) {
-        keywordSnippets.get(keyword)?.push(snippet);
-      }
-    });
-  });
-
-  const selectedSnippets = new Set<string>();
-  keywordSnippets.forEach((snippetsForKeyword) => {
-    snippetsForKeyword.slice(0, minPerKeyword).forEach((snippet) => selectedSnippets.add(snippet));
-  });
-
-  const remainingSnippets = snippets.filter((s) => !selectedSnippets.has(s));
-  const rankedRemaining = rankByScore(remainingSnippets, lowerKeywords);
-
-  return [...selectedSnippets, ...rankedRemaining];
-}
-
-function rankByScore(snippets: string[], keywords: string[]): string[] {
-  const scored = snippets.map((snippet) => {
-    const lower = snippet.toLowerCase();
-    const score = keywords.reduce((count, keyword) => {
-      const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-      const matches = lower.match(regex);
-      return count + (matches ? matches.length : 0);
-    }, 0);
-    return { snippet, score };
-  });
-
-  scored.sort((a, b) => b.score - a.score);
-  return scored.map((s) => s.snippet);
-}
-
-function deduplicateSnippets(
-  snippets: string[],
-  similarityThreshold = 0.85,
-  maxChars = 1000000, // Default to a very large number if not specified
-): string[] {
-  const unique: string[] = [];
-
-  for (const snippet of snippets) {
-    const cleaned = snippet.replace(/\s+/g, ' ').trim(); // Normalize whitespace
-    if (!cleaned || cleaned.length < 30) {
-      // Filter out very short or empty snippets
-      continue;
-    }
-
-    const isSimilar = unique.some((existing) => {
-      const dist = distance(cleaned, existing);
-      const maxLen = Math.max(cleaned.length, existing.length);
-      // Calculate similarity: 1 - (distance / max_length)
-      // If similarity is above threshold, they are considered similar
-      return 1 - dist / maxLen > similarityThreshold;
-    });
-
-    if (!isSimilar) {
-      unique.push(cleaned);
-    }
-
-    // Check total character count to prevent sending excessively large prompts
-    const currentCharCount = unique.reduce((sum, s) => sum + s.length, 0);
-    if (currentCharCount > maxChars) {
-      break;
-    }
-  }
-
-  return unique;
-}
-
-async function extractRelevantSnippets(page: Page, language: string): Promise<string[]> {
-  const keywords = getKeywords(language); // Get keywords for the detected language
-  const keywordRegex = new RegExp(keywords.join('|'), 'i'); // Create a regex for all keywords
-
-  const title = await page.title();
-  const metaDescription = await page
-    .$eval('meta[name="description"]', (el: Element) =>
-      (el as HTMLMetaElement).getAttribute('content'),
-    )
-    .catch(() => ''); // Handle case where meta description is not found
-
-  // Define these values in your Node.js environment
-  const minSnippetLength = parseInt((process.env.MIN_SNIPPET_LENGTH as string) ?? '0');
-  const maxSnippetLength = parseInt((process.env.MAX_SNIPPET_LENGTH as string) ?? '500');
-
-  // Create a single object to pass all necessary data to the browser context
-  const evalArgs = {
-    keywordRegexSource: keywordRegex.source,
-    minLen: minSnippetLength,
-    maxLen: maxSnippetLength,
-  };
-
-  // Extract text from larger structural blocks
-  const blocks = await page.$$eval(
-    'section, article, div, ul, ol, li, tr, span',
-    (
-      elements: Element[],
-      // The second argument of the pageFunction will be the single object we pass
-      args: { keywordRegexSource: string; minLen: number; maxLen: number },
-    ) => {
-      const regex = new RegExp(args.keywordRegexSource, 'i'); // Access properties from the args object
-      return elements
-        .map((el) => (el as HTMLElement).innerText?.trim() || '')
-        .filter(Boolean) // Remove empty strings
-        .filter(
-          (text: string) =>
-            regex.test(text) &&
-            text.length > args.minLen && // Use the passed argument from the object
-            text.length < args.maxLen, // Use the passed argument from the object
-        ); // Filter by keyword and length
-    },
-    evalArgs, // Pass the single object here as the third argument to $$eval
-  );
-
-  // Extract text from direct content elements
-  const directSnippets = await page.$$eval(
-    'h1, h2, h3, h4, h5, h6, p, span, li, td, th, tr',
-    (elements: Element[], keywordRegexStr: string) => {
-      const regex = new RegExp(keywordRegexStr, 'i');
-      return elements
-        .map((el) => el.textContent?.trim() || '')
-        .filter(Boolean)
-        .filter((text: string) => regex.test(text) && text.length > 0 && text.length < 1000); // Filter by keyword and length
-    },
-    keywordRegex.source, // This remains the same as it only needs one argument
-  );
-
-  const allSnippets = [title, metaDescription, ...blocks, ...directSnippets]
-    .map((s: string | null) => (s ?? '').trim())
-    .filter(Boolean); // Ensure no nulls and trim all
-
-  const uniqueSnippets = deduplicateSnippets(allSnippets);
-
-  const rankedSnippets = rankSnippetsByKeywordMatch(uniqueSnippets, keywords);
-
-  // Return a limited number of top-ranked snippets to manage prompt size
-  return rankedSnippets.slice(0, 500);
-}
-
-async function gatherRelevantTexts(page: Page, language: string): Promise<string[]> {
-  return await extractRelevantSnippets(page, language);
-}
-
-const sendPrompt = async (prompt: string): Promise<string | undefined> => {
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash',
-    contents: prompt,
-  });
-  console.log(response.text);
-  return response.text;
-};
-
+/**
+ * Summarizes relevant information using the AI model, with retry logic for API calls.
+ * @param {string} url - The URL that was scraped.
+ * @param {string[]} snippets - Relevant text snippets from the page.
+ * @param {string} location - The location context for the AI.
+ * @returns {Promise<ScrapedInfo | null>} The parsed ScrapedInfo object, or null on failure.
+ */
 export async function summarizeRelevantInfoWithAI(
   url: string,
   snippets: string[],
@@ -255,7 +105,7 @@ export async function summarizeRelevantInfoWithAI(
 
   while (attempts < maxAttempts) {
     try {
-      const aiResponse = await sendPrompt(prompt);
+      const aiResponse = await LLMService.sendPrompt(prompt);
 
       if (!aiResponse) {
         console.error('AI response is empty');
@@ -306,21 +156,86 @@ export async function summarizeRelevantInfoWithAI(
   return null;
 }
 
+/**
+ * Scrapes a given URL, extracts contexts around a list of keywords.
+ * @param {string} url - The URL to scrape.
+ * @param {string} _location - The location context (currently unused in this function but kept for signature).
+ * @param {Page} page - The Playwright Page object (passed as an argument).
+ * @param {string[]} [keywordsToFind] - An optional array of keywords to find and extract context around. If not provided, default keywords for the detected language will be used.
+ * @param {number} [wordsBefore=50] - Number of words to extract before each keyword occurrence.
+ * @param {number} [wordsAfter=100] - Number of words to extract after each keyword occurrence.
+ * @returns {Promise<ScraperResult>} A dictionary of keyword to list of contexts, or null on error.
+ */
 export async function scraper(
   url: string,
   _location: string,
   page: Page, // Accept page as an argument
-): Promise<{ snippets: string[] } | null> {
+  keywordsToFind?: string[], // Optional array of keywords to find context for
+  wordsBefore: number = 50, // Default to 50 words before
+  wordsAfter: number = 100, // Default to 100 words after
+): Promise<ScraperResult> {
   console.log(`Scraping URL: ${url}`);
 
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     const language = await detectLanguage(page);
-    const snippets = await gatherRelevantTexts(page, language);
-    console.log(`Extracted ${snippets.length} snippets.`);
+    // Removed snippets gathering as per request to return only keyword contexts
+    // const snippets = await gatherRelevantTexts(page, language);
+    // console.log(`Extracted ${snippets.length} snippets.`);
 
-    return { snippets };
+    const keywordContexts: Record<string, string[]> = {};
+    const keywordsToUse =
+      keywordsToFind && keywordsToFind.length > 0 ? keywordsToFind : getKeywords(language);
+
+    // Get the full text content of the page for keyword context extraction
+    const pageText = await page.evaluate(() => {
+      // Select common elements that typically contain main content
+      const selectors = 'body, p, div, span, h1, h2, h3, h4, h5, h6, li, a, strong, em';
+      let fullText = '';
+      // eslint-disable-next-line no-undef
+      document.querySelectorAll(selectors).forEach((element) => {
+        // Get text content, trim whitespace, and add a space to separate words
+        const text = element.textContent?.trim();
+        if (text) {
+          fullText += text + ' ';
+        }
+      });
+      // Normalize whitespace: replace multiple spaces/newlines with a single space
+      return fullText.replace(/\s+/g, ' ').trim();
+    });
+
+    // Split the text into words
+    const words = pageText.split(/\s+/); // Split by one or more whitespace characters
+
+    for (const keyword of keywordsToUse) {
+      const keywordLower = keyword.toLowerCase();
+      const contextsForKeyword: string[] = [];
+
+      // Find all occurrences of the keyword
+      for (let i = 0; i < words.length; i++) {
+        if (words[i].toLowerCase() === keywordLower) {
+          // Calculate start and end indices for the context
+          const startIndex = Math.max(0, i - wordsBefore);
+          const endIndex = Math.min(words.length, i + wordsAfter + 1); // +1 to include the keyword itself
+
+          // Extract the context words
+          const contextWords = words.slice(startIndex, endIndex);
+
+          // Reconstruct the context string
+          contextsForKeyword.push(contextWords.join(' '));
+        }
+      }
+
+      if (contextsForKeyword.length > 0) {
+        keywordContexts[keyword] = contextsForKeyword;
+        console.log(`Keyword "${keyword}" found ${contextsForKeyword.length} time(s).`);
+      } else {
+        console.log(`Keyword "${keyword}" not found on the page.`);
+      }
+    }
+
+    return keywordContexts; // Return only the dictionary
   } catch (error) {
     console.error('Error scraping URL:', url, error);
     return null;
