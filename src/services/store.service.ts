@@ -54,15 +54,33 @@ export const StoreService = {
       throw new Error('Failed to scrape store information');
     }
 
-    const prompt = `Write a detailed store description between 300 and 500 words. 
-    Base the description strictly on the following two sources of information:
-      1. Store URL: ${URL}
-      2. About Info: "${scrapedInfo.about}
-      
-      make sure that (') is noted as ''.`;
+    function escapeApostrophes(text: string): string {
+      return text.replace(/'/g, "''");
+    }
+
+    function removeTrailingNewline(text: string): string {
+      return text.replace(/\n+$/, '');
+    }
+
+
+    const guidelines = 'https://www.europarl.europa.eu/topics/en/article/20240111STO16722/stopping-greenwashing-how-the-eu-regulates-green-claims'
+
+    const prompt = `Write one continuous paragraph (no line breaks) in our usual writing style for the store at this URL: ${URL}. 
+    The description should be about 225 words long. Begin with a few key words relevant to the store and mention the city where the store is located. 
+    Add a short summary explaining what the store does and what it stands for as a concept.
+    Mention the specific types of products they sell using clear and concrete terms (for example: “elegant women’s fashion”, “quality dresses and refined jackets” — not just “fashion”).
+    Include something special about the store that sets it apart, without using phrases like “unique” or “different from other stores”.
+    Explain how the store tries to reduce its environmental impact, but do not use any general green claims that are metoined in the guidelines in this link ${guidelines}. 
+    If the store uses systems like resell, takeback, repair, or rental services and they are mentioned on the site, describe them. If not, skip that. If the store is a multi-brand or flagship store, end with: “Find the brands they sell below.” 
+    Do not mention this if it’s a second-hand store or a workshop.
+    Write in third person. Don’t use semicolons, and don’t mention discounts, online shopping, or sales. 
+    Do not end the paragraph with a newline character.
+`;
 
     const largerDescription = await LLMService.sendPrompt(prompt);
-    console.log('Larger description:', largerDescription);
+    console.log('prompt:', prompt);
+    const apostropheRemoved = escapeApostrophes(largerDescription ?? '');
+    const betterDescription = removeTrailingNewline(apostropheRemoved);
 
     const [street, number, postalCode, city, country] = (scrapedInfo.location || '')
       .split(',')
@@ -75,11 +93,7 @@ export const StoreService = {
       country,
     );
 
-    const store = await StoreRepository.createStore(
-      name,
-      locationObj.id,
-      largerDescription ? largerDescription : scrapedInfo.about,
-    );
+    const store = await StoreRepository.createStore(name, locationObj.id, betterDescription);
 
     if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
       for (const brandName of scrapedInfo.brands) {
