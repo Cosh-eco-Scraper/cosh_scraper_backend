@@ -9,6 +9,7 @@ export const dtoMapper = {
       id: store.id,
       description: store.description,
       name: store.name,
+      retour: store.retour,
       street: store.location?.street ?? 'unknown',
       number: store.location?.number ?? 'unknown',
       city: store.location?.city ?? 'unknown',
