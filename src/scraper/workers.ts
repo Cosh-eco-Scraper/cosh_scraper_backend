@@ -1,71 +1,139 @@
-import { workerData, parentPort } from 'worker_threads';
+import { parentPort, workerData } from 'worker_threads';
+import dotenv from 'dotenv';
+import { Browser, chromium } from 'playwright';
 import { scraper } from './scraper';
 
-const CONCURRENT_SCRAPES = 4;
+dotenv.config();
 
-async function runTasksWithLimit<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
-  const results: T[] = [];
-  let running = 0;
-  let index = 0;
-  let completed = 0;
-
-  return new Promise((resolve) => {
-    function runNext() {
-      if (index === tasks.length && running === 0) {
-        resolve(results);
-        return;
-      }
-      while (running < limit && index < tasks.length) {
-        const currentIndex = index++;
-        running++;
-
-        parentPort?.postMessage({ type: 'progress', count: completed });
-
-        tasks[currentIndex]()
-          .then((res) => {
-            results[currentIndex] = res;
-          })
-          .catch((err) => {
-            results[currentIndex] = null as any;
-            console.error('Error in scraping:', err);
-          })
-          .finally(() => {
-            running--;
-            completed++;
-            parentPort?.postMessage({ type: 'progress', count: completed });
-            runNext();
-          });
-      }
+// Define message types for clear communication
+type MainToWorkerMessage =
+  | {
+      type: 'new_task';
+      url: string;
     }
-    runNext();
-  });
-}
+  | {
+      type: 'terminate';
+    };
+
+type WorkerToMainMessage =
+  | {
+      type: 'task_complete';
+      url: string;
+      snippets: string[];
+    }
+  | {
+      type: 'task_error';
+      url: string;
+      message: string;
+    }
+  | {
+      type: 'request_task';
+    }
+  | {
+      type: 'worker_ready'; // Worker signals it's ready to receive tasks
+    }
+  | {
+      type: 'worker_terminated'; // NEW: Worker confirms it has terminated gracefully
+    };
+
+const { location, delayMs } = workerData;
+
+let browser: Browser | null = null;
+let isShuttingDown = false; // Flag to prevent new tasks during shutdown
 
 (async () => {
-  const { links, location } = workerData;
-  console.log(`Worker started with ${links.length} links.`);
+  if (!parentPort) {
+    console.error('Worker does not have a parent port. This worker should be run as a thread.');
+    process.exit(1);
+  }
 
-  type ScraperResult = { snippets: string[] };
+  try {
+    browser = await chromium.launch({ headless: true });
+    console.log(`Worker (ID: ${process.pid}) started and ready.`);
 
-  const tasks = links.map((url: string) => async (): Promise<ScraperResult | null> => {
-    console.log(`Worker scraping URL: ${url}`);
-    try {
-      return await scraper(url, location);
-    } catch (e) {
-      console.error(`Error scraping ${url}:`, e);
-      return null;
+    // Signal to the main thread that this worker is ready for a task
+    parentPort.postMessage({ type: 'worker_ready' } as WorkerToMainMessage); // Changed to 'worker_ready'
+
+    parentPort.on('message', async (msg: MainToWorkerMessage) => {
+      if (isShuttingDown) {
+        console.log(`Worker (ID: ${process.pid}) received message while shutting down. Ignoring.`);
+        return; // Ignore messages if already in shutdown sequence
+      }
+
+      if (msg.type === 'new_task') {
+        const url = msg.url;
+
+        console.log(`Worker (ID: ${process.pid}) scraping URL: ${url}`);
+        let currentPage = null;
+        try {
+          currentPage = await browser!.newPage(); // Create new page for each task
+
+          const result = await scraper(url, location, currentPage);
+
+          // eslint-disable-next-line no-undef
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+
+          parentPort!.postMessage({
+            type: 'task_complete',
+            url: url,
+            snippets: result ? result.snippets : [],
+          } as WorkerToMainMessage);
+        } catch (e: any) {
+          console.error(`Worker (ID: ${process.pid}) error scraping ${url}:`, e);
+          parentPort!.postMessage({
+            type: 'task_error',
+            url: url,
+            message: e.message || 'Unknown error',
+          } as WorkerToMainMessage);
+        } finally {
+          if (currentPage) {
+            await currentPage.close();
+            console.log(`Worker (ID: ${process.pid}) closed page for ${url}.`);
+          }
+          parentPort!.postMessage({ type: 'request_task' } as WorkerToMainMessage);
+        }
+      } else if (msg.type === 'terminate') {
+        console.log(
+          `Worker (ID: ${process.pid}) received termination signal. Initiating shutdown.`,
+        );
+        isShuttingDown = true;
+        // Perform cleanup
+        if (browser) {
+          await browser.close();
+          console.log(`Worker (ID: ${process.pid}) browser closed.`);
+        }
+        // NEW: Confirm termination to the main thread
+        parentPort!.postMessage({ type: 'worker_terminated' } as WorkerToMainMessage);
+        process.exit(0); // Exit gracefully
+      }
+    });
+  } catch (error: any) {
+    console.error(
+      `Worker (ID: ${process.pid}) failed to initialize or encountered unhandled error during setup:`,
+      error,
+    );
+    if (parentPort) {
+      parentPort.postMessage({
+        type: 'task_error',
+        url: 'initialization',
+        message: error.message || 'Worker initialization failed',
+      } as WorkerToMainMessage);
+    }
+    if (browser) {
+      await browser.close();
+    }
+    process.exit(1);
+  }
+})();
+
+// Handle worker exit to ensure browser is closed if something goes wrong
+if (parentPort) {
+  parentPort.on('close', async () => {
+    console.log(`Worker (ID: ${process.pid}) parentPort closed. Initiating emergency shutdown.`);
+    isShuttingDown = true;
+    if (browser) {
+      await browser.close();
+      console.log(`Worker (ID: ${process.pid}) browser closed on parentPort close.`);
     }
   });
-
-  const results = await runTasksWithLimit<ScraperResult | null>(tasks, CONCURRENT_SCRAPES);
-
-  // Flatten snippets from all pages scraped by this worker
-  const allSnippets = results
-    .filter((r): r is ScraperResult => r !== null && !!r.snippets)
-    .flatMap((r) => r.snippets);
-
-  console.log(`Worker finished scraping ${allSnippets.length} snippets.`);
-
-  // Send back all snippets only, no AI call here
-  parentPort?.postMessage({ type: 'done', snippets: allSnippets });
-})();
+}
