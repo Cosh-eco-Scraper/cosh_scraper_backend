@@ -230,6 +230,7 @@ const germanKeywords = [
 ];
 
 const dutchKeywords = [
+  'gesloten',
   'over',
   'over ons',
   'intro',
