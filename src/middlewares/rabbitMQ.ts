@@ -16,6 +16,7 @@ export async function sendMessage(message: string) {
 
     console.log('Message sent:', message);
 
+    // @ts-ignore
     setTimeout(() => {
       channel.close();
       connection.close();
