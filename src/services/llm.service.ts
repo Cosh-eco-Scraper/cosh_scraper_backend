@@ -18,7 +18,7 @@ const descriptionCheck = async (description: string): Promise<string | undefined
   const response = await ai.models.generateContent({
     model: 'gemini-2.0-flash',
     contents:
-      'Give me only true or false for an answer. can you check if this description complies to the European and Belgian guidelines for greeNwashing:' +
+      'Give me only Yes, it does comply or No, It does not comply for an answer. can you check if this description complies to the European and Belgian guidelines for greeNwashing:' +
       description,
   });
   console.log(response.text);
