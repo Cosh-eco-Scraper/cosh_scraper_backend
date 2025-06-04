@@ -51,26 +51,19 @@ export const StoreService = {
     const guidelines = 'https://www.europarl.europa.eu/topics/en/article/20240111STO16722/stopping-greenwashing-how-the-eu-regulates-green-claims'
 
     
-    const prompt = `
-        Write a fluent, engaging brand description of approximately 225 words for a store page. Use our usual tone of voice: professional yet conversational, clear, positive, and descriptive.
+    const prompt = `Write a description for a sustainble store trying to market themselves to customers
+     of approximately 225 words as a single paragraph (no line breaks) use this link ${URL}. Make sure to follow the European and Belgian guidelines for greenwashing: ${guidelines}.
 
-        Strictly follow the structure below and DO NOT make any green/environmental claims (use ${guidelines}), mention discounts/sales, or refer to online shopping.
+      Follow these instructions:
+        - Write in the third person
+        - Begin with a few relevant keywords related to the store and mention the city where the store is located.
+        - Write after the beginning a short summary in about 110 characters that captures what the store does and where it is located.
+        - Add one sentence about the concept of the store: what it focuses on or how it presents its products.
+        - Include one sentence that clearly describes the main product categories using concrete terms (e.g., “wooden toys and cloth diapers” instead of “eco baby products”).
+        - Include one sentence that makes this store unique to this store without specifying that what makes it unique.
 
-        Structure:
-        - write this description as one paragraph without any line breaks or bullet points.
-        - A few descriptive words + the city where the store is located ${scrapedInfo.location}.
-        - A brief summary of what the store does and stands for. This should be (approx. 110 characters).  
-        - In a sentence describe the store concept.
-        - Then describe the main products sold by the store be very specific, e.g., “elegant women’s fashion” or “refined coats and quality dresses”) 
-        - After that Describe something distinctive about the store without explicitly stating it's unique  
-        - Mention one thing that makes the store more conscious (without using words like “sustainable” or “eco-friendly”). use this link as a reference for the guidelines.
-        - (optional)Only if mentioned on the website, add info about resell systems, takeback, repairs, rentals, etc. Leave this out if not applicable  
-        - For multi-brand or flagship stores only, add: “Discover the brands available at [store name] below.” (Do not include this for second-hand stores or workshop spaces)
 
-        Use the following URL as your sole source of information. Extract only factual, verifiable content from it. Do NOT copy or include any green/environmental marketing claims from the site.  
-        ${URL}
     `;
-
 
 
     const largerDescription = await LLMService.sendPrompt(prompt);
