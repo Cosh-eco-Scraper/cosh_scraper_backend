@@ -1,9 +1,9 @@
-var amqp = require('amqplib/callback_api');
+import amqp from 'amqplib';
 import { Buffer } from 'buffer';
 
 export const variables = {
   queue: 'scraper_updates',
-  connectionUrl: 'amqp://localhost:15672',
+  connectionUrl: 'amqp://guest:guest@localhost:5672',
 };
 
 export async function sendMessage(message: string) {
@@ -12,7 +12,7 @@ export async function sendMessage(message: string) {
     const channel = await connection.createChannel();
 
     await channel.assertQueue(variables.queue, { durable: true });
-    channel.sendToQueue(variables.queue, Buffer.from(message));
+    await channel.sendToQueue(variables.queue, Buffer.from(message));
 
     console.log('Message sent:', message);
 

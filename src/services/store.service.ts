@@ -5,11 +5,13 @@ import OpeningHoursService from './openingshours.service';
 import LocationService from './location.service';
 import storeBrandsService from './storeBrands.service';
 import { LLMService } from './llm.service';
+import RabbitMQMiddleware from '../middlewares/rabbitMQ';
 
 export const StoreService = {
   getAllStores: async () => {
     const stores = await StoreRepository.getAllStores();
-
+    RabbitMQMiddleware.sendMessage('All stores fetched successfully');
+    RabbitMQMiddleware.receiveMessages();
     return stores;
   },
   getStore: async (id: number) => {
