@@ -20,7 +20,7 @@ export async function sendMessage(message: string) {
     setTimeout(() => {
       channel.close();
       connection.close();
-    }, 500);
+    }, 500); // eslint-disable-line no-undef
   } catch (error) {
     console.error('Error sending message:', error);
   }

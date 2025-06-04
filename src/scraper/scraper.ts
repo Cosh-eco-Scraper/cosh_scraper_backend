@@ -228,7 +228,7 @@ export async function summarizeRelevantInfoWithAI(
         const delay = baseDelay * Math.pow(2, attempts);
 
         // @ts-ignore
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay)); // eslint-disable-line no-undef
         continue;
       }
 
