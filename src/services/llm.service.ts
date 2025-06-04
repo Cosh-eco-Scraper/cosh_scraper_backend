@@ -17,6 +17,9 @@ const sendPrompt = async (prompt: string): Promise<string | undefined> => {
 const descriptionCheck = async (description: string): Promise<string | undefined> => {
   const response = await ai.models.generateContent({
     model: 'gemini-2.0-flash',
+    // config :{
+    //   temperature: 0.1,
+    // },
     contents:
       'Give me only Yes, it does comply or No, It does not comply for an answer. can you check if this description complies to the European and Belgian guidelines for greeNwashing:' +
       description,

@@ -47,24 +47,36 @@ export const StoreService = {
       return text.replace(/\n+$/, '');
     }
 
-
-    const guidelines = 'https://www.europarl.europa.eu/topics/en/article/20240111STO16722/stopping-greenwashing-how-the-eu-regulates-green-claims'
+    const guidelines =
+      'https://www.europarl.europa.eu/topics/en/article/20240111STO16722/stopping-greenwashing-how-the-eu-regulates-green-claims';
 
     
-    const prompt = `Write a description for a sustainble store trying to market themselves to customers
-     of approximately 225 words as a single paragraph (no line breaks) use this link ${URL}. Make sure to follow the European and Belgian guidelines for greenwashing: ${guidelines}.
+  const prompt = `You are a marketing copywriter. Your task is to write a product description for a store based on information from a provided URL, adhering to specific length and style guidelines. You must also be aware of and avoid greenwashing, following European and Belgian guidelines.
 
-      Follow these instructions:
-        - Write in the third person
-        - Begin with a few relevant keywords related to the store and mention the city where the store is located.
-        - Write after the beginning a short summary in about 110 characters that captures what the store does and where it is located.
-        - Add one sentence about the concept of the store: what it focuses on or how it presents its products.
-        - Include one sentence that clearly describes the main product categories using concrete terms (e.g., “wooden toys and cloth diapers” instead of “eco baby products”).
-        - Include one sentence that makes this store unique to this store without specifying that what makes it unique.
+      **Input:**
 
+      *   **Store URL:** ${URL}
+      *   **Store Location:** ${scrapedInfo.location}
+      *   **Greenwashing Guidelines URL:** ${guidelines}
 
+      **Output Requirements:**
+
+      *   **Word Count:** Approximately 225 words.
+      *   **Paragraph Structure:** Single paragraph (no line breaks).
+      *   **Writing Style:** Third person.
+      *   **Opening:** Begin with a few relevant keywords related to the store and mention the city where the store is located.
+      *   **Summary:** After the opening, include a short summary (approximately 110 characters) that captures what the store does and where it is located.
+      *   **Concept Sentence:** Add one sentence about the concept of the store: what it focuses on or how it presents its products.
+      *   **Product Categories Sentence:** Include one sentence that clearly describes the main product categories using concrete terms.
+      *   **Unique Sentence:** Include one sentence that makes this store unique without specifying *what* makes it unique.
+      *   **Greenwashing Avoidance:** Ensure the description avoids any misleading or unsubstantiated environmental claims, adhering to the guidelines provided in the Greenwashing Guidelines URL.
+
+      **Process:**
+
+      1.  Browse the provided URLs to understand the store's offerings and the greenwashing guidelines.
+      2.  Write the description, adhering to all specified requirements.
+      3.  Ensure the description is accurate, engaging, and avoids any potential greenwashing.
     `;
-
 
     const largerDescription = await LLMService.sendPrompt(prompt);
     console.log('prompt:', prompt);
