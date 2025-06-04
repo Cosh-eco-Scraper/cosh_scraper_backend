@@ -28,32 +28,27 @@ export async function sendMessage(message: string) {
 }
 
 export async function receiveMessages() {
-  amqp.connect(variables.connectionUrl, function (error0: any, connection: any) {
-    if (error0) {
-      throw error0;
-    }
-    connection.createChannel(function (error1: any, channel: any) {
-      if (error1) {
-        throw error1;
-      }
+  try {
+    const connection = await amqp.connect(variables.connectionUrl);
+    const channel = await connection.createChannel();
 
-      channel.assertQueue(variables.queue, {
-        durable: false,
-      });
+    await channel.assertQueue(variables.queue, { durable: true });
 
-      console.log(' [*] Waiting for messages in %s. To exit press CTRL+C', variables.queue);
-
-      channel.consume(
-        variables.queue,
-        function (msg: any) {
-          console.log(' [x] Received %s', msg.content.toString());
-        },
-        {
-          noAck: true,
-        },
-      );
-    });
-  });
+    channel.consume(
+      variables.queue,
+      (msg) => {
+        if (msg !== null) {
+          const messageContent = msg.content.toString();
+          console.log(`${messageContent}`);
+          // Process the message here
+          channel.ack(msg);
+        }
+      },
+      { noAck: false },
+    );
+  } catch (error) {
+    console.error('Error receiving messages:', error);
+  }
 }
 
 const RabbitMQMiddleware = {
