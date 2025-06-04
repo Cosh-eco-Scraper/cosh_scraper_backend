@@ -16,10 +16,12 @@ export async function sendMessage(message: string) {
 
     console.log('Message sent:', message);
 
+    /* eslint-disable */
     setTimeout(() => {
       channel.close();
       connection.close();
     }, 500); // eslint-disable-line no-undef
+    /* eslint-enable */
   } catch (error) {
     console.error('Error sending message:', error);
   }
