@@ -3,8 +3,11 @@ import * as dotenv from 'dotenv';
 import getPrompt from './prompt/prompt';
 import getKeywords from './keywords';
 import { LLMService } from '../services/llm.service';
+import * as fs from 'fs';
 
 dotenv.config();
+
+// (ScrapedInfo type remains the same as provided)
 type ScrapedInfo = {
   url: string;
   name: string;
@@ -59,8 +62,7 @@ type ScrapedInfo = {
   type: string[];
 };
 
-// Define the return type for the modified scraper function
-// It now directly returns the dictionary of keyword contexts
+// (ScraperResult type remains the same)
 export type ScraperResult = Record<string, string[]> | null;
 
 /**
@@ -95,13 +97,15 @@ async function detectLanguage(page: Page): Promise<string> {
  */
 export async function summarizeRelevantInfoWithAI(
   url: string,
-  snippets: string[],
+  snippets: string[], // These will now be consolidated snippets
   location: string,
 ): Promise<ScrapedInfo | null> {
   const prompt = getPrompt(url, snippets, location);
   let attempts = 0;
   const maxAttempts = 5;
   const baseDelay = 1500;
+
+  snippets.forEach(console.log); // Keep for debugging if needed
 
   while (attempts < maxAttempts) {
     try {
@@ -117,16 +121,17 @@ export async function summarizeRelevantInfoWithAI(
       }
 
       try {
-        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+        const jsonMatch = aiResponse.match(/\{[\s\S]*}/);
         if (jsonMatch) {
           const jsonString = jsonMatch[0];
           const parsed = JSON.parse(jsonString) as ScrapedInfo;
+          // You might add more rigorous validation here if needed
           if (!parsed.name || !parsed.openingHours || !parsed.type || !parsed.brands) {
-            throw new Error('Invalid JSON structure');
+            throw new Error('Invalid JSON structure: Missing critical fields after parsing.');
           }
           return parsed;
         }
-        throw new Error('No JSON found in response');
+        throw new Error('No JSON found in AI response, or JSON is malformed.');
       } catch (err) {
         console.error('Failed to parse AI response as JSON:', err);
         attempts++;
@@ -144,7 +149,7 @@ export async function summarizeRelevantInfoWithAI(
         await new Promise((resolve) => setTimeout(resolve, delay));
         continue;
       }
-      console.error('Failed to backoff from AI api: ', err.message);
+      console.error('Failed to backoff from AI API:', err.message);
       attempts++;
       const delay = baseDelay * Math.pow(2, attempts);
       // eslint-disable-next-line no-undef
@@ -159,11 +164,11 @@ export async function summarizeRelevantInfoWithAI(
 /**
  * Scrapes a given URL, extracts contexts around a list of keywords.
  * @param {string} url - The URL to scrape.
- * @param {string} _location - The location context (currently unused in this function but kept for signature).
- * @param {Page} page - The Playwright Page object (passed as an argument).
- * @param {string[]} [keywordsToFind] - An optional array of keywords to find and extract context around. If not provided, default keywords for the detected language will be used.
- * @param {number} [wordsBefore=50] - Number of words to extract before each keyword occurrence.
- * @param {number} [wordsAfter=100] - Number of words to extract after each keyword occurrence.
+ * @param {string} _location - The location context.
+ * @param {Page} page - The Playwright Page object.
+ * @param {string[]} [keywordsToFind] - An optional array of keywords. If not provided, default keywords for the detected language will be used.
+ * @param {Record<string, number>} [wordsBeforeMap] - Optional map for keyword-specific wordsBefore.
+ * @param {Record<string, number>} [wordsAfterMap] - Optional map for keyword-specific wordsAfter.
  * @returns {Promise<ScraperResult>} A dictionary of keyword to list of contexts, or null on error.
  */
 export async function scraper(
@@ -171,80 +176,71 @@ export async function scraper(
   _location: string,
   page: Page, // Accept page as an argument
   keywordsToFind?: string[], // Optional array of keywords to find context for
-  wordsBefore: number = 50, // Default to 50 words before
-  wordsAfter: number = 100, // Default to 100 words after
+  // New: Optional maps for dynamic context lengths
+  wordsBeforeMap?: Record<string, number>,
+  wordsAfterMap?: Record<string, number>,
 ): Promise<ScraperResult> {
   console.log(`Scraping URL: ${url}`);
+  fs.appendFileSync('files/scraped_urls.txt', url + '\n');
 
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     const language = await detectLanguage(page);
-    // Removed snippets gathering as per request to return only keyword contexts
-    // const snippets = await gatherRelevantTexts(page, language);
-    // console.log(`Extracted ${snippets.length} snippets.`);
-
     const keywordContexts: Record<string, string[]> = {};
     const keywordsToUse =
       keywordsToFind && keywordsToFind.length > 0 ? keywordsToFind : getKeywords(language);
 
-    // Get the full text content of the page for keyword context extraction
     const pageText = await page.evaluate(() => {
       // Select common elements that typically contain main content
       const selectors = 'body, p, div, span, h1, h2, h3, h4, h5, h6, li, a, strong, em';
       let fullText = '';
       // eslint-disable-next-line no-undef
       document.querySelectorAll(selectors).forEach((element) => {
-        // Get text content, trim whitespace, and add a space to separate words
         const text = element.textContent?.trim();
         if (text) {
           fullText += text + ' ';
         }
       });
-      // Normalize whitespace: replace multiple spaces/newlines with a single space
       return fullText.replace(/\s+/g, ' ').trim();
     });
 
-    // Split the text into words
-    const words = pageText.split(/\s+/); // Split by one or more whitespace characters
+    const words = pageText.split(/\s+/);
 
     for (const keyword of keywordsToUse) {
       const keywordLower = keyword.toLowerCase();
       const contextsForKeyword: string[] = [];
 
-      // Find all occurrences of the keyword
+      // Determine context lengths dynamically based on keyword maps, or use defaults
+      const currentWordsBefore = wordsBeforeMap?.[keywordLower] ?? 50; // Default 50
+      const currentWordsAfter = wordsAfterMap?.[keywordLower] ?? 100; // Default 100
+
       for (let i = 0; i < words.length; i++) {
         if (words[i].toLowerCase() === keywordLower) {
-          // Calculate start and end indices for the context
-          const startIndex = Math.max(0, i - wordsBefore);
-          const endIndex = Math.min(words.length, i + wordsAfter + 1); // +1 to include the keyword itself
+          const startIndex = Math.max(0, i - currentWordsBefore);
+          const endIndex = Math.min(words.length, i + currentWordsAfter + 1);
 
-          // Extract the context words
           const contextWords = words.slice(startIndex, endIndex);
-
-          // Reconstruct the context string
           contextsForKeyword.push(contextWords.join(' '));
         }
       }
 
       if (contextsForKeyword.length > 0) {
         keywordContexts[keyword] = contextsForKeyword;
-        console.log(`Keyword "${keyword}" found ${contextsForKeyword.length} time(s).`);
+        // console.log(`Keyword "${keyword}" found ${contextsForKeyword.length} time(s).`); // Too verbose
       } else {
-        console.log(`Keyword "${keyword}" not found on the page.`);
+        // console.log(`Keyword "${keyword}" not found on the page.`); // Too verbose
       }
     }
 
-    return keywordContexts; // Return only the dictionary
+    return keywordContexts;
   } catch (error) {
     console.error('Error scraping URL:', url, error);
     return null;
   } finally {
-    // This is correct: the page is closed after each task, which is then re-opened by the worker for the next task.
     if (page && !page.isClosed()) {
-      // Add check for !page.isClosed() to prevent errors if already closed
       await page.close();
-      console.log(`Scraper: Page for ${url} closed.`);
+      // console.log(`Scraper: Page for ${url} closed.`); // Too verbose
     }
   }
 }

@@ -13,9 +13,13 @@ Respond ONLY with the JSON object.
 }
 
 function getHeader(url: string): string {
-  return `The website URL is: ${url}
-
-Given the following relevant text snippets from a shop website, which you will convert to English then extract and summarize the following fields as a JSON object:`;
+  return `
+  You are an expert data classifier and summarizer. You will be given a list of relevant text snippets from a shop website, and you will place them into their respective fields in a JSON object. 
+  
+  
+**Goal:** Consolidate all factual details from these snippets into a single, comprehensive, and non-redundant JSON object, if any data would be missing, or incorrect the check it on the website (${url}) and correct it.
+          It is important to note that the snippets are not always correct, and that the information in the snippets is not always complete. so checking the information on the website is the best way to ensure that the information is correct.
+`;
 }
 
 function getSchemaDefinition(): string {
