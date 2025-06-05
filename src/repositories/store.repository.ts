@@ -28,11 +28,11 @@ export const StoreRepository = {
     return result.rows.map(mapper.mapStore)[0] as Store;
   },
 
-  updateStore: async (storeId?: number, name?: string, description?: string) => {
+  updateStore: async (storeId?: number, name?: string, description?: string, retour?: string) => {
     // const result = await databasePool.query(storeQueries.updateStore(storeId, name, description));
 
     const query = storeQueries.updateStore();
-    const params = [name, description, storeId];
+    const params = [name, description, retour, storeId];
     const result = await databasePool.query(query, params);
 
     if (!result.rowCount) {
@@ -79,9 +79,14 @@ export const StoreRepository = {
     return types;
   },
 
-  createStore: async (name: string, location_id: number, description?: string): Promise<Store> => {
+  createStore: async (
+    name: string,
+    location_id: number,
+    retour: string,
+    description?: string,
+  ): Promise<Store> => {
     const querry = storeQueries.createStore();
-    const params = [name, location_id, description];
+    const params = [name, location_id, description, retour];
     const result = await databasePool.query(querry, params);
 
     const store = result.rows.map(mapper.mapStore)[0] as Store;
