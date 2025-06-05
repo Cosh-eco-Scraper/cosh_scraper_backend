@@ -7,7 +7,7 @@
     "test": "mocha -r ts-node/register \"src/test/**/*.test.ts\"",
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "nodemon --watch \"src/**/*.ts\" --exec \"npx ts-node\" src/server.ts",
+    "dev": "concurrently \"nodemon --watch 'src/**/*.ts' --exec ts-node src/server.ts\" \"nodemon --watch 'src/**/*.ts' --exec ts-node src/websocketServer.ts\"",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint --fix \"src/**/*.ts\"",
     "format": "prettier --write .",
@@ -26,6 +26,7 @@
   "homepage": "https://github.com/Cosh-eco-Scraper/Cosh.Eco_Scraper_Backend#readme",
   "devDependencies": {
     "@eslint/js": "^9.27.0",
+    "@types/amqplib": "^0.10.7",
     "@types/chai": "^5.2.2",
     "@types/chai-as-promised": "^8.0.2",
     "@types/cors": "^2.8.18",
@@ -33,9 +34,11 @@
     "@types/pg": "^8.15.2",
     "@types/sinon": "^17.0.4",
     "@types/swagger-ui-express": "^4.1.8",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/parser": "^8.32.1",
     "chai": "^5.2.0",
     "chai-as-promised": "^8.0.1",
+    "concurrently": "^9.1.2",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.0",
@@ -57,6 +60,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.15.18",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "amqplib": "^0.10.8",
     "axios": "^1.9.0",
     "backend": "file:",
     "cheerio": "^1.0.0",
@@ -68,7 +72,8 @@
     "pg": "^8.16.0",
     "playwright": "^1.52.0",
     "robots-parser": "^3.0.1",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "ws": "^8.18.2"
   },
   "lint-staged": {
     "*.{js,ts,json,css,md}": [
