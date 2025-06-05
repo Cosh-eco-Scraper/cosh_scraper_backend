@@ -43,6 +43,8 @@ export async function run(baseURL: string, location: string) {
   const taskQueue: string[] = [...allLinks];
 
   const collectedSnippets: string[] = [];
+
+  // eslint-disable-next-line no-undef
   let tasksDispatched = 0;
   let tasksProcessed = 0;
   let workersReadyCount = 0;
