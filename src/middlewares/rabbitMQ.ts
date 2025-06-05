@@ -39,7 +39,9 @@ export async function receiveMessages(onMessage?: (msg: string) => void) {
       (msg) => {
         if (msg !== null) {
           const messageContent = msg.content.toString();
-          if (onMessage) onMessage(messageContent); // <-- Call the callback
+          if (onMessage) {
+            onMessage(messageContent);
+          }
           channel.ack(msg);
         }
       },
