@@ -47,7 +47,8 @@ export const StoreService = {
       return text.replace(/\n+$/, '');
     }
 
-    const guidelines = 'https://www.europarl.europa.eu/topics/en/article/20240111STO16722/stopping-greenwashing-how-the-eu-regulates-green-claims';
+    const guidelines =
+      'https://www.europarl.europa.eu/topics/en/article/20240111STO16722/stopping-greenwashing-how-the-eu-regulates-green-claims';
 
     const prompt = `You are a marketing copywriter. Your task is to write a product description for a store based on information from a provided URL, adhering to specific length and style guidelines. You must also be aware of and avoid greenwashing, following European and Belgian guidelines.
 

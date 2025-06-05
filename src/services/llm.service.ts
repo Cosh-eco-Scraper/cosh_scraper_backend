@@ -14,10 +14,9 @@ const sendPrompt = async (prompt: string): Promise<string | undefined> => {
   return response.text;
 };
 
-
 const descriptionGenerator = async (prompt: string): Promise<string | undefined> => {
   const response = await ai.models.generateContent({
-    config :{
+    config: {
       temperature: 0,
     },
     model: 'gemini-2.0-flash',
@@ -27,7 +26,6 @@ const descriptionGenerator = async (prompt: string): Promise<string | undefined>
 
   return response.text;
 };
-
 
 const descriptionCheck = async (description: string): Promise<string | undefined> => {
   const response = await ai.models.generateContent({
