@@ -44,8 +44,9 @@ export async function run(baseURL: string, location: string) {
 
   const collectedSnippets: string[] = [];
 
-  // eslint-disable-next-line no-undef
+  /* eslint-disable */
   let tasksDispatched = 0;
+  /* eslint-enable */
   let tasksProcessed = 0;
   let workersReadyCount = 0;
   let workersTerminatedCount = 0;
