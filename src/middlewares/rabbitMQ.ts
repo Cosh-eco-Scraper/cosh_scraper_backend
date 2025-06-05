@@ -27,7 +27,7 @@ export async function sendMessage(message: string) {
   }
 }
 
-export async function receiveMessages() {
+export async function receiveMessages(onMessage?: (msg: string) => void) {
   try {
     const connection = await amqp.connect(variables.connectionUrl);
     const channel = await connection.createChannel();
@@ -39,8 +39,7 @@ export async function receiveMessages() {
       (msg) => {
         if (msg !== null) {
           const messageContent = msg.content.toString();
-          console.log(`${messageContent}`);
-          // Process the message here
+          if (onMessage) onMessage(messageContent); // <-- Call the callback
           channel.ack(msg);
         }
       },
