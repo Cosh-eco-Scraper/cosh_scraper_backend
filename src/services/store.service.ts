@@ -47,11 +47,9 @@ export const StoreService = {
       return text.replace(/\n+$/, '');
     }
 
-    const guidelines =
-      'https://www.europarl.europa.eu/topics/en/article/20240111STO16722/stopping-greenwashing-how-the-eu-regulates-green-claims';
+    const guidelines = 'https://www.europarl.europa.eu/topics/en/article/20240111STO16722/stopping-greenwashing-how-the-eu-regulates-green-claims';
 
-    
-  const prompt = `You are a marketing copywriter. Your task is to write a product description for a store based on information from a provided URL, adhering to specific length and style guidelines. You must also be aware of and avoid greenwashing, following European and Belgian guidelines.
+    const prompt = `You are a marketing copywriter. Your task is to write a product description for a store based on information from a provided URL, adhering to specific length and style guidelines. You must also be aware of and avoid greenwashing, following European and Belgian guidelines.
 
       **Input:**
 
@@ -70,6 +68,21 @@ export const StoreService = {
       *   **Product Categories Sentence:** Include one sentence that clearly describes the main product categories using concrete terms.
       *   **Unique Sentence:** Include one sentence that makes this store unique without specifying *what* makes it unique.
       *   **Greenwashing Avoidance:** Ensure the description avoids any misleading or unsubstantiated environmental claims, adhering to the guidelines provided in the Greenwashing Guidelines URL.
+      *   **Provide Evidence:** When you claim something It needs to be backed up with concrete examples and quantifiable datas.  If you claim a product is "eco-friendly," be prepared to show *how*. Use the url provided to find the necessary information.
+      *   **Be Specific and Quantifiable:**
+            *   Instead of "consciously curated," say "We prioritize products with at least 70% recycled content." 
+            *   Instead of "mindful consumption," say "We encourage customers to repair and reuse products through our repair workshops and online tutorials."
+            *   Instead of "natural skincare products," say "Our skincare products are made with 95% natural ingredients and are certified by [Certification Name]."
+            *   Instead of "sustainably harvested forests," say "Our wooden toys are made from FSC-certified wood."
+            *   Instead of "extending their lifespan," say "Our products are designed for a minimum lifespan of [Number] years and come with a [Warranty Length] warranty."
+      *  **Provide Evidence and Context:**
+            *   Explain the recycling process for the packaging and provide information on recycling rates in Belgium.
+            *   Provide information on the company's carbon footprint and efforts to reduce it.
+      *  **Obtain and Display Certifications:**
+            *   Use recognized certifications (e.g., GOTS, FSC, Fair Trade) and display the logos prominently.     
+      *   **Omit some information:** Omit any information that you cannot verify or that does not comply with the guidelines.
+      *   **Avoid Implied Green Claims:** Don't let staff make verbal suggestions about the sustainability of a product unless it's demonstrably true and can be backed up with evidence.
+      *   ANY CLAIM MADE MUST BE BACKED UP WITH EVIDENCE AND QUANTIFIABLE DATA. IF THIS IS NOT POSSIBLE DO NOT MAKE THE CLAIM.
 
       **Process:**
 
@@ -78,7 +91,7 @@ export const StoreService = {
       3.  Ensure the description is accurate, engaging, and avoids any potential greenwashing.
     `;
 
-    const largerDescription = await LLMService.sendPrompt(prompt);
+    const largerDescription = await LLMService.descriptionGenerator(prompt);
     console.log('prompt:', prompt);
     const apostropheRemoved = escapeApostrophes(largerDescription ?? '');
     const betterDescription = removeTrailingNewline(apostropheRemoved);
