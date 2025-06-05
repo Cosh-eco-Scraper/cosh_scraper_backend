@@ -5,7 +5,7 @@ import OpeningHoursService from './openingshours.service';
 import LocationService from './location.service';
 import storeBrandsService from './storeBrands.service';
 import { LLMService } from './llm.service';
-import getRobotParser from '../scraper/robot/robot';
+// import getRobotParser from '../scraper/robot/robot';
 
 export const StoreService = {
   getAllStores: async () => {
@@ -131,7 +131,7 @@ export const StoreService = {
     const store = await StoreRepository.createStore(
       name,
       locationObj.id,
-      largerDescription ? largerDescription : scrapedInfo.about,
+      betterDescription,
       scrapedInfo.retour,
     );
 
