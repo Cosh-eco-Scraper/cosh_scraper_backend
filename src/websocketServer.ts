@@ -1,10 +1,8 @@
-import { createServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
-import { app } from './app';
 import RabbitMQMiddleware from './middlewares/rabbitMQ';
 
-const server = createServer(app);
-const wss = new WebSocketServer({ server });
+const PORT = process.env.WS_PORT || 3002;
+const wss = new WebSocketServer({ port: Number(PORT) });
 
 const clients = new Set<WebSocket>();
 
@@ -25,8 +23,4 @@ RabbitMQMiddleware.receiveMessages((msg: string) => {
   broadcastToClients(msg);
 });
 
-// Start HTTP & WebSocket server
-const PORT = process.env.PORT || 3002;
-server.listen(PORT, () => {
-  console.log(`WebSocket running on port ${PORT}`);
-});
+console.log(`WebSocket server running on port ${PORT}`);
