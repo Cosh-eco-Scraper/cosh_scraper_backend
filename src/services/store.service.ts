@@ -83,6 +83,7 @@ export const StoreService = {
     - The city is mentioned in the beginning of the description.
     - One sentence should be about the store's concept.
     - One sentence about what makes the store unique compared to other stores, without explicitly stating that this makes the store unique. Just write about something unique about the store.
+    - One sentence about “find the brands they sell below” (for multibrands and possibly flagships, NOT for second-hand, workshops, ...).
     - The description should not mention discounts, online shopping, or sales.
 `;
 
