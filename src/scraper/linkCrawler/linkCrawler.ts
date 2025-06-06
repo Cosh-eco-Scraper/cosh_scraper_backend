@@ -35,10 +35,40 @@ const URL_BLACKLIST_PATTERNS: string[] = [
   '/wp-admin',
   '/wp-login.php',
   '/search', // Often large number of irrelevant URLs
+
+  // --- NEW AGGRESSIVE BLACKLIST PATTERNS to reduce crawl size ---
+  // These patterns target common URL structures for product pages, category listings, and blog content.
+  // They are applied *after* the explicit inclusion whitelist, so your 'winkel' pages will be safe.
+  '/product/', // Common for individual product detail pages (e.g., /product/abc-123)
+  '/products/', // Common for product listing/category pages (e.g., /products/electronics)
+  '/item/', // Another common identifier for individual items
+  '/detail/', // Common for product detail or article detail pages
+  '/category/', // Category listing pages (e.g., /category/shoes)
+  '/categories/',
+  '/collection/', // E-commerce collection pages
+  '/shop/', // General shop directories (be cautious if your desired 'winkels' pages contain this term, though 'explicitlyIncludedPaths' should protect them)
+  '/blog/', // Blog posts and listings (e.g., /blog/my-great-article)
+  '/news/', // News articles and listings
+  '/article/', // Generic article paths
+  '/post/', // Generic post paths
+  '/tag/', // Tag pages (often very numerous)
+  '/archive/', // Archive pages (e.g., blog archives by date)
+  '/events/', // Event pages (if not desired)
+  '/media/', // Common for image/video galleries or media assets
+  '/assets/', // Static assets, often not content pages
+  '/js/', // JavaScript files (though 'ALLOWED_PAGE_EXTENSIONS' also handles this)
+  '/css/', // CSS files
+  '/img/', // Image directories
+  '/image/',
+  '/download/', // Download links
+  '/pdf/', // PDF document paths
+  '.pdf', // Direct PDF file links (added to URL_BLACKLIST_PATTERNS as an alternative check)
+  '.xml', // XML files (sitemaps are handled by parseSitemap)
+  '.json', // JSON API endpoints
 ];
 
 // Whitelist approach: Only these extensions are considered crawlable "pages"
-// Focused on typical HTML-based content for text extraction.
+// TIGHTENED: Focusing strictly on typical HTML-based content for text extraction.
 const ALLOWED_PAGE_EXTENSIONS: string[] = [
   '', // For URLs with no extension (e.g., example.com/about)
   'html',
@@ -48,12 +78,13 @@ const ALLOWED_PAGE_EXTENSIONS: string[] = [
   'aspx',
   'jsp',
   'cfm',
-  // Removed other file types (pdf, doc, jpg, mp4, etc.) as they are typically not pages
-  // intended for direct text content scraping without specialized parsers.
-  // If you need to process these, consider adding specific logic for them elsewhere.
+  // Removed 'js', 'json', 'xml' - these are often for data or functionality, not content pages.
+  // If you need to scrape text from specific XML/JSON feeds, that's usually a separate process.
 ];
 
 // Query parameters that should be removed for normalization purposes
+// These are parameters that *do not* change the fundamental content of the page
+// but are used for tracking, sorting, or simple pagination.
 const IGNORED_QUERY_PARAMS: string[] = [
   'utm_source',
   'utm_medium',
@@ -78,12 +109,12 @@ const IGNORED_QUERY_PARAMS: string[] = [
   'cid',
   'variant',
   'v',
-  'page',
-  'p',
-  'sort',
+  'page', // If 'page' only indicates pagination on a listing, it's ignored for content uniqueness.
+  'p', // Same as 'page'
+  'sort', // Sorting parameters rarely change the *content* drastically, just the order.
   'order',
   'view',
-  'q',
+  'q', // Search query parameter. If /search is blacklisted, this is fine.
 ];
 
 // --- Helper Functions ---
@@ -103,6 +134,28 @@ function isValidUrlFormat(url: string): boolean {
   } catch (e) {
     return false;
   }
+}
+
+function isProductPage(url: string): boolean {
+  const productUrlPatterns = [
+    /\/product\/\S+/,
+    /\/products\/\S+/,
+    /\/shop\/\S+\/\S+/,
+    /\/item\/\S+/,
+    /\/[a-z0-9-]+\-p-(\d+)\.html/, // eslint-disable-line
+    /\/[a-z0-9-]+\-id-(\d+)\.html/, // eslint-disable-line
+    /\/[a-z0-9-]+\/dp\/\w+/,
+    /\/[a-zA-Z0-9-]+-\d+-\d+$/,
+    /\?.+/,
+  ];
+  for (const pattern of productUrlPatterns) {
+    if (pattern.test(url)) {
+      console.log(`  [DETECTED] Product page by URL pattern: "${pattern.source}"`);
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -164,28 +217,21 @@ function hasAllowedPageExtension(url: string): boolean {
 }
 
 function isBlacklistedUrl(url: string): boolean {
-  // This now checks against URL_BLACKLIST_PATTERNS
+  // This now checks against URL_BLACKLIST_PATTERNS using String.prototype.includes()
   const isBlacklisted = URL_BLACKLIST_PATTERNS.some((pattern) => url.includes(pattern));
   return isBlacklisted;
 }
 
-function shouldCrawlUrl(
-  url: string,
-  baseUrlOrigin: string,
-  robot: Robot,
-  visitedUrls: Set<string>,
-): boolean {
-  console.log(`\n--- [shouldCrawlUrl] Evaluating: ${url} ---`);
-
+function isValidUrl(url: string): boolean {
   // 0. Initial format check
   if (!isValidUrlFormat(url)) {
-    console.warn(`[shouldCrawlUrl] Reason: Invalid URL format. Skipping: ${url}`);
+    // console.warn(`[shouldCrawlUrl] Reason: Invalid URL format. Skipping: ${url}`);
     return false;
   }
 
   // Normalize after initial format check
   const normalizedUrl = normalizeUrl(url);
-  console.log(`[shouldCrawlUrl] Normalized: ${normalizedUrl}`);
+  // console.log(`[shouldCrawlUrl] Normalized: ${normalizedUrl}`);
 
   // 1. Basic non-web protocol/pseudo-link checks
   if (
@@ -195,17 +241,72 @@ function shouldCrawlUrl(
     normalizedUrl.startsWith('ftp:') ||
     normalizedUrl.startsWith('data:')
   ) {
-    console.warn(
-      `[shouldCrawlUrl] Reason: Non-web protocol or pseudo-link. Skipping: ${normalizedUrl}`,
-    );
+    // console.warn(`[shouldCrawlUrl] Reason: Non-web protocol or pseudo-link. Skipping: ${normalizedUrl}`);
+    return false;
+  }
+
+  const explicitlyIncludedPaths = [
+    /(winkels|winkels\/.+|contact|over-ons)\/?$/i, // Dutch: stores, contact, about us
+    /(geschaefte|filialen|standorte|kontakt|ueber-uns)\/?$/i, // German: stores, branches, locations, contact, about us
+    /(stores|locations|shops|contact|about-us)\/?$/i, // English: stores, locations, shops, contact, about us
+    /(magasins|boutiques|emplacements|contact|a-propos)\/?$/i, // French: stores, shops, locations, contact, about us
+    /(contact|about-us|over-ons)\/?$/i, // Root level common terms, if not language-specific
+  ];
+
+  const pathName = new URL(normalizedUrl).pathname;
+  if (explicitlyIncludedPaths.some((pattern) => pattern.test(pathName))) {
+    return true;
+  }
+
+  if (isBlacklistedUrl(normalizedUrl)) {
+    return false;
+  }
+
+  // 5. File extension check (only allow web pages, applies AFTER explicit inclusions)
+  if (!hasAllowedPageExtension(normalizedUrl)) {
+    return false;
+  }
+
+  if (isProductPage(normalizedUrl)) {
+    return false;
+  }
+
+  return true;
+}
+
+function shouldCrawlUrl(
+  url: string,
+  baseUrlOrigin: string,
+  robot: Robot,
+  visitedUrls: Set<string>,
+): boolean {
+  // console.log(`\n--- [shouldCrawlUrl] Evaluating: ${url} ---`); // Uncomment for verbose debugging
+
+  // 0. Initial format check
+  if (!isValidUrlFormat(url)) {
+    // console.warn(`[shouldCrawlUrl] Reason: Invalid URL format. Skipping: ${url}`);
+    return false;
+  }
+
+  // Normalize after initial format check
+  const normalizedUrl = normalizeUrl(url);
+  // console.log(`[shouldCrawlUrl] Normalized: ${normalizedUrl}`);
+
+  // 1. Basic non-web protocol/pseudo-link checks
+  if (
+    normalizedUrl.startsWith('javascript:') ||
+    normalizedUrl.startsWith('mailto:') ||
+    normalizedUrl.startsWith('tel:') ||
+    normalizedUrl.startsWith('ftp:') ||
+    normalizedUrl.startsWith('data:')
+  ) {
+    // console.warn(`[shouldCrawlUrl] Reason: Non-web protocol or pseudo-link. Skipping: ${normalizedUrl}`);
     return false;
   }
 
   // 2. Check if already visited (crucial for efficiency)
   if (visitedUrls.has(normalizedUrl)) {
-    console.warn(
-      `[shouldCrawlUrl] Reason: Already visited (after normalization). Skipping: ${normalizedUrl}`,
-    );
+    // console.warn(`[shouldCrawlUrl] Reason: Already visited (after normalization). Skipping: ${normalizedUrl}`);
     return false;
   }
 
@@ -213,21 +314,19 @@ function shouldCrawlUrl(
   try {
     const urlOrigin = new URL(normalizedUrl).origin;
     if (urlOrigin !== baseUrlOrigin) {
-      console.warn(
-        `[shouldCrawlUrl] Reason: Different origin. Skipping: ${normalizedUrl} (from ${baseUrlOrigin})`,
-      );
+      // console.warn(`[shouldCrawlUrl] Reason: Different origin. Skipping: ${normalizedUrl} (from ${baseUrlOrigin})`);
       return false;
     }
   } catch (e: any) {
-    console.warn(
-      `[shouldCrawlUrl] Reason: Unexpected URL parsing error for origin check. Skipping: ${normalizedUrl}. Error: ${e.message}`,
-    );
+    // console.warn(`[shouldCrawlUrl] Reason: Unexpected URL parsing error for origin check. Skipping: ${normalizedUrl}. Error: ${e.message}`);
     return false;
   }
 
-  // --- NEW: Explicit INCLUSION for known important paths (Whitelist) ---
+  // --- Explicit INCLUSION for known important paths (Whitelist) ---
   // This takes precedence over blacklists and extension checks below.
-  // Includes common terms for "store", "shop", "location", "about us", "contact" in multiple languages.
+  // Add specific patterns for pages you *definitely* want to crawl,
+  // such as store locators, contact pages, about pages, etc.
+  // These are often language-prefixed or have very specific structures.
   const explicitlyIncludedPaths = [
     /^\/nl\/(winkels|winkels\/.+|contact|over-ons)\/?$/i, // Dutch: stores, contact, about us
     /^\/de\/(geschaefte|filialen|standorte|kontakt|ueber-uns)\/?$/i, // German: stores, branches, locations, contact, about us
@@ -238,38 +337,34 @@ function shouldCrawlUrl(
 
   const pathName = new URL(normalizedUrl).pathname;
   if (explicitlyIncludedPaths.some((pattern) => pattern.test(pathName))) {
-    console.log(
-      `[shouldCrawlUrl] Reason: Explicitly whitelisted path. Including: ${normalizedUrl}`,
-    );
+    // console.log(`[shouldCrawlUrl] Reason: Explicitly whitelisted path. Including: ${normalizedUrl}`);
     visitedUrls.add(normalizedUrl); // Mark as visited and include
     return true;
   }
-  // --- END NEW ---
+  // --- END Explicit INCLUSION ---
 
   // 4. Blacklisted patterns (applies AFTER explicit inclusions)
+  // This is where generic undesirable paths are filtered out.
   if (isBlacklistedUrl(normalizedUrl)) {
-    console.warn(`[shouldCrawlUrl] Reason: Blacklisted pattern found. Skipping: ${normalizedUrl}`);
+    // console.warn(`[shouldCrawlUrl] Reason: Blacklisted pattern found. Skipping: ${normalizedUrl}`);
     return false;
   }
 
   // 5. File extension check (only allow web pages, applies AFTER explicit inclusions)
   if (!hasAllowedPageExtension(normalizedUrl)) {
-    console.warn(`[shouldCrawlUrl] Reason: Disallowed file extension. Skipping: ${normalizedUrl}`);
+    // console.warn(`[shouldCrawlUrl] Reason: Disallowed file extension. Skipping: ${normalizedUrl}`);
     return false;
   }
 
   // 6. Robots.txt checks (robot object is always available here, applies LAST)
   if (robot.isDisallowed(normalizedUrl)) {
-    console.warn(`[shouldCrawlUrl] Reason: Disallowed by robots.txt. Skipping: ${normalizedUrl}`);
+    // console.warn(`[shouldCrawlUrl] Reason: Disallowed by robots.txt. Skipping: ${normalizedUrl}`);
     return false;
   }
 
-  // If all checks pass and not explicitly included (already added to visitedUrls), add to visited set
-  // This means it passed all general filters.
+  // If all checks pass, add to visited set
   visitedUrls.add(normalizedUrl);
-  console.log(
-    `[shouldCrawlUrl] Status: PASSED ALL GENERAL CHECKS. Added to visitedUrls. Processing: ${normalizedUrl}`,
-  );
+  // console.log(`[shouldCrawlUrl] Status: PASSED ALL GENERAL CHECKS. Added to visitedUrls. Processing: ${normalizedUrl}`);
   return true;
 }
 
@@ -300,7 +395,7 @@ export async function parseSitemap(
     console.log(`[parseSitemap] Skipping already processed sitemap: ${normalizedSitemapUrl}`);
     return [];
   }
-  visitedUrls.add(normalizedSitemapUrl);
+  visitedUrls.add(normalizedSitemapUrl); // Mark sitemap URL itself as visited
   console.log(`[parseSitemap] Processing sitemap: ${normalizedSitemapUrl}`);
 
   try {
@@ -314,16 +409,22 @@ export async function parseSitemap(
     if (response.headers['content-encoding'] === 'gzip') {
       xmlString = await new Promise((resolve, reject) => {
         zlib.gunzip(response.data as Buffer, (err, dezipped) => {
-          if (err) return reject(new Error(`Gunzip error for ${sitemapUrl}: ${err.message}`));
+          if (err) {
+            return reject(new Error(`Gunzip error for ${sitemapUrl}: ${err.message}`));
+          }
           const unzippedData = dezipped.toString('utf8');
-          if (!unzippedData.trim())
+          if (!unzippedData.trim()) {
             reject(new Error(`Decompressed data for ${sitemapUrl} is empty.`));
-          else resolve(unzippedData);
+          } else {
+            resolve(unzippedData);
+          }
         });
       });
     } else {
       xmlString = response.data.toString('utf8');
-      if (!xmlString.trim()) throw new Error(`Response data for ${sitemapUrl} is empty.`);
+      if (!xmlString.trim()) {
+        throw new Error(`Response data for ${sitemapUrl} is empty.`);
+      }
     }
 
     const parser = new XMLParser({
@@ -362,10 +463,11 @@ export async function parseSitemap(
 
       for (const urlEntry of urls) {
         if (urlEntry.loc) {
+          // --- CHANGE: Filter URLs from sitemap directly here ---
           if (shouldCrawlUrl(urlEntry.loc, baseUrlOrigin, robot, visitedUrls)) {
             sitemapUrls.push(normalizeUrl(urlEntry.loc));
           } else {
-            console.log(`[parseSitemap] Skipping URL from sitemap (filter): ${urlEntry.loc}`);
+            // console.log(`[parseSitemap] Skipping URL from sitemap (filter): ${urlEntry.loc}`);
           }
         }
       }
@@ -390,8 +492,8 @@ export async function getAllValidUrls(url: string) {
   let maxLevel = parseInt(process.env.MAX_SCRAPER_LEVEL as string) || 3;
   let crawlerDelay = robot.getCrawlDelay(url) ?? 0;
   let delayMs = crawlerDelay * 1000 || parseInt(process.env.SCRAPER_DELAY as string, 10) || 1000;
-  const visitedUrls = new Set<string>();
-  const resultUrls: string[] = [];
+  const visitedUrls = new Set<string>(); // Tracks all URLs that have passed filters
+  const finalResultUrls: string[] = []; // Only stores URLs that should be returned
 
   console.log(`\n--- [getAllValidUrls] START Crawl for: ${url} ---`);
   console.log(`[getAllValidUrls] Base URL Origin: ${baseUrlOrigin}`);
@@ -405,10 +507,11 @@ export async function getAllValidUrls(url: string) {
       `[getAllValidUrls] Found sitemaps in robots.txt: ${sitemapUrlsFromRobots.join(', ')}`,
     );
     for (const sitemapUrl of sitemapUrlsFromRobots) {
+      // parseSitemap now only returns valid URLs thanks to its internal `shouldCrawlUrl` filter
       const urlsFromSitemap = await parseSitemap(sitemapUrl, visitedUrls, baseUrlOrigin, robot);
-      resultUrls.push(...urlsFromSitemap);
+      finalResultUrls.push(...urlsFromSitemap);
     }
-    console.log(`[getAllValidUrls] URLs from sitemaps initially added: ${resultUrls.length}`);
+    console.log(`[getAllValidUrls] URLs from sitemaps initially added: ${finalResultUrls.length}`);
   } else {
     console.log(`[getAllValidUrls] No sitemaps found in robots.txt.`);
   }
@@ -427,7 +530,7 @@ export async function getAllValidUrls(url: string) {
       visitedUrls,
       baseUrlOrigin,
     );
-    resultUrls.push(...crawledUrls);
+    finalResultUrls.push(...crawledUrls);
     console.log(`[getAllValidUrls] URLs from initial direct crawl added: ${crawledUrls.length}`);
   } else {
     console.log(
@@ -436,43 +539,51 @@ export async function getAllValidUrls(url: string) {
   }
 
   // 3. Process the URLs found in sitemaps to crawl their subpages
-  const sitemapUrlsToCrawlSubpages = Array.from(visitedUrls).filter((u) => {
-    const isAlreadyInResult = resultUrls.includes(u);
-    const isSameOrigin = new URL(u).origin === baseUrlOrigin;
-    const shouldProcess = !isAlreadyInResult && isSameOrigin;
-    return shouldProcess;
+  // This step ensures that any URLs discovered in sitemaps (which were valid
+  // and added to `visitedUrls`) also get their subpages crawled, if those
+  // subpages haven't been visited yet through the initial crawl path.
+  // IMPORTANT: We iterate `visitedUrls` (which has all valid URLs) and check
+  // if they are already in `finalResultUrls`. If not, it means they came from
+  // a sitemap *and* haven't been processed by `getUrlsFromPage` yet as a
+  // primary URL for recursion.
+  const sitemapDiscoveredUrlsToCrawl = Array.from(visitedUrls).filter((u) => {
+    // Only process URLs that are in `visitedUrls` (meaning they passed shouldCrawlUrl)
+    // but are NOT yet in `finalResultUrls` (meaning `getUrlsFromPage` hasn't run on them).
+    // This ensures we crawl deeper from sitemap roots without duplicating effort.
+    return !finalResultUrls.includes(u);
   });
 
   console.log(
-    `[getAllValidUrls] Initiating crawl for ${sitemapUrlsToCrawlSubpages.length} sitemap-discovered URLs for subpages.`,
+    `[getAllValidUrls] Initiating crawl for ${sitemapDiscoveredUrlsToCrawl.length} sitemap-discovered URLs for subpages.`,
   );
-  for (const sitemapDiscoveredUrl of sitemapUrlsToCrawlSubpages) {
+  for (const sitemapDiscoveredUrl of sitemapDiscoveredUrlsToCrawl) {
     console.log(
       `[getAllValidUrls] Starting getUrlsFromPage for sitemap URL: ${sitemapDiscoveredUrl}`,
     );
     const crawledSubUrls = await getUrlsFromPage(
       sitemapDiscoveredUrl,
-      currentLevel,
+      currentLevel + 1, // Treat these as next level crawls
       maxLevel,
       delayMs,
       robot,
       visitedUrls,
       baseUrlOrigin,
     );
-    resultUrls.push(...crawledSubUrls);
+    finalResultUrls.push(...crawledSubUrls);
     console.log(
       `[getAllValidUrls] Added ${crawledSubUrls.length} sub-URLs from sitemap URL ${sitemapDiscoveredUrl}`,
     );
   }
 
-  // --- CRITICAL CHANGE: Removed the .filter(IsLegalUrl) call ---
-  const finalResultUrls = Array.from(new Set(resultUrls)).sort();
+  // The final list is already filtered and unique as URLs are added only after `shouldCrawlUrl` check.
+  // A final `Set` conversion and sort ensure absolute uniqueness and order.
+  const uniqueSortedResultUrls = Array.from(new Set(finalResultUrls)).filter(isValidUrl).sort();
   console.log(`\n--- [getAllValidUrls] END Crawl ---`);
-  console.log(`[getAllValidUrls] Final count of valid unique URLs: ${finalResultUrls.length}`);
-  return finalResultUrls;
+  console.log(
+    `[getAllValidUrls] Final count of valid unique URLs: ${uniqueSortedResultUrls.length}`,
+  );
+  return uniqueSortedResultUrls;
 }
-
-// --- REMOVED THE IsLegalUrl FUNCTION DEFINITION ENTIRELY ---
 
 async function getUrlsFromPage(
   url: string,
@@ -480,10 +591,11 @@ async function getUrlsFromPage(
   maxLevel: number,
   delayMs: number,
   robot: Robot,
-  visitedUrls: Set<string>,
+  visitedUrls: Set<string>, // Passed to ensure `shouldCrawlUrl` has context
   baseUrlOrigin: string,
 ) {
-  const result: string[] = [];
+  const resultForThisBranch: string[] = []; // URLs found in this branch of recursion
+
   const normalizedUrl = normalizeUrl(url);
 
   console.log(
@@ -495,47 +607,47 @@ async function getUrlsFromPage(
     console.warn(
       `[getUrlsFromPage] Reason: Reached max level (${maxLevel}). Skipping: ${normalizedUrl}`,
     );
-    return result;
+    return resultForThisBranch;
   }
 
-  if (!visitedUrls.has(normalizedUrl)) {
+  // Ensure the current URL itself is added to results for this branch if it was valid
+  // It must already be in `visitedUrls` before `getUrlsFromPage` is called.
+  if (visitedUrls.has(normalizedUrl) && !resultForThisBranch.includes(normalizedUrl)) {
+    resultForThisBranch.push(normalizedUrl);
+    // console.log(`[getUrlsFromPage] Added ${normalizedUrl} to current page's branch result.`);
+  } else if (!visitedUrls.has(normalizedUrl)) {
     console.error(
       `[getUrlsFromPage] ERROR: URL ${normalizedUrl} should be in visitedUrls but isn't! This indicates a logic error.`,
     );
+    // Add to visitedUrls for safety, though it should have been added by shouldCrawlUrl
     visitedUrls.add(normalizedUrl);
   }
 
-  if (!result.includes(normalizedUrl)) {
-    result.push(normalizedUrl);
-    console.log(`[getUrlsFromPage] Added ${normalizedUrl} to current page's result.`);
-  }
-
-  console.log(`[getUrlsFromPage] Fetching child URLs from: ${normalizedUrl}`);
-  let childUrls = await getUrlsFromUrl(normalizedUrl);
-  console.log(
-    `[getUrlsFromPage] Found ${childUrls.length} raw child URLs from HTML of ${normalizedUrl}`,
-  );
+  // console.log(`[getUrlsFromPage] Fetching child URLs from: ${normalizedUrl}`);
+  let childUrlsRaw = await getUrlsFromUrl(normalizedUrl);
+  // console.log( `[getUrlsFromPage] Found ${childUrlsRaw.length} raw child URLs from HTML of ${normalizedUrl}`);
 
   await logDelay(delayMs);
 
-  const newChildUrlsToProcess = new Set<string>();
-  for (const childUrlCandidate of childUrls) {
+  const validChildUrlsToRecurse = new Set<string>();
+  for (const childUrlCandidate of childUrlsRaw) {
     if (!isValidUrlFormat(childUrlCandidate)) {
-      console.warn(`[getUrlsFromPage] Skipping malformed child URL: ${childUrlCandidate}`);
+      // console.warn(`[getUrlsFromPage] Skipping malformed child URL: ${childUrlCandidate}`);
       continue;
     }
     const absoluteChildUrl = new URL(childUrlCandidate, normalizedUrl).toString();
+    // CRITICAL FILTER: Only process and add to `resultForThisBranch` if `shouldCrawlUrl` allows it.
     if (shouldCrawlUrl(absoluteChildUrl, baseUrlOrigin, robot, visitedUrls)) {
-      newChildUrlsToProcess.add(absoluteChildUrl);
+      validChildUrlsToRecurse.add(absoluteChildUrl);
     } else {
-      // console.log(`[getUrlsFromPage] Child URL skipped by filter: ${absoluteChildUrl}`);
+      // console.log(`[getUrlsFromPage] Child URL skipped by filter: ${absoluteChildUrl}`); // Uncomment for detailed debugging
     }
   }
 
-  console.log(
-    `[getUrlsFromPage] Processing ${newChildUrlsToProcess.size} unique & valid child URLs for recursion from ${normalizedUrl}.`,
-  );
-  const recursiveCrawlPromises = Array.from(newChildUrlsToProcess).map(async (validChildUrl) => {
+  // console.log(
+  //   `[getUrlsFromPage] Processing ${validChildUrlsToRecurse.size} unique & valid child URLs for recursion from ${normalizedUrl}.`,
+  // );
+  const recursiveCrawlPromises = Array.from(validChildUrlsToRecurse).map(async (validChildUrl) => {
     return await getUrlsFromPage(
       validChildUrl,
       currentLevel + 1,
@@ -548,18 +660,17 @@ async function getUrlsFromPage(
   });
 
   const validChildUrlsFromRecursion = (await Promise.all(recursiveCrawlPromises)).flat();
-  result.push(...validChildUrlsFromRecursion);
+  resultForThisBranch.push(...validChildUrlsFromRecursion);
 
   console.log(
-    `--- [getUrlsFromPage] END Processing: ${normalizedUrl}. Returning ${result.length} URLs. ---\n`,
+    `--- [getUrlsFromPage] END Processing: ${normalizedUrl}. Returning ${Array.from(new Set(resultForThisBranch)).length} URLs for this branch.---\n`,
   );
-  return Array.from(new Set(result));
+  return Array.from(new Set(resultForThisBranch)); // Return unique URLs for this branch
 }
 
-// getUrlsFromUrl (Axios/Cheerio based) remains the same
 async function getUrlsFromUrl(url: string): Promise<string[]> {
   try {
-    console.log(`[getUrlsFromUrl] Attempting to fetch HTML from: ${url}`);
+    // console.log(`[getUrlsFromUrl] Attempting to fetch HTML from: ${url}`);
     const res = await axios.get(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LinkCrawler/1.0)' },
       timeout: 15000,
@@ -568,12 +679,12 @@ async function getUrlsFromUrl(url: string): Promise<string[]> {
 
     const contentType = res.headers['content-type'] || '';
     if (!contentType.includes('text/html')) {
-      console.warn(
-        `[getUrlsFromUrl] Skipping non-HTML content for ${url}: Content-Type: ${contentType}`,
-      );
+      // console.warn(
+      //   `[getUrlsFromUrl] Skipping non-HTML content for ${url}: Content-Type: ${contentType}`,
+      // );
       return [];
     }
-    console.log(`[getUrlsFromUrl] Successfully fetched HTML for: ${url}`);
+    // console.log(`[getUrlsFromUrl] Successfully fetched HTML for: ${url}`);
 
     const $ = cheerio.load(res.data);
     const baseUrl = new URL(url);
@@ -598,9 +709,7 @@ async function getUrlsFromUrl(url: string): Promise<string[]> {
       })
       .get()
       .filter(Boolean) as string[];
-    console.log(
-      `[getUrlsFromUrl] Finished extracting links from ${url}. Found ${extractedUrls.length} raw links.`,
-    );
+    // console.log( `[getUrlsFromUrl] Finished extracting links from ${url}. Found ${extractedUrls.length} raw links.`);
     return extractedUrls;
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
@@ -626,10 +735,10 @@ async function getUrlsFromUrl(url: string): Promise<string[]> {
 
 async function logDelay(delayMs: number) {
   if (delayMs > 0) {
-    console.log(`[logDelay] Waiting ${delayMs} ms...`);
+    // console.log(`[logDelay] Waiting ${delayMs} ms...`);
     await delay(delayMs);
-    console.log(`[logDelay] Resumed.`);
+    // console.log(`[logDelay] Resumed.`);
   } else {
-    console.log(`[logDelay] No delay (0ms).`);
+    // console.log(`[logDelay] No delay (0ms).`);
   }
 }
