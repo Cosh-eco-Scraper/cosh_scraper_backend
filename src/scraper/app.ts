@@ -278,6 +278,8 @@ export async function run(baseURL: string, location: string) {
   const finalSnippetsForSummarizeAI: string[] = [];
   for (const [keyword, consolidatedContent] of Object.entries(summarizedSiteWideKeywordData)) {
     // Prefix with keyword to help the final AI model understand context
+    console.log(`consolidatedContent for ${keyword}:\n ${consolidatedContent}\n\n`);
+
     finalSnippetsForSummarizeAI.push(
       `**Consolidated ${keyword} Information:**\n${consolidatedContent}`,
     );
@@ -336,30 +338,60 @@ function filterAndPrioritizeContexts(
     case 'weekdays':
     case 'weekends':
     case 'public holidays':
+    case 'openingstijden':
+    case 'openingsuren':
+    case 'öffnungszeiten':
+    case "heures d'ouverture":
+    case 'maandag':
+    case 'dinsdag':
+    case 'woensdag':
+    case 'donderdag':
+    case 'vrijdag':
+    case 'zaterdag':
+    case 'zondag':
+    case 'montag':
+    case 'dienstag':
+    case 'mittwoch':
+    case 'donnerstag':
+    case 'freitag':
+    case 'samstag':
+    case 'sonntag':
+    case 'lundi':
+    case 'mardi':
+    case 'mercredi':
+    case 'jeudi':
+    case 'vendredi':
+    case 'samedi':
+    case 'dimanche':
       return uniqueContexts
         .filter((context) => context.toLowerCase().includes(location.toLowerCase())) // Prioritize location-specific hours
         .sort((a, b) => {
-          const days = [
-            'monday',
-            'tuesday',
-            'wednesday',
-            'thursday',
-            'friday',
-            'saturday',
-            'sunday',
-          ];
-          const countDays = (text: string) =>
-            days.filter((day) => text.toLowerCase().includes(day)).length;
+          const days = {
+            en: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+            nl: ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'],
+            fr: ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'],
+            de: ['montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag', 'sonntag'],
+          };
+          const countDays = (text: string) => {
+            let count = 0;
+            for (const lang of Object.values(days)) {
+              for (const day of lang) {
+                if (text.toLowerCase().includes(day)) {
+                  count++;
+                }
+              }
+            }
+            return count;
+          };
           return countDays(b) - countDays(a); // Sort by number of days mentioned (more complete)
         })
-        .slice(0, 5); // Take top 5
+        .slice(0, 10); // Take top 10
     case 'address':
     case 'location':
     case 'find us':
     case 'visit us':
     case 'directions':
     case 'street':
-    case 'avenue':
     case 'road':
     case 'lane':
     case 'place':
@@ -367,10 +399,32 @@ function filterAndPrioritizeContexts(
     case 'zip code':
     case 'postal code':
     case 'country':
+    case 'adres':
+    case 'locatie':
+    case 'bezoek ons':
+    case 'straat':
+    case 'laan':
+    case 'weg':
+    case 'plaats':
+    case 'stad':
+    case 'postcode':
+    case 'adresse':
+    case 'emplacement':
+    case 'rue':
+    case 'avenue':
+    case 'ville':
+    case 'code postal':
+    case 'pays':
+    case 'anschrift':
+    case 'standort':
+    case 'straße':
+    case 'stadt':
+    case 'postleitzahl':
+    case 'land':
       return uniqueContexts
         .filter((context) => context.toLowerCase().includes(location.toLowerCase()))
         .sort((a, b) => b.length - a.length) // Prefer longer, more complete addresses
-        .slice(0, 3); // Take top 3
+        .slice(0, 10); // Take top 10
     case 'about us':
     case 'our story':
     case 'company profile':
@@ -390,14 +444,60 @@ function filterAndPrioritizeContexts(
     case 'how to return':
     case 'eligibility':
     case 'process':
+    case 'over ons':
+    case 'ons verhaal':
+    case 'bedrijfsprofiel':
+    case 'wie zijn wij':
+    case 'onze missie':
+    case 'onze visie':
+    case 'geschiedenis':
+    case 'retourbeleid':
+    case 'retouren':
+    case 'terugbetalingen':
+    case 'garantie':
+    case 'voorwaarden':
+    case 'à propos de nous':
+    case 'notre histoire':
+    case 'profil de la société':
+    case 'qui sommes-nous':
+    case 'notre mission':
+    case 'notre vision':
+    case 'histoire':
+    case 'politique de retour':
+    case 'retours':
+    case 'remboursements':
+    case 'conditions':
+    case 'über uns':
+    case 'unsere geschichte':
+    case 'unternehmensprofil':
+    case 'wer wir sind':
+    case 'unsere mission':
+    case 'unsere vision':
+    case 'geschichte':
+    case 'rückgaberecht':
+    case 'rückgaben':
+    case 'erstattungen':
+    case 'bedingungen':
       return uniqueContexts.sort((a, b) => b.length - a.length).slice(0, 3); // Prefer longer, more descriptive texts
     case 'brands':
     case 'our brands':
     case 'featured brands':
     case 'brand list':
+    case 'merken':
+    case 'onze merken':
+    case 'marques':
+    case 'nos marques':
+    case 'marken':
+    case 'unsere marken':
       return uniqueContexts; // All unique brands are relevant
     case 'store name':
     case 'company':
+    case 'winkel naam':
+    case 'bedrijf':
+    case 'nom du magasin':
+    case 'entreprise':
+    case 'laden name':
+    case 'firma':
       return uniqueContexts
         .filter(
           (context) =>
@@ -405,15 +505,35 @@ function filterAndPrioritizeContexts(
             context.split(/\s+/).length < 10,
         )
         .sort((a, b) => a.length - b.length) // Prefer shorter, more direct names
-        .slice(0, 2); // Take top 2
+        .slice(0, 10); // Take top 10
     case 'categories':
     case 'shop by':
     case 'departments':
     case 'products':
     case 'what we sell':
-    case 'services':
     case 'specialties':
-      return uniqueContexts.slice(0, 3); // Take a few relevant types/categories
+    case 'categorieën':
+    case 'winkelen per':
+    case 'afdelingen':
+    case 'producten':
+    case 'wat we verkopen':
+    case 'diensten':
+    case 'specialiteiten':
+    case 'catégories':
+    case 'acheter par':
+    case 'départements':
+    case 'produits':
+    case 'ce que nous vendons':
+    case 'services':
+    case 'spécialités':
+    case 'kategorien':
+    case 'einkaufen nach':
+    case 'abteilungen':
+    case 'produkte':
+    case 'was wir verkaufen':
+    case 'dienstleistungen':
+    case 'spezialitäten':
+      return uniqueContexts.slice(0, 10);
     default:
       return uniqueContexts.sort((a, b) => b.length - a.length).slice(0, 5); // General fallback
   }
