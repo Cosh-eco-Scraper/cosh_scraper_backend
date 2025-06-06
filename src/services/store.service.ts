@@ -5,6 +5,7 @@ import OpeningHoursService from './openingshours.service';
 import LocationService from './location.service';
 import storeBrandsService from './storeBrands.service';
 import { LLMService } from './llm.service';
+import getRobotParser from '../scraper/robot/robot';
 
 export const StoreService = {
   getAllStores: async () => {
@@ -17,8 +18,13 @@ export const StoreService = {
 
     return store;
   },
-  updateStore: async (storeId: number, name: string, description?: string): Promise<number> => {
-    const result = await StoreRepository.updateStore(storeId, name, description);
+  updateStore: async (
+    storeId: number,
+    name: string,
+    retour: string,
+    description?: string,
+  ): Promise<number> => {
+    const result = await StoreRepository.updateStore(storeId, name, description, retour);
     return result;
   },
   getOpeningsHoursByStoreId: async (id: number) => {
@@ -38,7 +44,16 @@ export const StoreService = {
   },
 
   createCompleteStore: async (name: string, URL: string, location: string) => {
+    // eslint-disable-next-line no-undef
+    const startTime = performance.now();
     const scrapedInfo = await run(URL, location);
+    // eslint-disable-next-line no-undef
+    const endTime = performance.now();
+    const executionTime = endTime - startTime;
+    const minutes = Math.floor(executionTime / 60000);
+    const seconds = Math.floor((executionTime % 60000) / 1000);
+    const milliseconds = Math.floor(executionTime % 1000);
+    console.log(`Execution time: ${minutes}min ${seconds}s ${milliseconds}ms`);
 
     if (!scrapedInfo) {
       throw new Error('Failed to scrape store information');
@@ -69,6 +84,7 @@ export const StoreService = {
       name,
       locationObj.id,
       largerDescription ? largerDescription : scrapedInfo.about,
+      scrapedInfo.retour,
     );
 
     if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
@@ -93,8 +109,6 @@ export const StoreService = {
         await storeBrandsService.addBrandToStore(store.id, brand.id);
       }
     }
-
-    // Retour field still has to be handled
 
     return store;
   },
