@@ -666,25 +666,6 @@
         }
       }
     },
-    "/statements/random": {
-      "get": {
-        "tags": ["Statements"],
-        "summary": "Get a random statement",
-        "description": "Fetches a random statement from the database.",
-        "produces": ["application/json"],
-        "responses": {
-          "200": {
-            "description": "A random statement",
-            "schema": {
-              "$ref": "#/definitions/Statement"
-            }
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
     "/statements/{id}": {
       "get": {
         "tags": ["Statements"],
