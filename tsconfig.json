@@ -9,7 +9,7 @@
     "strict": true,
     "skipLibCheck": true,
     "rootDir": ".",
-    "sourceMap": true,
+    "sourceMap": true
     // <--- ADDED: Specifies the root directory of your source files
   },
   "include": [
