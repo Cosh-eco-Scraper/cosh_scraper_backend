@@ -1,4 +1,5 @@
 import { Router } from 'express';
+
 import {
   getAllStatements,
   getRandomStatement,
@@ -7,9 +8,7 @@ import {
 const router = Router();
 
 router.get('/', getAllStatements);
-
-router.get('/random', getRandomStatement);
-
 router.get('/:id', getStatementById);
+router.get('/random', getRandomStatement);
 
 export default router;
