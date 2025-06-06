@@ -13,6 +13,7 @@ const sendPrompt = async (prompt: string): Promise<string | undefined> => {
   let backOffTime = 1000;
 
   console.log(`[AI] waiting for ${minDelay}ms before sending prompt.`);
+  // eslint-disable-next-line no-undef
   await new Promise((resolve) => setTimeout(resolve, minDelay));
 
   let retry: boolean = true;
@@ -45,6 +46,7 @@ const sendPrompt = async (prompt: string): Promise<string | undefined> => {
           specificRetryDelay > 0 ? specificRetryDelay : backOffTime * Math.pow(2, backOffAmount);
         console.log(`[AI] Backing off for: ${currentDelay}ms`);
 
+        // eslint-disable-next-line no-undef
         await new Promise((resolve) => setTimeout(resolve, currentDelay));
 
         // Increase backOffAmount for next retry if API didn't provide a specific delay

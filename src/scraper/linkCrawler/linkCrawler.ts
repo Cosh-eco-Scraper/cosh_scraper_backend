@@ -131,7 +131,7 @@ function isValidUrlFormat(url: string): boolean {
   try {
     new URL(url);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
@@ -317,7 +317,7 @@ function shouldCrawlUrl(
       // console.warn(`[shouldCrawlUrl] Reason: Different origin. Skipping: ${normalizedUrl} (from ${baseUrlOrigin})`);
       return false;
     }
-  } catch (e: any) {
+  } catch {
     // console.warn(`[shouldCrawlUrl] Reason: Unexpected URL parsing error for origin check. Skipping: ${normalizedUrl}. Error: ${e.message}`);
     return false;
   }
@@ -408,6 +408,7 @@ export async function parseSitemap(
     let xmlString: string;
     if (response.headers['content-encoding'] === 'gzip') {
       xmlString = await new Promise((resolve, reject) => {
+        // eslint-disable-next-line no-undef
         zlib.gunzip(response.data as Buffer, (err, dezipped) => {
           if (err) {
             return reject(new Error(`Gunzip error for ${sitemapUrl}: ${err.message}`));

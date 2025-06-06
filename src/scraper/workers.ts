@@ -43,7 +43,7 @@ type WorkerToMainMessage =
 
 // Destructure workerData. location is now used to pass to scraper if needed,
 // but remember the scraper function itself doesn't currently accept it.
-const { location, delayMs } = workerData as { location: string; delayMs: number };
+const { delayMs } = workerData as { delayMs: number };
 
 let browser: Browser | null = null;
 let isShuttingDown = false; // Flag to prevent new tasks during shutdown
@@ -81,6 +81,7 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
           const result: ScraperResult = await scraper(url, currentPage); // Passed URL and Page
 
           // Add a delay between scrapes to respect crawl-delay and avoid overwhelming the server
+          // eslint-disable-next-line no-undef
           await new Promise((resolve) => setTimeout(resolve, delayMs));
 
           // Send the result back using the 'keywordContexts' property name

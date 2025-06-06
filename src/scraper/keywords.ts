@@ -1,6 +1,4 @@
 // keywords.ts
-import { ScrapedInfo } from './domain/ScrapedInfo'; // Assuming this path is correct
-
 type KeywordConfig = {
   keywords: string[];
   wordsBeforeMap?: Record<string, number>;
