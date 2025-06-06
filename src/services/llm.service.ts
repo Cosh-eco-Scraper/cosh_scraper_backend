@@ -17,7 +17,7 @@ const sendPrompt = async (prompt: string): Promise<string | undefined> => {
 const descriptionGenerator = async (prompt: string): Promise<string | undefined> => {
   const response = await ai.models.generateContent({
     config: {
-      temperature: 0,
+      temperature: 0.2,
     },
     model: 'gemini-2.0-flash',
     contents: prompt,
