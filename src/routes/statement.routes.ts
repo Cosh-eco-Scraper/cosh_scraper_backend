@@ -1,7 +1,15 @@
 import { Router } from 'express';
-import { getRandomStatement } from '../controllers/statement.controller';
+import {
+  getAllStatements,
+  getRandomStatement,
+  getStatementById,
+} from '../controllers/statement.controller';
 const router = Router();
 
-router.get('/', getRandomStatement);
+router.get('/', getAllStatements);
+
+router.get('/random', getRandomStatement);
+
+router.get('/:id', getStatementById);
 
 export default router;
