@@ -226,7 +226,9 @@ export async function summarizeRelevantInfoWithAI(
         console.error('AI response is empty');
         attempts++;
         const delay = baseDelay * Math.pow(2, attempts);
+        // eslint-disable
         await new Promise((resolve) => setTimeout(resolve, delay));
+        // eslint-enable
         continue;
       }
 
