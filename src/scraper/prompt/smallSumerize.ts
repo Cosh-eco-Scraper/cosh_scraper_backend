@@ -26,6 +26,8 @@ You know that not all information is relevant to the keyword, and that some info
 
 **Current Location:** ${location}
 
+**personality: you are very keen on the right information that's why you will always double check the website (${url}) before you start**
+
 **Specific Instructions for "${keyword}":**
 
 ${getSpecificInstructions(keyword)}
@@ -76,15 +78,19 @@ function getSpecificInstructions(keyword: string): string {
     case 'closed':
     case 'business hours':
     case 'schedule':
+    case 'weekdays':
+    case 'weekends':
+    case 'public holidays':
+    case 'from':
+    case 'to':
+    case 'and':
+    case 'appointments':
       return `
-      Extract ALL opening and closing hours for EACH day of the week (Monday-Sunday).
+      Extract ALL opening and closing hours for EACH day of the week (Monday-Sunday) for a location.
       If days are listed like "monday - friday", then the hours are listed for each day separately, monday til friday in this case.
       If days are not listed, assume they are closed that day.
       Note any lunch breaks or split hours.
       If a day is closed, state "closed".
-      If times are ambiguous, include all possibilities or indicate ambiguity.
-      Example: "Monday: 09:00-12:00, 14:00-18:00; Tuesday: 10:00-18:00; Sunday: Closed."
-      if they are different per location embed them into brackets for example
       Note: if any day is writen in short form (e.g., "Mon") use the full name (e.g., "Monday").
         some more examples:
         * "mon" becomes "Monday"
@@ -95,7 +101,7 @@ function getSpecificInstructions(keyword: string): string {
         * "sat" becomes "Saturday"
         * "sun" becomes "Sunday"
       This will work the same for other languages.
-      list every opening and closing hours in a table per city
+      return every opening and closing hours in a table per city
       example:
       "
       Leuven, Belgium:
@@ -118,14 +124,34 @@ function getSpecificInstructions(keyword: string): string {
     case 'stores':
     case 'shop':
     case 'shops':
+    case 'street':
+    case 'avenue':
+    case 'road':
+    case 'lane':
+    case 'place':
+    case 'suite':
+    case 'apt':
+    case 'unit':
+    case 'city':
+    case 'state':
+    case 'province':
+    case 'zip code':
+    case 'postal code':
+    case 'country':
       return `
       Extract the complete street address including street name, house number, postal code, city, and country.
       If multiple addresses are present for the *same* store, prioritize the most detailed one.
-      If a specific store location (e.g., "Brasschaat") is mentioned, only extract information for that location's address.
+      If a specific store location (e.g., "Amsterdam") is mentioned, only extract information for that location's address.
       Example: "Burgemeester de Vlugtlaan 125, 1063 Amsterdam, Netherlands."
       `;
     case 'brands':
     case 'brand':
+    case 'our brands':
+    case 'featured brands':
+    case 'brand list':
+    case 'designers':
+    case 'collections':
+    case 'products by brand':
       return `
       Extract all distinct brand names mentioned.
       List them as a comma-separated string.
@@ -134,7 +160,6 @@ function getSpecificInstructions(keyword: string): string {
     case 'about':
     case 'about us':
     case 'intro':
-    case 'company':
     case 'our story':
     case 'mission':
     case 'vision':
@@ -143,6 +168,8 @@ function getSpecificInstructions(keyword: string): string {
     case 'staff':
     case 'history':
     case 'what we do':
+    case 'company profile':
+    case 'who we are':
       return `
       Consolidate all factual information about the company's history, mission, values, services, and general description into a single, coherent paragraph.
       Focus on core facts and purpose.
@@ -159,17 +186,75 @@ function getSpecificInstructions(keyword: string): string {
     case 'guarantee':
     case 'disclaimer':
     case 'cancellation':
+    case 'return policy':
+    case 'refunds':
+    case 'exchanges':
+    case 'shipping & returns':
+    case 'customer service':
+    case 'how to return':
+    case 'eligibility':
+    case 'process':
       return `
       Consolidate all essential details about the return policy, exchange policy, refund terms, shipping options, delivery times, and warranty information.
       Be concise but include all key conditions (e.g., "30-day return window", "free shipping over $50", "proof of purchase required").
       `;
-    case 'type': // This keyword is less about finding "types" directly in text, more about inferring from overall context
+    case 'type':
+    case 'categories':
+    case 'shop by':
+    case 'departments':
+    case 'products':
+    case 'what we sell':
+    case 'services':
+    case 'specialties':
+    case 'electronics':
+    case 'fashion':
+    case 'clothing':
+    case 'apparel':
+    case 'footwear':
+    case 'jewelry':
+    case 'home goods':
+    case 'furniture':
+    case 'decor':
+    case 'groceries':
+    case 'food':
+    case 'books':
+    case 'sporting goods':
+    case 'outdoor':
+    case 'hardware':
+    case 'tools':
+    case 'pharmacy':
+    case 'beauty':
+    case 'cosmetics':
+    case 'automotive':
+    case 'kids':
+    case 'toys':
+    case 'pet supplies':
+    case 'gifts':
+    case 'art':
+    case 'crafts':
+    case 'music':
+    case 'movies':
+    case 'video games':
+    case 'health':
+    case 'wellness':
+    case 'fitness':
+    case 'baby & kids':
+    case 'bags & luggage':
+    case 'general merchandise':
+    case 'office supplies':
+    case 'repair':
+    case 'second-hand':
+    case 'specialty food & drink':
+    case 'service provider':
       return `
       Based on the snippets provided, infer the primary business type(s) of the shop.
       Choose from: Repair, Second-Hand, Clothing, Footwear, Accessories, Grocery, Specialty Food & Drink, Home Goods, Hardware & Garden, Pet Supplies, Book & Media, Hobby & Toy, Health & Beauty, General Merchandise, Service Provider, Bags & Luggage, Jewelry, Electronics, Sports & Outdoor, Art & Craft, Office Supplies, Wellness & Fitness, Baby & Kids, Decor, Gifts & Lifestyle.
       If multiple types apply, list them comma-separated.
       `;
     case 'name':
+    case 'welcome to':
+    case 'our shop':
+    case 'company':
       return `
       Extract the official name of the shop. If multiple stores are mentioned, identify the name of the store specific to the provided location if discernable.
       `;

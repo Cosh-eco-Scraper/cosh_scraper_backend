@@ -1,3 +1,5 @@
+// linkCrawler/linkCrawler.ts
+
 import getRobotParser, { Robot } from '../robot/robot';
 import { delay } from '../misc/misc';
 import axios from 'axios';
@@ -8,64 +10,335 @@ import zlib from 'zlib';
 
 dotenv.config();
 
+// --- Configuration for URL Filtering ---
+const URL_BLACKLIST_PATTERNS: string[] = [
+  '#', // Internal anchors (should be filtered earlier, but good safety)
+  'javascript:', // Javascript pseudo-links
+  'mailto:', // Mailto links
+  'tel:', // Telephone links
+  'ftp:', // FTP links
+  '/login',
+  '/signin',
+  '/signup',
+  '/register',
+  '/cart',
+  '/checkout',
+  '/privacy-policy',
+  '/terms-of-service',
+  '/legal',
+  '/cookie-policy',
+  '/sitemap.xml', // Already handled by robots.txt discovery, no need to crawl as page
+  '/feed', // RSS feeds
+  '/rss',
+  '/atom',
+  '/xmlrpc.php',
+  '/wp-admin',
+  '/wp-login.php',
+  '/search', // Often large number of irrelevant URLs
+];
+
+// Whitelist approach: Only these extensions are considered crawlable "pages"
+// Focused on typical HTML-based content for text extraction.
+const ALLOWED_PAGE_EXTENSIONS: string[] = [
+  '', // For URLs with no extension (e.g., example.com/about)
+  'html',
+  'htm',
+  'php',
+  'asp',
+  'aspx',
+  'jsp',
+  'cfm',
+  // Removed other file types (pdf, doc, jpg, mp4, etc.) as they are typically not pages
+  // intended for direct text content scraping without specialized parsers.
+  // If you need to process these, consider adding specific logic for them elsewhere.
+];
+
+// Query parameters that should be removed for normalization purposes
+const IGNORED_QUERY_PARAMS: string[] = [
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_term',
+  'utm_content',
+  'sessionid',
+  'sid',
+  'ref',
+  'referrer',
+  '_ga',
+  '_gl',
+  '_hsmi',
+  '_hsenc',
+  'gclid',
+  'fbclid',
+  's_kwcid',
+  'mc_cid',
+  'mc_eid',
+  '_kx',
+  'g_acct',
+  'cid',
+  'variant',
+  'v',
+  'page',
+  'p',
+  'sort',
+  'order',
+  'view',
+  'q',
+];
+
+// --- Helper Functions ---
+
+/**
+ * Checks if a string is a syntactically valid URL.
+ * @param url The string to check.
+ * @returns True if the string can be parsed as a URL, false otherwise.
+ */
+function isValidUrlFormat(url: string): boolean {
+  if (!url || typeof url !== 'string' || url.trim() === '') {
+    return false;
+  }
+  try {
+    new URL(url);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Normalizes a URL by converting to lowercase, removing ignored query parameters,
+ * and standardizing trailing slashes and hash fragments.
+ * @param url The URL string to normalize.
+ * @returns The normalized URL string, or the original (lowercase) if normalization fails.
+ */
+function normalizeUrl(url: string): string {
+  if (!isValidUrlFormat(url)) {
+    console.warn(
+      `[normalizeUrl] Input URL is not a valid format, returning lowercase original: '${url}'`,
+    );
+    return url.toLowerCase();
+  }
+  try {
+    const urlObj = new URL(url);
+    urlObj.hash = ''; // Remove hash fragment
+    // Remove trailing slash if not root and no extension
+    if (
+      urlObj.pathname.endsWith('/') &&
+      urlObj.pathname.length > 1 &&
+      !urlObj.pathname.includes('.')
+    ) {
+      urlObj.pathname = urlObj.pathname.slice(0, -1);
+    }
+    const newSearchParams = new URLSearchParams();
+    urlObj.searchParams.forEach((value, key) => {
+      if (!IGNORED_QUERY_PARAMS.includes(key.toLowerCase())) {
+        newSearchParams.append(key, value);
+      }
+    });
+    urlObj.search = newSearchParams.toString();
+    urlObj.searchParams.sort();
+    return urlObj.toString().toLowerCase();
+  } catch (e: any) {
+    console.warn(`[normalizeUrl] Failed to normalize URL: ${url}. Error: ${e.message}`);
+    return url.toLowerCase(); // Fallback to lowercase only
+  }
+}
+
+function hasAllowedPageExtension(url: string): boolean {
+  if (!isValidUrlFormat(url)) {
+    return false;
+  }
+  try {
+    const urlObj = new URL(url);
+    const path = urlObj.pathname;
+    const lastDotIndex = path.lastIndexOf('.');
+    if (lastDotIndex === -1 || lastDotIndex < path.lastIndexOf('/')) {
+      return ALLOWED_PAGE_EXTENSIONS.includes(''); // Check for URLs with no extension
+    }
+    const extension = path.substring(lastDotIndex + 1).toLowerCase();
+    const isAllowed = ALLOWED_PAGE_EXTENSIONS.includes(extension);
+    return isAllowed;
+  } catch {
+    return false;
+  }
+}
+
+function isBlacklistedUrl(url: string): boolean {
+  // This now checks against URL_BLACKLIST_PATTERNS
+  const isBlacklisted = URL_BLACKLIST_PATTERNS.some((pattern) => url.includes(pattern));
+  return isBlacklisted;
+}
+
+function shouldCrawlUrl(
+  url: string,
+  baseUrlOrigin: string,
+  robot: Robot,
+  visitedUrls: Set<string>,
+): boolean {
+  console.log(`\n--- [shouldCrawlUrl] Evaluating: ${url} ---`);
+
+  // 0. Initial format check
+  if (!isValidUrlFormat(url)) {
+    console.warn(`[shouldCrawlUrl] Reason: Invalid URL format. Skipping: ${url}`);
+    return false;
+  }
+
+  // Normalize after initial format check
+  const normalizedUrl = normalizeUrl(url);
+  console.log(`[shouldCrawlUrl] Normalized: ${normalizedUrl}`);
+
+  // 1. Basic non-web protocol/pseudo-link checks
+  if (
+    normalizedUrl.startsWith('javascript:') ||
+    normalizedUrl.startsWith('mailto:') ||
+    normalizedUrl.startsWith('tel:') ||
+    normalizedUrl.startsWith('ftp:') ||
+    normalizedUrl.startsWith('data:')
+  ) {
+    console.warn(
+      `[shouldCrawlUrl] Reason: Non-web protocol or pseudo-link. Skipping: ${normalizedUrl}`,
+    );
+    return false;
+  }
+
+  // 2. Check if already visited (crucial for efficiency)
+  if (visitedUrls.has(normalizedUrl)) {
+    console.warn(
+      `[shouldCrawlUrl] Reason: Already visited (after normalization). Skipping: ${normalizedUrl}`,
+    );
+    return false;
+  }
+
+  // 3. Same origin check (avoid external links)
+  try {
+    const urlOrigin = new URL(normalizedUrl).origin;
+    if (urlOrigin !== baseUrlOrigin) {
+      console.warn(
+        `[shouldCrawlUrl] Reason: Different origin. Skipping: ${normalizedUrl} (from ${baseUrlOrigin})`,
+      );
+      return false;
+    }
+  } catch (e: any) {
+    console.warn(
+      `[shouldCrawlUrl] Reason: Unexpected URL parsing error for origin check. Skipping: ${normalizedUrl}. Error: ${e.message}`,
+    );
+    return false;
+  }
+
+  // --- NEW: Explicit INCLUSION for known important paths (Whitelist) ---
+  // This takes precedence over blacklists and extension checks below.
+  // Includes common terms for "store", "shop", "location", "about us", "contact" in multiple languages.
+  const explicitlyIncludedPaths = [
+    /^\/nl\/(winkels|winkels\/.+|contact|over-ons)\/?$/i, // Dutch: stores, contact, about us
+    /^\/de\/(geschaefte|filialen|standorte|kontakt|ueber-uns)\/?$/i, // German: stores, branches, locations, contact, about us
+    /^\/en\/(stores|locations|shops|contact|about-us)\/?$/i, // English: stores, locations, shops, contact, about us
+    /^\/fr\/(magasins|boutiques|emplacements|contact|a-propos)\/?$/i, // French: stores, shops, locations, contact, about us
+    /^\/(contact|about-us|over-ons)\/?$/i, // Root level common terms, if not language-specific
+  ];
+
+  const pathName = new URL(normalizedUrl).pathname;
+  if (explicitlyIncludedPaths.some((pattern) => pattern.test(pathName))) {
+    console.log(
+      `[shouldCrawlUrl] Reason: Explicitly whitelisted path. Including: ${normalizedUrl}`,
+    );
+    visitedUrls.add(normalizedUrl); // Mark as visited and include
+    return true;
+  }
+  // --- END NEW ---
+
+  // 4. Blacklisted patterns (applies AFTER explicit inclusions)
+  if (isBlacklistedUrl(normalizedUrl)) {
+    console.warn(`[shouldCrawlUrl] Reason: Blacklisted pattern found. Skipping: ${normalizedUrl}`);
+    return false;
+  }
+
+  // 5. File extension check (only allow web pages, applies AFTER explicit inclusions)
+  if (!hasAllowedPageExtension(normalizedUrl)) {
+    console.warn(`[shouldCrawlUrl] Reason: Disallowed file extension. Skipping: ${normalizedUrl}`);
+    return false;
+  }
+
+  // 6. Robots.txt checks (robot object is always available here, applies LAST)
+  if (robot.isDisallowed(normalizedUrl)) {
+    console.warn(`[shouldCrawlUrl] Reason: Disallowed by robots.txt. Skipping: ${normalizedUrl}`);
+    return false;
+  }
+
+  // If all checks pass and not explicitly included (already added to visitedUrls), add to visited set
+  // This means it passed all general filters.
+  visitedUrls.add(normalizedUrl);
+  console.log(
+    `[shouldCrawlUrl] Status: PASSED ALL GENERAL CHECKS. Added to visitedUrls. Processing: ${normalizedUrl}`,
+  );
+  return true;
+}
+
 /**
  * Recursively parses a sitemap or sitemap index URL and extracts all reachable URLs.
  * @param sitemapUrl The URL of the sitemap (or sitemap index) to parse.
  * @param visitedUrls A Set to keep track of already visited URLs to prevent infinite loops and duplicates.
+ * @param baseUrlOrigin The origin of the main site being crawled.
+ * @param robot The Robot object for robots.txt rules.
  * @returns A Promise that resolves to an array of unique sitemap URLs.
  */
-export async function parseSitemap(sitemapUrl: string, visitedUrls: Set<string>): Promise<string[]> {
+export async function parseSitemap(
+  sitemapUrl: string,
+  visitedUrls: Set<string>,
+  baseUrlOrigin: string,
+  robot: Robot,
+): Promise<string[]> {
   const sitemapUrls: string[] = [];
 
-  // Add the current sitemap URL to visited to prevent re-fetching if it's encountered again
-  if (visitedUrls.has(sitemapUrl)) {
-    return []; // Already processed this sitemap, return empty
+  if (!isValidUrlFormat(sitemapUrl)) {
+    console.error(`[parseSitemap] Invalid sitemap URL format, skipping: ${sitemapUrl}`);
+    return [];
   }
-  visitedUrls.add(sitemapUrl);
+
+  const normalizedSitemapUrl = normalizeUrl(sitemapUrl);
+
+  if (visitedUrls.has(normalizedSitemapUrl)) {
+    console.log(`[parseSitemap] Skipping already processed sitemap: ${normalizedSitemapUrl}`);
+    return [];
+  }
+  visitedUrls.add(normalizedSitemapUrl);
+  console.log(`[parseSitemap] Processing sitemap: ${normalizedSitemapUrl}`);
 
   try {
     const response = await axios.get(sitemapUrl, {
-      timeout: 10000, // 10-second timeout
-      responseType: 'arraybuffer', // Crucial for handling binary data (like gzip)
-      headers: {
-        'Accept-Encoding': 'gzip, deflate' // Request compressed data if available
-      }
+      timeout: 10000,
+      responseType: 'arraybuffer',
+      headers: { 'Accept-Encoding': 'gzip, deflate' },
     });
 
-    let sitemapData: any;
-    const parser = new XMLParser({
-      ignoreAttributes: false,
-      attributeNamePrefix: "",
-      textNodeName: "#text"
-    });
-
+    let xmlString: string;
     if (response.headers['content-encoding'] === 'gzip') {
-      // Handle gzipped content: buffer all data and then parse
-      sitemapData = await new Promise((resolve, reject) => {
-        const gunzip = zlib.createGunzip();
-        const chunks: Buffer[] = [];
-
-        gunzip.on('data', (chunk) => chunks.push(chunk));
-        gunzip.on('end', () => {
-          try {
-            const unzippedData = Buffer.concat(chunks).toString('utf8');
-            resolve(parser.parse(unzippedData));
-          } catch (parseError: any) {
-            reject(new Error(`Failed to parse unzipped XML from ${sitemapUrl}: ${parseError.message}`));
-          }
+      xmlString = await new Promise((resolve, reject) => {
+        zlib.gunzip(response.data as Buffer, (err, dezipped) => {
+          if (err) return reject(new Error(`Gunzip error for ${sitemapUrl}: ${err.message}`));
+          const unzippedData = dezipped.toString('utf8');
+          if (!unzippedData.trim())
+            reject(new Error(`Decompressed data for ${sitemapUrl} is empty.`));
+          else resolve(unzippedData);
         });
-        gunzip.on('error', (err) => {
-          reject(new Error(`Gunzip error for ${sitemapUrl}: ${err.message}`));
-        });
-
-        gunzip.end(response.data); // Pipe the compressed buffer to gunzip
       });
     } else {
-      // Assume it's plain XML
-      sitemapData = parser.parse(response.data.toString('utf8'));
+      xmlString = response.data.toString('utf8');
+      if (!xmlString.trim()) throw new Error(`Response data for ${sitemapUrl} is empty.`);
     }
 
-    // Check if it's a sitemap index (contains other sitemaps)
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: '',
+      textNodeName: '#text',
+    });
+    let sitemapData: any;
+
+    try {
+      sitemapData = parser.parse(xmlString);
+    } catch (parseError: any) {
+      throw new Error(`XML parsing failed for ${sitemapUrl}: ${parseError.message}`);
+    }
+
     if (sitemapData.sitemapindex && sitemapData.sitemapindex.sitemap) {
       const sitemaps = Array.isArray(sitemapData.sitemapindex.sitemap)
         ? sitemapData.sitemapindex.sitemap
@@ -73,57 +346,78 @@ export async function parseSitemap(sitemapUrl: string, visitedUrls: Set<string>)
 
       for (const sitemapEntry of sitemaps) {
         if (sitemapEntry.loc) {
-          // Recursive call for nested sitemaps
-          const nestedUrls = await parseSitemap(sitemapEntry.loc, visitedUrls);
+          const nestedUrls = await parseSitemap(
+            sitemapEntry.loc,
+            visitedUrls,
+            baseUrlOrigin,
+            robot,
+          );
           sitemapUrls.push(...nestedUrls);
         }
       }
-    }
-    // Check if it's a regular sitemap (contains actual URLs)
-    else if (sitemapData.urlset && sitemapData.urlset.url) {
+    } else if (sitemapData.urlset && sitemapData.urlset.url) {
       const urls = Array.isArray(sitemapData.urlset.url)
         ? sitemapData.urlset.url
         : [sitemapData.urlset.url];
 
       for (const urlEntry of urls) {
         if (urlEntry.loc) {
-          const normalizedUrl = urlEntry.loc.toLowerCase();
-          if (!visitedUrls.has(normalizedUrl) && !isFile(normalizedUrl)) {
-            sitemapUrls.push(normalizedUrl);
-            visitedUrls.add(normalizedUrl); // Add to visitedUrls here as well
+          if (shouldCrawlUrl(urlEntry.loc, baseUrlOrigin, robot, visitedUrls)) {
+            sitemapUrls.push(normalizeUrl(urlEntry.loc));
+          } else {
+            console.log(`[parseSitemap] Skipping URL from sitemap (filter): ${urlEntry.loc}`);
           }
         }
       }
     } else {
-      console.warn(`Sitemap ${sitemapUrl} has an unexpected structure.`);
+      console.warn(`Sitemap ${sitemapUrl} has an unrecognized or invalid structure after parsing.`);
     }
   } catch (error: any) {
-    console.error(`Error parsing sitemap ${sitemapUrl}:`, error.message);
-    // You might want to throw the error or return an empty array based on your error handling strategy
+    console.error(`Error processing sitemap ${sitemapUrl}: ${error.message}`);
   }
   return sitemapUrls;
 }
 
 export async function getAllValidUrls(url: string) {
+  if (!isValidUrlFormat(url)) {
+    console.error(`[getAllValidUrls] Initial URL is not a valid format: ${url}. Aborting crawl.`);
+    return [];
+  }
+
   const robot = await getRobotParser(url);
+  const baseUrlOrigin = new URL(url).origin;
   let currentLevel = 1;
   let maxLevel = parseInt(process.env.MAX_SCRAPER_LEVEL as string) || 3;
   let crawlerDelay = robot.getCrawlDelay(url) ?? 0;
-  let delayMs = crawlerDelay * 1000 || parseInt(process.env.SCRAPER_DELAY as string) || 1000;
+  let delayMs = crawlerDelay * 1000 || parseInt(process.env.SCRAPER_DELAY as string, 10) || 1000;
   const visitedUrls = new Set<string>();
   const resultUrls: string[] = [];
 
-  // 1. Try to get URLs from sitemaps defined in robots.txt
+  console.log(`\n--- [getAllValidUrls] START Crawl for: ${url} ---`);
+  console.log(`[getAllValidUrls] Base URL Origin: ${baseUrlOrigin}`);
+  console.log(`[getAllValidUrls] Max Level: ${maxLevel}, Delay: ${delayMs}ms`);
+  console.log(`[getAllValidUrls] Initial visitedUrls size: ${visitedUrls.size}`);
+
+  // 1. Get URLs from sitemaps defined in robots.txt
   const sitemapUrlsFromRobots = robot.getSitemaps();
-  for (const sitemapUrl of sitemapUrlsFromRobots) {
-    console.log(`[getAllValidUrls] Found sitemap in robots.txt: ${sitemapUrl}`);
-    const urlsFromSitemap = await parseSitemap(sitemapUrl, visitedUrls);
-    resultUrls.push(...urlsFromSitemap);
+  if (sitemapUrlsFromRobots.length > 0) {
+    console.log(
+      `[getAllValidUrls] Found sitemaps in robots.txt: ${sitemapUrlsFromRobots.join(', ')}`,
+    );
+    for (const sitemapUrl of sitemapUrlsFromRobots) {
+      const urlsFromSitemap = await parseSitemap(sitemapUrl, visitedUrls, baseUrlOrigin, robot);
+      resultUrls.push(...urlsFromSitemap);
+    }
+    console.log(`[getAllValidUrls] URLs from sitemaps initially added: ${resultUrls.length}`);
+  } else {
+    console.log(`[getAllValidUrls] No sitemaps found in robots.txt.`);
   }
 
-  // 2. Start crawling from the initial URL if not already covered by sitemaps
-  const initialUrlNormalized = new URL(url.toLowerCase()).toString();
-  if (!visitedUrls.has(initialUrlNormalized) && !isFile(initialUrlNormalized)) {
+  // 2. Start crawling from the initial URL if it passes filters
+  const initialUrlNormalized = normalizeUrl(url);
+
+  if (shouldCrawlUrl(initialUrlNormalized, baseUrlOrigin, robot, visitedUrls)) {
+    console.log(`[getAllValidUrls] Initial URL ${initialUrlNormalized} valid for direct crawl.`);
     const crawledUrls = await getUrlsFromPage(
       initialUrlNormalized,
       currentLevel,
@@ -131,48 +425,54 @@ export async function getAllValidUrls(url: string) {
       delayMs,
       robot,
       visitedUrls,
+      baseUrlOrigin,
     );
     resultUrls.push(...crawledUrls);
-  } else if (visitedUrls.has(initialUrlNormalized)) {
+    console.log(`[getAllValidUrls] URLs from initial direct crawl added: ${crawledUrls.length}`);
+  } else {
     console.log(
-      `[getAllValidUrls] Initial URL ${initialUrlNormalized} already processed via sitemap.`,
+      `[getAllValidUrls] Initial URL ${initialUrlNormalized} skipped by filter (already visited or disallowed).`,
     );
   }
 
-  // Now, also process the URLs found in the sitemap if they haven't been visited yet
-  // This ensures that sitemap URLs also get their subpages crawled if they meet the criteria.
-  // We iterate over the initially collected sitemap URLs and kick off getUrlsFromPage for them.
-  // This part ensures that if a URL is found *only* in the sitemap, it still gets its subpages crawled up to maxLevel.
-  for (const sitemapDiscoveredUrl of [...visitedUrls]) {
-    // Iterate over a copy of visitedUrls to avoid issues with modification during iteration
-    if (!resultUrls.includes(sitemapDiscoveredUrl)) {
-      // If it's a URL from sitemap but not yet added to result from direct crawling
-      const crawledSubUrls = await getUrlsFromPage(
-        sitemapDiscoveredUrl,
-        currentLevel, // Start crawling from level 1 for these sitemap URLs as well
-        maxLevel,
-        delayMs,
-        robot,
-        visitedUrls,
-      );
-      resultUrls.push(...crawledSubUrls);
-    }
+  // 3. Process the URLs found in sitemaps to crawl their subpages
+  const sitemapUrlsToCrawlSubpages = Array.from(visitedUrls).filter((u) => {
+    const isAlreadyInResult = resultUrls.includes(u);
+    const isSameOrigin = new URL(u).origin === baseUrlOrigin;
+    const shouldProcess = !isAlreadyInResult && isSameOrigin;
+    return shouldProcess;
+  });
+
+  console.log(
+    `[getAllValidUrls] Initiating crawl for ${sitemapUrlsToCrawlSubpages.length} sitemap-discovered URLs for subpages.`,
+  );
+  for (const sitemapDiscoveredUrl of sitemapUrlsToCrawlSubpages) {
+    console.log(
+      `[getAllValidUrls] Starting getUrlsFromPage for sitemap URL: ${sitemapDiscoveredUrl}`,
+    );
+    const crawledSubUrls = await getUrlsFromPage(
+      sitemapDiscoveredUrl,
+      currentLevel,
+      maxLevel,
+      delayMs,
+      robot,
+      visitedUrls,
+      baseUrlOrigin,
+    );
+    resultUrls.push(...crawledSubUrls);
+    console.log(
+      `[getAllValidUrls] Added ${crawledSubUrls.length} sub-URLs from sitemap URL ${sitemapDiscoveredUrl}`,
+    );
   }
 
-  const resultsSet = new Set(resultUrls.filter(isValidUrl));
-  return Array.from(resultsSet).sort();
+  // --- CRITICAL CHANGE: Removed the .filter(IsLegalUrl) call ---
+  const finalResultUrls = Array.from(new Set(resultUrls)).sort();
+  console.log(`\n--- [getAllValidUrls] END Crawl ---`);
+  console.log(`[getAllValidUrls] Final count of valid unique URLs: ${finalResultUrls.length}`);
+  return finalResultUrls;
 }
 
-function isValidUrl(url: string): boolean {
-  const baseUrl = url.toLowerCase();
-  const containsFile = isFile(baseUrl);
-  const containsHash = baseUrl.includes('#');
-  const containsQuery = baseUrl.includes('?');
-  const isValid = !containsHash && !containsQuery && !containsFile;
-  console.log(`[isValidUrl] ${url} is ${isValid ? 'valid' : 'invalid'}`);
-
-  return isValid;
-}
+// --- REMOVED THE IsLegalUrl FUNCTION DEFINITION ENTIRELY ---
 
 async function getUrlsFromPage(
   url: string,
@@ -181,135 +481,155 @@ async function getUrlsFromPage(
   delayMs: number,
   robot: Robot,
   visitedUrls: Set<string>,
+  baseUrlOrigin: string,
 ) {
   const result: string[] = [];
+  const normalizedUrl = normalizeUrl(url);
 
-  const baseUrl = url.toLowerCase();
-  const isAllowed = robot.isAllowed(baseUrl);
-  const isNotAllowed = robot.isDisallowed(baseUrl);
-  const containsFile = isFile(baseUrl);
-  const isHigherLevel = currentLevel > maxLevel;
-  const alreadyVisitedBeforeCheck = visitedUrls.has(baseUrl); // Check before adding
+  console.log(
+    `\n--- [getUrlsFromPage] START Processing: ${normalizedUrl} (Level: ${currentLevel}/${maxLevel}) ---`,
+  );
+  console.log(`[getUrlsFromPage] Current visitedUrls size: ${visitedUrls.size}`);
 
-  console.log(`[getUrlsFromPage] Processing page: ${baseUrl}`);
-  console.log(`[getUrlsFromPage] pages visited: ${visitedUrls.size}`);
-  console.log(`[getUrlsFromPage] for url ${baseUrl} level ${currentLevel}/${maxLevel}`);
-
-  switch (true) {
-    case isHigherLevel:
-      console.warn('[getUrlsFromPage] Reached max level, skipping subpages: ', url);
-      return result;
-    case isNotAllowed:
-      console.warn('[getUrlsFromPage] Disallowed by robots.txt, skipping subpages: ', url);
-      return result;
-    case containsFile:
-      console.warn('[getUrlsFromPage] Image, skipping subpages: ', url);
-      return result;
-    case alreadyVisitedBeforeCheck: // Use the value before adding
-      console.warn('[getUrlsFromPage] Already visited skipping page: ', url);
-      return result;
+  if (currentLevel > maxLevel) {
+    console.warn(
+      `[getUrlsFromPage] Reason: Reached max level (${maxLevel}). Skipping: ${normalizedUrl}`,
+    );
+    return result;
   }
 
-  visitedUrls.add(baseUrl); // Add after all checks that would skip processing
-
-  if (isAllowed) {
-    // No need to check !alreadyVisited here again
-    addValidUrl(baseUrl, result); // Add the current URL to the result
-    let childUrls = await getUrlsFromUrl(baseUrl); // Use baseUrl for consistency
-    await logDelay(delayMs);
-
-    const validChildUrls = await Promise.all(
-      Array.from(new Set(childUrls)).map(async (childUrlCandidate) => {
-        try {
-          const absoluteChildUrl = new URL(childUrlCandidate, baseUrl).toString();
-          const normalizedAbsoluteChildUrl = absoluteChildUrl.toLowerCase();
-
-          if (
-            new URL(normalizedAbsoluteChildUrl).origin === new URL(baseUrl).origin &&
-            !visitedUrls.has(normalizedAbsoluteChildUrl)
-          ) {
-            return await getUrlsFromPage(
-              normalizedAbsoluteChildUrl,
-              currentLevel + 1,
-              maxLevel,
-              delayMs,
-              robot,
-              visitedUrls,
-            );
-          }
-          return Promise.resolve([]);
-        } catch (e) {
-          console.error(`Error processing child URL ${childUrlCandidate} from ${baseUrl}:`, e);
-          return Promise.resolve([]);
-        }
-      }),
-    ).then((results) => results.flat());
-
-    result.push(...validChildUrls);
+  if (!visitedUrls.has(normalizedUrl)) {
+    console.error(
+      `[getUrlsFromPage] ERROR: URL ${normalizedUrl} should be in visitedUrls but isn't! This indicates a logic error.`,
+    );
+    visitedUrls.add(normalizedUrl);
   }
 
+  if (!result.includes(normalizedUrl)) {
+    result.push(normalizedUrl);
+    console.log(`[getUrlsFromPage] Added ${normalizedUrl} to current page's result.`);
+  }
+
+  console.log(`[getUrlsFromPage] Fetching child URLs from: ${normalizedUrl}`);
+  let childUrls = await getUrlsFromUrl(normalizedUrl);
+  console.log(
+    `[getUrlsFromPage] Found ${childUrls.length} raw child URLs from HTML of ${normalizedUrl}`,
+  );
+
+  await logDelay(delayMs);
+
+  const newChildUrlsToProcess = new Set<string>();
+  for (const childUrlCandidate of childUrls) {
+    if (!isValidUrlFormat(childUrlCandidate)) {
+      console.warn(`[getUrlsFromPage] Skipping malformed child URL: ${childUrlCandidate}`);
+      continue;
+    }
+    const absoluteChildUrl = new URL(childUrlCandidate, normalizedUrl).toString();
+    if (shouldCrawlUrl(absoluteChildUrl, baseUrlOrigin, robot, visitedUrls)) {
+      newChildUrlsToProcess.add(absoluteChildUrl);
+    } else {
+      // console.log(`[getUrlsFromPage] Child URL skipped by filter: ${absoluteChildUrl}`);
+    }
+  }
+
+  console.log(
+    `[getUrlsFromPage] Processing ${newChildUrlsToProcess.size} unique & valid child URLs for recursion from ${normalizedUrl}.`,
+  );
+  const recursiveCrawlPromises = Array.from(newChildUrlsToProcess).map(async (validChildUrl) => {
+    return await getUrlsFromPage(
+      validChildUrl,
+      currentLevel + 1,
+      maxLevel,
+      delayMs,
+      robot,
+      visitedUrls,
+      baseUrlOrigin,
+    );
+  });
+
+  const validChildUrlsFromRecursion = (await Promise.all(recursiveCrawlPromises)).flat();
+  result.push(...validChildUrlsFromRecursion);
+
+  console.log(
+    `--- [getUrlsFromPage] END Processing: ${normalizedUrl}. Returning ${result.length} URLs. ---\n`,
+  );
   return Array.from(new Set(result));
 }
 
-function addValidUrl(url: string, result: string[]) {
-  console.log(`[getUrlsFromPage] Visiting page: ${url}`);
-  result.push(url); // <-- Pushes the current URL to the result
-  console.log(`[getUrlsFromPage] added: ${url}`);
-  // No return here, as the function modifies the result array directly
-}
-
-async function logDelay(delayMs: number) {
-  console.log(`[getUrlsFromPage] waiting ${delayMs} ms`);
-  await delay(delayMs);
-}
-
-async function getUrlsFromUrl(url: string) {
+// getUrlsFromUrl (Axios/Cheerio based) remains the same
+async function getUrlsFromUrl(url: string): Promise<string[]> {
   try {
+    console.log(`[getUrlsFromUrl] Attempting to fetch HTML from: ${url}`);
     const res = await axios.get(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LinkCrawler/1.0)' },
-      timeout: 10000,
+      timeout: 15000,
       responseType: 'text',
     });
-    if (!res.headers['content-type']?.includes('text/html')) {
+
+    const contentType = res.headers['content-type'] || '';
+    if (!contentType.includes('text/html')) {
+      console.warn(
+        `[getUrlsFromUrl] Skipping non-HTML content for ${url}: Content-Type: ${contentType}`,
+      );
       return [];
     }
+    console.log(`[getUrlsFromUrl] Successfully fetched HTML for: ${url}`);
 
     const $ = cheerio.load(res.data);
     const baseUrl = new URL(url);
-    return $('a[href]')
-      .map((_, el) => {
+    const extractedUrls = $('a[href]')
+      .map((_, el: any) => {
         const href = $(el).attr('href');
         if (href) {
-          // Handle relative paths and absolute URLs
+          if (!isValidUrlFormat(href)) {
+            return null;
+          }
           try {
             const absoluteUrl = new URL(href, baseUrl).toString();
             return absoluteUrl;
-          } catch (e) {
-            console.warn(`Could not resolve URL: ${href} relative to ${baseUrl.toString()}`, e);
-            return null; // Return null for invalid URLs
+          } catch (e: any) {
+            console.warn(
+              `[getUrlsFromUrl] Could not resolve URL: ${href} relative to ${baseUrl.toString()}: ${e.message}`,
+            );
+            return null;
           }
         }
         return null;
       })
       .get()
       .filter(Boolean) as string[];
+    console.log(
+      `[getUrlsFromUrl] Finished extracting links from ${url}. Found ${extractedUrls.length} raw links.`,
+    );
+    return extractedUrls;
   } catch (error: any) {
-    if (error.response?.status === 404) {
-      console.warn(`[getUrlsFromUrl] URL not found (404): ${url}`);
-      return [];
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        console.error(
+          `[getUrlsFromUrl] HTTP Error for ${url}: Status ${error.response.status} - ${error.message}`,
+        );
+      } else if (error.request) {
+        console.error(
+          `[getUrlsFromUrl] Network Error for ${url}: No response received (Timeout/DNS/Connection) - ${error.message}`,
+        );
+      } else {
+        console.error(
+          `[getUrlsFromUrl] Axios config/request setup Error for ${url}: ${error.message}`,
+        );
+      }
+    } else {
+      console.error(`[getUrlsFromUrl] Generic Error fetching or parsing ${url}: ${error.message}`);
     }
-    console.error(`[getUrlsFromUrl] Error fetching or parsing ${url}:`, error.message);
-    return []; // Return empty array on other errors to allow continued processing
+    return [];
   }
 }
 
-function isFile(url: string) {
-  try {
-    const urlObj = new URL(url);
-    const path = urlObj.pathname.toLowerCase();
-    // More comprehensive list of image extensions
-    return /\.(jpg|jpeg|png|gif|bmp|webp|svg|tiff|ico|pdf)$/i.test(path);
-  } catch {
-    return false;
+async function logDelay(delayMs: number) {
+  if (delayMs > 0) {
+    console.log(`[logDelay] Waiting ${delayMs} ms...`);
+    await delay(delayMs);
+    console.log(`[logDelay] Resumed.`);
+  } else {
+    console.log(`[logDelay] No delay (0ms).`);
   }
 }
