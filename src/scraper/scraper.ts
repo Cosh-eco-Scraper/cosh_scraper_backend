@@ -518,6 +518,7 @@ async function isProductDetailPage(page: Page, url: string): Promise<boolean> {
   // --- Detection Method 2: Schema Markup (Very High Confidence) ---
   try {
     const hasProductSchema = await page.evaluate(() => {
+      // eslint-disable-next-line no-undef
       const productSchema = document.querySelector('script[type="application/ld+json"]');
       if (productSchema && productSchema.textContent) {
         try {
@@ -529,7 +530,7 @@ async function isProductDetailPage(page: Page, url: string): Promise<boolean> {
               schema['@type'] === 'Offer' || // Offers are typically within products
               (schema['@type'] === 'ListItem' && schema.item && schema.item['@type'] === 'Product'),
           );
-        } catch (e) {
+        } catch {
           // console.warn('Error parsing JSON-LD schema:', e);
           return false; // Invalid JSON-LD
         }
