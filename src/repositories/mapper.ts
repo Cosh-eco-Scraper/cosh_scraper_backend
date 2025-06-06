@@ -4,6 +4,7 @@ import { DatabaseOpeningHours } from '../domain/OpeningHours';
 import { DatabaseBrand, DatabaseBrandForList } from '../domain/Brand';
 import { Location } from '../domain/Location';
 import { StoreType } from '../domain/StoreType';
+import { Statement } from '../domain/Statement';
 
 function mapStore(databaseResult: any): Store {
   return {
@@ -23,6 +24,13 @@ function mapStore(databaseResult: any): Store {
       createdAt: databaseResult.loc_created_at,
       updatedAt: databaseResult.loc_updated_at,
     },
+  };
+}
+
+function mapStatement(databaseResult: any): Statement {
+  return {
+    id: databaseResult.id,
+    statement: databaseResult.statement,
   };
 }
 
@@ -86,4 +94,5 @@ export const mapper = {
   mapLocation: (databaseResult: any) => mapLocation(databaseResult),
   mapBrandForList: (databaseResult: any) => mapBrandForList(databaseResult),
   mapStoreType: (databaseResult: any) => mapStoreType(databaseResult),
+  mapStatement: (databaseResult: any) => mapStatement(databaseResult),
 };
