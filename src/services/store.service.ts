@@ -89,7 +89,14 @@ export const StoreService = {
     if (scrapedInfo.openingHours) {
       for (const [day, hours] of Object.entries(scrapedInfo.openingHours)) {
         if (hours) {
-          await OpeningHoursService.createOpeningHours(day, hours.open, hours.close, store.id);
+          await OpeningHoursService.createOpeningHours(
+            day,
+            hours.open,
+            hours.close,
+            hours.openAfterNoon,
+            hours.closeAfterNoon,
+            store.id,
+          );
         }
       }
     }

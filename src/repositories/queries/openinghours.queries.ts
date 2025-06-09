@@ -9,8 +9,8 @@ export const openingHoursQueries = {
   `,
 
   createOpeningHours: () => `
-    INSERT INTO opening_hours (day, openingat, closingat, store_id)
-    VALUES ($1, $2, $3, $4)
+    INSERT INTO opening_hours (day, openingat, closingat,openingAtAfterNoon,closingAtAfterNoon, store_id)
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *;
   `,
 };
