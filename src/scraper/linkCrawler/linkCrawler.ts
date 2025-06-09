@@ -146,6 +146,7 @@ function isProductPage(url: string): boolean {
     /\/[a-z0-9-]+\-id-(\d+)\.html/, // eslint-disable-line
     /\/[a-z0-9-]+\/dp\/\w+/,
     /\/[a-zA-Z0-9-]+-\d+-\d+$/,
+    /\/\d+$/,
     /\?.+/,
   ];
   for (const pattern of productUrlPatterns) {
@@ -516,65 +517,27 @@ export async function getAllValidUrls(url: string) {
   } else {
     console.log(`[getAllValidUrls] No sitemaps found in robots.txt.`);
   }
-
-  // 2. Start crawling from the initial URL if it passes filters
-  const initialUrlNormalized = normalizeUrl(url);
-
-  if (shouldCrawlUrl(initialUrlNormalized, baseUrlOrigin, robot, visitedUrls)) {
-    console.log(`[getAllValidUrls] Initial URL ${initialUrlNormalized} valid for direct crawl.`);
-    const crawledUrls = await getUrlsFromPage(
-      initialUrlNormalized,
-      currentLevel,
-      maxLevel,
-      delayMs,
-      robot,
-      visitedUrls,
-      baseUrlOrigin,
-    );
-    finalResultUrls.push(...crawledUrls);
-    console.log(`[getAllValidUrls] URLs from initial direct crawl added: ${crawledUrls.length}`);
-  } else {
-    console.log(
-      `[getAllValidUrls] Initial URL ${initialUrlNormalized} skipped by filter (already visited or disallowed).`,
-    );
-  }
-
-  // 3. Process the URLs found in sitemaps to crawl their subpages
-  // This step ensures that any URLs discovered in sitemaps (which were valid
-  // and added to `visitedUrls`) also get their subpages crawled, if those
-  // subpages haven't been visited yet through the initial crawl path.
-  // IMPORTANT: We iterate `visitedUrls` (which has all valid URLs) and check
-  // if they are already in `finalResultUrls`. If not, it means they came from
-  // a sitemap *and* haven't been processed by `getUrlsFromPage` yet as a
-  // primary URL for recursion.
-  const sitemapDiscoveredUrlsToCrawl = Array.from(visitedUrls).filter((u) => {
-    // Only process URLs that are in `visitedUrls` (meaning they passed shouldCrawlUrl)
-    // but are NOT yet in `finalResultUrls` (meaning `getUrlsFromPage` hasn't run on them).
-    // This ensures we crawl deeper from sitemap roots without duplicating effort.
-    return !finalResultUrls.includes(u);
-  });
-
-  console.log(
-    `[getAllValidUrls] Initiating crawl for ${sitemapDiscoveredUrlsToCrawl.length} sitemap-discovered URLs for subpages.`,
+  const crawledUrls = await getUrlsFromPage(
+    baseUrlOrigin,
+    currentLevel,
+    maxLevel,
+    delayMs,
+    robot,
+    visitedUrls,
+    baseUrlOrigin,
   );
-  for (const sitemapDiscoveredUrl of sitemapDiscoveredUrlsToCrawl) {
-    console.log(
-      `[getAllValidUrls] Starting getUrlsFromPage for sitemap URL: ${sitemapDiscoveredUrl}`,
-    );
-    const crawledSubUrls = await getUrlsFromPage(
-      sitemapDiscoveredUrl,
-      currentLevel + 1, // Treat these as next level crawls
-      maxLevel,
-      delayMs,
-      robot,
-      visitedUrls,
-      baseUrlOrigin,
-    );
-    finalResultUrls.push(...crawledSubUrls);
-    console.log(
-      `[getAllValidUrls] Added ${crawledSubUrls.length} sub-URLs from sitemap URL ${sitemapDiscoveredUrl}`,
-    );
-  }
+  finalResultUrls.push(...crawledUrls);
+
+  const crawledSubUrls = await getUrlsFromPage(
+    baseUrlOrigin,
+    currentLevel, // Treat these as next level crawls
+    maxLevel,
+    delayMs,
+    robot,
+    visitedUrls,
+    baseUrlOrigin,
+  );
+  finalResultUrls.push(...crawledSubUrls);
 
   // The final list is already filtered and unique as URLs are added only after `shouldCrawlUrl` check.
   // A final `Set` conversion and sort ensure absolute uniqueness and order.
@@ -611,23 +574,16 @@ async function getUrlsFromPage(
     return resultForThisBranch;
   }
 
-  // Ensure the current URL itself is added to results for this branch if it was valid
-  // It must already be in `visitedUrls` before `getUrlsFromPage` is called.
   if (visitedUrls.has(normalizedUrl) && !resultForThisBranch.includes(normalizedUrl)) {
     resultForThisBranch.push(normalizedUrl);
-    // console.log(`[getUrlsFromPage] Added ${normalizedUrl} to current page's branch result.`);
   } else if (!visitedUrls.has(normalizedUrl)) {
     console.error(
       `[getUrlsFromPage] ERROR: URL ${normalizedUrl} should be in visitedUrls but isn't! This indicates a logic error.`,
     );
-    // Add to visitedUrls for safety, though it should have been added by shouldCrawlUrl
     visitedUrls.add(normalizedUrl);
   }
 
-  // console.log(`[getUrlsFromPage] Fetching child URLs from: ${normalizedUrl}`);
   let childUrlsRaw = await getUrlsFromUrl(normalizedUrl);
-  // console.log( `[getUrlsFromPage] Found ${childUrlsRaw.length} raw child URLs from HTML of ${normalizedUrl}`);
-
   await logDelay(delayMs);
 
   const validChildUrlsToRecurse = new Set<string>();
@@ -637,17 +593,12 @@ async function getUrlsFromPage(
       continue;
     }
     const absoluteChildUrl = new URL(childUrlCandidate, normalizedUrl).toString();
-    // CRITICAL FILTER: Only process and add to `resultForThisBranch` if `shouldCrawlUrl` allows it.
+
     if (shouldCrawlUrl(absoluteChildUrl, baseUrlOrigin, robot, visitedUrls)) {
       validChildUrlsToRecurse.add(absoluteChildUrl);
-    } else {
-      // console.log(`[getUrlsFromPage] Child URL skipped by filter: ${absoluteChildUrl}`); // Uncomment for detailed debugging
     }
   }
 
-  // console.log(
-  //   `[getUrlsFromPage] Processing ${validChildUrlsToRecurse.size} unique & valid child URLs for recursion from ${normalizedUrl}.`,
-  // );
   const recursiveCrawlPromises = Array.from(validChildUrlsToRecurse).map(async (validChildUrl) => {
     return await getUrlsFromPage(
       validChildUrl,
