@@ -226,6 +226,7 @@ export async function summarizeRelevantInfoWithAI(
         console.error('AI response is empty');
         attempts++;
         const delay = baseDelay * Math.pow(2, attempts);
+        // eslint-disable-next-line no-undef
         await new Promise((resolve) => setTimeout(resolve, delay));
         continue;
       }
@@ -245,6 +246,7 @@ export async function summarizeRelevantInfoWithAI(
         console.error('Failed to parse AI response as JSON:', err);
         attempts++;
         const delay = baseDelay * Math.pow(2, attempts);
+        // eslint-disable-next-line no-undef
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     } catch (error) {
@@ -253,12 +255,14 @@ export async function summarizeRelevantInfoWithAI(
       if ((err.statusCode === 429 || err.statusCode === 503) && attempts < maxAttempts - 1) {
         attempts++;
         const delay = baseDelay * Math.pow(2, attempts);
+        // eslint-disable-next-line no-undef
         await new Promise((resolve) => setTimeout(resolve, delay));
         continue;
       }
       console.error('Failed to backoff from AI api: ', err.message);
       attempts++;
       const delay = baseDelay * Math.pow(2, attempts);
+      // eslint-disable-next-line no-undef
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
