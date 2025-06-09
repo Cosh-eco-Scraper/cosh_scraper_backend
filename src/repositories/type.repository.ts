@@ -15,7 +15,9 @@ export const TypeRepository = {
   async addTypeToStore(storeId: number, typeId: number) {
     const checkQuery = 'SELECT 1 FROM store_types WHERE store_id = $1 AND type_id = $2';
     const checkResult = await databasePool.query(checkQuery, [storeId, typeId]);
-    if (checkResult.rows.length > 0) return;
+    if (checkResult.rows.length > 0) {
+      return;
+    }
     const insertQuery = 'INSERT INTO store_types (store_id, type_id) VALUES ($1, $2)';
     await databasePool.query(insertQuery, [storeId, typeId]);
   },

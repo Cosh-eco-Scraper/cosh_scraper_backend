@@ -5,7 +5,6 @@ import OpeningHoursService from './openingshours.service';
 import LocationService from './location.service';
 import storeBrandsService from './storeBrands.service';
 import { LLMService } from './llm.service';
-import getRobotParser from '../scraper/robot/robot';
 import TypeService from './type.service';
 
 export const StoreService = {
