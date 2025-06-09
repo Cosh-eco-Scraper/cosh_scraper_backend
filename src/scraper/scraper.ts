@@ -3,7 +3,6 @@ import * as dotenv from 'dotenv';
 import getPrompt from './prompt/prompt';
 import getKeywords from './keywords'; // This now returns KeywordConfig
 import { LLMService } from '../services/llm.service';
-import * as fs from 'fs';
 import { ScrapedInfo } from './domain/ScrapedInfo';
 
 dotenv.config();
