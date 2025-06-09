@@ -450,7 +450,6 @@ type ScraperResult = Record<string, string[]> | null;
  */
 export async function scraper(url: string, page: Page): Promise<ScraperResult> {
   console.log(`Scraping URL: ${url}`);
-  fs.appendFileSync('files/scraped_urls.txt', `[${new Date().toString()}] ${url}\n`);
 
   try {
     await blockUnnecessaryResources(page);
