@@ -7,17 +7,11 @@ type KeywordConfig = {
 
 const englishKeywordsConfig: KeywordConfig = {
   keywords: [
-    'welcome to',
-    'about',
     'store name',
-    'our shop',
-    'company',
     'brands',
     'our brands',
     'featured brands',
     'brand list',
-    'designers',
-    'collections',
     'products by brand',
     'opening hours',
     'store hours',
@@ -42,9 +36,6 @@ const englishKeywordsConfig: KeywordConfig = {
     'weekdays',
     'weekends',
     'public holidays',
-    'from',
-    'to',
-    'and',
     'appointments',
     'address',
     'location',
@@ -128,9 +119,9 @@ const englishKeywordsConfig: KeywordConfig = {
     'opening hours': 10,
     'store hours': 10,
     'our hours': 10,
-    'business hours': 10, // Narrow context for hour phrases
+    'business hours': 10,
     open: 5,
-    closed: 5, // Even narrower for specific day open/closed states
+    closed: 5,
     monday: 5,
     tuesday: 5,
     wednesday: 5,
@@ -147,25 +138,25 @@ const englishKeywordsConfig: KeywordConfig = {
     sun: 5,
     address: 15,
     location: 15,
-    contact: 15, // Context around address details
+    contact: 15,
     'about us': 20,
     'our story': 20,
-    'company profile': 20, // Context around about sections
+    'company profile': 20,
     'return policy': 20,
     returns: 20,
-    refunds: 20, // Context around return policy details
+    refunds: 20,
     brands: 15,
     'our brands': 15,
     'featured brands': 15,
-    'brand list': 15, // Context for brands
+    'brand list': 15,
   },
   wordsAfterMap: {
     'opening hours': 150,
     'store hours': 150,
     'our hours': 150,
-    'business hours': 150, // Large context to capture all daily hours
+    'business hours': 150,
     open: 20,
-    closed: 20, // To get the specific times or reason for closure
+    closed: 20,
     monday: 30,
     tuesday: 30,
     wednesday: 30,
@@ -182,33 +173,27 @@ const englishKeywordsConfig: KeywordConfig = {
     sun: 30,
     address: 50,
     location: 50,
-    contact: 50, // To capture the full address
+    contact: 50,
     'about us': 300,
     'our story': 300,
-    'company profile': 300, // Large context for full 'about' text
+    'company profile': 300,
     'return policy': 400,
     returns: 400,
-    refunds: 400, // Very large context for detailed return policies
+    refunds: 400,
     brands: 100,
     'our brands': 100,
     'featured brands': 100,
-    'brand list': 100, // Enough context to capture brand names
+    'brand list': 100,
   },
 };
 
 const frenchKeywordsConfig: KeywordConfig = {
   keywords: [
-    'bienvenue à',
-    'à propos',
     'nom du magasin',
-    'notre boutique',
-    'entreprise',
     'marques',
     'nos marques',
     'marques vedettes',
     'liste des marques',
-    'designers',
-    'collections',
     'produits par marque',
     "heures d'ouverture",
     'horaires du magasin',
@@ -233,9 +218,6 @@ const frenchKeywordsConfig: KeywordConfig = {
     'jours de semaine',
     'week-ends',
     'jours fériés',
-    'de',
-    'à',
-    'et',
     'rendez-vous',
     'adresse',
     'emplacement',
@@ -387,22 +369,15 @@ const frenchKeywordsConfig: KeywordConfig = {
 
 const germanKeywordsConfig: KeywordConfig = {
   keywords: [
-    'willkommen bei',
-    'über',
     'geschäftsname',
-    'unser laden',
-    'unternehmen',
     'marken',
     'unsere marken',
     'ausgewählte marken',
     'markenliste',
-    'designer',
-    'kollektionen',
     'produkte nach marke',
     'öffnungszeiten',
     'geschäftszeiten',
     'unsere öffnungszeiten',
-    'geschäftszeiten',
     'geöffnet',
     'geschlossen',
     'montag',
@@ -422,9 +397,6 @@ const germanKeywordsConfig: KeywordConfig = {
     'werktags',
     'wochenenden',
     'feiertage',
-    'von',
-    'bis',
-    'und',
     'termine',
     'adresse',
     'standort',
@@ -574,17 +546,11 @@ const germanKeywordsConfig: KeywordConfig = {
 
 const dutchKeywordsConfig: KeywordConfig = {
   keywords: [
-    'welkom bij',
-    'over',
     'winkelnaam',
-    'onze winkel',
-    'bedrijf',
     'merken',
     'onze merken',
     'uitgelichte merken',
     'merkenlijst',
-    'ontwerpers',
-    'collecties',
     'producten per merk',
     'openingstijden',
     'winkeltijden',
@@ -609,9 +575,6 @@ const dutchKeywordsConfig: KeywordConfig = {
     'doordeweeks',
     'weekenden',
     'feestdagen',
-    'van',
-    'tot',
-    'en',
     'afspraken',
     'adres',
     'locatie',
@@ -764,7 +727,7 @@ const dutchKeywordsConfig: KeywordConfig = {
 const allKeywordsConfig: Record<string, KeywordConfig> = {
   en: englishKeywordsConfig,
   fr: frenchKeywordsConfig,
-  de: germanKeywordsConfig, // Assuming you will fill this with detailed maps
+  de: germanKeywordsConfig,
   nl: dutchKeywordsConfig,
 };
 

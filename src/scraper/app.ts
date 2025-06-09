@@ -5,7 +5,7 @@ import path from 'path';
 import { getAllValidUrls } from './linkCrawler/linkCrawler';
 import dotenv from 'dotenv';
 import getRobotParser from './robot/robot';
-import { smallSumerize } from './prompt/smallSumerize';
+import { smallSummarize } from './prompt/smallSummarize';
 import { LLMService } from '../services/llm.service';
 import { summarizeRelevantInfoWithAI } from './scraper';
 // The consolidateScrapedInfoResults is not needed in run.ts for Strategy B,
@@ -215,11 +215,7 @@ export async function run(baseURL: string, location: string) {
     // Iterate over all unique keywords found
     const contexts = collectedKeywordContexts[keyword];
     if (contexts && contexts.length > 0) {
-      // Apply site-wide filtering and prioritization
-      const filteredAndPrioritized = filterAndPrioritizeContexts(keyword, contexts, location);
-      if (filteredAndPrioritized.length > 0) {
-        finalSiteWideKeywordContexts[keyword] = filteredAndPrioritized;
-      }
+      finalSiteWideKeywordContexts[keyword] = contexts;
     }
   }
 
@@ -228,6 +224,7 @@ export async function run(baseURL: string, location: string) {
   // --- Step 3: Use smallSumerize for each keyword to consolidate its site-wide collected contexts ---
   const summarizedSiteWideKeywordData: Record<string, string> = {};
   const promptDelayMs = 1500; // Delay between LLM calls to respect rate limits
+  const maxChunksPerKeyword = 20; // New constant for the maximum number of chunks
 
   for (const [keyword, contexts] of Object.entries(finalSiteWideKeywordContexts)) {
     const maxContextsCharsPerPrompt = 200000; // Aim for Flash-Lite context window (1M chars)
@@ -241,21 +238,33 @@ export async function run(baseURL: string, location: string) {
         currentChunkCharCount + context.length > maxContextsCharsPerPrompt &&
         currentChunk.length > 0
       ) {
-        chunksToSend.push(currentChunk);
+        // Only add chunk if we haven't reached the maxChunksPerKeyword limit
+        if (chunksToSend.length < maxChunksPerKeyword) {
+          chunksToSend.push(currentChunk);
+        } else {
+          console.warn(
+            `Skipping further contexts for keyword "${keyword}" as max chunk limit (${maxChunksPerKeyword}) reached.`,
+          );
+          break; // Stop processing contexts for this keyword
+        }
         currentChunk = [];
         currentChunkCharCount = 0;
       }
       currentChunk.push(context);
       currentChunkCharCount += context.length;
     }
-    // Push the last chunk if it has content
-    if (currentChunk.length > 0) {
+    // Push the last chunk if it has content and we haven't reached the limit
+    if (currentChunk.length > 0 && chunksToSend.length < maxChunksPerKeyword) {
       chunksToSend.push(currentChunk);
+    } else if (currentChunk.length > 0 && chunksToSend.length >= maxChunksPerKeyword) {
+      console.warn(
+        `Last chunk for keyword "${keyword}" skipped as max chunk limit (${maxChunksPerKeyword}) was already reached during iteration.`,
+      );
     }
 
     let combinedSummaryForKeyword = '';
     for (const chunk of chunksToSend) {
-      const smallPrompt = smallSumerize(keyword, chunk, location, baseURL);
+      const smallPrompt = smallSummarize(keyword, chunk, location, baseURL);
       console.log(
         `Sending smallSumerize prompt for keyword "${keyword}" (chunk size: ${chunk.length} snippets, chars: ${smallPrompt.length}).`,
       );
@@ -296,245 +305,4 @@ export async function run(baseURL: string, location: string) {
   );
   console.log('Final combined summary:', finalSummary);
   return finalSummary;
-}
-
-/**
- * Helper function to filter and prioritize contexts for a given keyword.
- * This is where you implement your logic for deduplication, quality selection, etc.
- * @param {string} keyword - The keyword being processed.
- * @param {string[]} contexts - All collected contexts for this keyword from all pages.
- * @param {string} location - The location context (e.g., "Brasschaat").
- * @returns {string[]} Filtered and prioritized contexts.
- */
-function filterAndPrioritizeContexts(
-  keyword: string,
-  contexts: string[],
-  location: string,
-): string[] {
-  const uniqueContexts = Array.from(new Set(contexts)); // Basic deduplication
-
-  // Further prioritization logic based on keyword type
-  switch (keyword.toLowerCase()) {
-    case 'opening hours':
-    case 'store hours':
-    case 'our hours':
-    case 'business hours':
-    case 'open':
-    case 'closed':
-    case 'monday':
-    case 'tuesday':
-    case 'wednesday':
-    case 'thursday':
-    case 'friday':
-    case 'saturday':
-    case 'sunday':
-    case 'mon':
-    case 'tue':
-    case 'wed':
-    case 'thu':
-    case 'fri':
-    case 'sat':
-    case 'sun':
-    case 'weekdays':
-    case 'weekends':
-    case 'public holidays':
-    case 'openingstijden':
-    case 'openingsuren':
-    case 'öffnungszeiten':
-    case "heures d'ouverture":
-    case 'maandag':
-    case 'dinsdag':
-    case 'woensdag':
-    case 'donderdag':
-    case 'vrijdag':
-    case 'zaterdag':
-    case 'zondag':
-    case 'montag':
-    case 'dienstag':
-    case 'mittwoch':
-    case 'donnerstag':
-    case 'freitag':
-    case 'samstag':
-    case 'sonntag':
-    case 'lundi':
-    case 'mardi':
-    case 'mercredi':
-    case 'jeudi':
-    case 'vendredi':
-    case 'samedi':
-    case 'dimanche':
-      return uniqueContexts
-        .filter((context) => context.toLowerCase().includes(location.toLowerCase())) // Prioritize location-specific hours
-        .sort((a, b) => {
-          const days = {
-            en: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-            nl: ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'],
-            fr: ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'],
-            de: ['montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag', 'sonntag'],
-          };
-          const countDays = (text: string) => {
-            let count = 0;
-            for (const lang of Object.values(days)) {
-              for (const day of lang) {
-                if (text.toLowerCase().includes(day)) {
-                  count++;
-                }
-              }
-            }
-            return count;
-          };
-          return countDays(b) - countDays(a); // Sort by number of days mentioned (more complete)
-        })
-        .slice(0, 10); // Take top 10
-    case 'address':
-    case 'location':
-    case 'find us':
-    case 'visit us':
-    case 'directions':
-    case 'street':
-    case 'road':
-    case 'lane':
-    case 'place':
-    case 'city':
-    case 'zip code':
-    case 'postal code':
-    case 'country':
-    case 'adres':
-    case 'locatie':
-    case 'bezoek ons':
-    case 'straat':
-    case 'laan':
-    case 'weg':
-    case 'plaats':
-    case 'stad':
-    case 'postcode':
-    case 'adresse':
-    case 'emplacement':
-    case 'rue':
-    case 'avenue':
-    case 'ville':
-    case 'code postal':
-    case 'pays':
-    case 'anschrift':
-    case 'standort':
-    case 'straße':
-    case 'stadt':
-    case 'postleitzahl':
-    case 'land':
-      return uniqueContexts
-        .filter((context) => context.toLowerCase().includes(location.toLowerCase()))
-        .sort((a, b) => b.length - a.length) // Prefer longer, more complete addresses
-        .slice(0, 10); // Take top 10
-    case 'about us':
-    case 'our story':
-    case 'company profile':
-    case 'who we are':
-    case 'our mission':
-    case 'our vision':
-    case 'history':
-    case 'return policy':
-    case 'returns':
-    case 'refunds':
-    case 'exchanges':
-    case 'shipping & returns':
-    case 'customer service':
-    case 'warranty':
-    case 'guarantee':
-    case 'terms and conditions':
-    case 'how to return':
-    case 'eligibility':
-    case 'process':
-    case 'over ons':
-    case 'ons verhaal':
-    case 'bedrijfsprofiel':
-    case 'wie zijn wij':
-    case 'onze missie':
-    case 'onze visie':
-    case 'geschiedenis':
-    case 'retourbeleid':
-    case 'retouren':
-    case 'terugbetalingen':
-    case 'garantie':
-    case 'voorwaarden':
-    case 'à propos de nous':
-    case 'notre histoire':
-    case 'profil de la société':
-    case 'qui sommes-nous':
-    case 'notre mission':
-    case 'notre vision':
-    case 'histoire':
-    case 'politique de retour':
-    case 'retours':
-    case 'remboursements':
-    case 'conditions':
-    case 'über uns':
-    case 'unsere geschichte':
-    case 'unternehmensprofil':
-    case 'wer wir sind':
-    case 'unsere mission':
-    case 'unsere vision':
-    case 'geschichte':
-    case 'rückgaberecht':
-    case 'rückgaben':
-    case 'erstattungen':
-    case 'bedingungen':
-      return uniqueContexts.sort((a, b) => b.length - a.length).slice(0, 3); // Prefer longer, more descriptive texts
-    case 'brands':
-    case 'our brands':
-    case 'featured brands':
-    case 'brand list':
-    case 'merken':
-    case 'onze merken':
-    case 'marques':
-    case 'nos marques':
-    case 'marken':
-    case 'unsere marken':
-      return uniqueContexts; // All unique brands are relevant
-    case 'store name':
-    case 'company':
-    case 'winkel naam':
-    case 'bedrijf':
-    case 'nom du magasin':
-    case 'entreprise':
-    case 'laden name':
-    case 'firma':
-      return uniqueContexts
-        .filter(
-          (context) =>
-            context.toLowerCase().includes(location.toLowerCase()) ||
-            context.split(/\s+/).length < 10,
-        )
-        .sort((a, b) => a.length - b.length) // Prefer shorter, more direct names
-        .slice(0, 10); // Take top 10
-    case 'categories':
-    case 'shop by':
-    case 'departments':
-    case 'products':
-    case 'what we sell':
-    case 'specialties':
-    case 'categorieën':
-    case 'winkelen per':
-    case 'afdelingen':
-    case 'producten':
-    case 'wat we verkopen':
-    case 'diensten':
-    case 'specialiteiten':
-    case 'catégories':
-    case 'acheter par':
-    case 'départements':
-    case 'produits':
-    case 'ce que nous vendons':
-    case 'services':
-    case 'spécialités':
-    case 'kategorien':
-    case 'einkaufen nach':
-    case 'abteilungen':
-    case 'produkte':
-    case 'was wir verkaufen':
-    case 'dienstleistungen':
-    case 'spezialitäten':
-      return uniqueContexts.slice(0, 10);
-    default:
-      return uniqueContexts.sort((a, b) => b.length - a.length).slice(0, 5); // General fallback
-  }
 }
