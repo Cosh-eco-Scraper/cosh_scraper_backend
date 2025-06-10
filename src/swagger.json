@@ -39,10 +39,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "name": {
-                  "type": "string",
-                  "example": "New Store Name"
-                },
                 "url": {
                   "type": "string",
                   "example": "https://example.com"
