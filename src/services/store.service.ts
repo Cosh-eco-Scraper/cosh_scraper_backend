@@ -20,8 +20,8 @@ export const StoreService = {
   updateStore: async (
     storeId: number,
     name: string,
+    description: string,
     retour: string,
-    description?: string,
   ): Promise<number> => {
     const result = await StoreRepository.updateStore(storeId, name, description, retour);
     return result;

@@ -82,8 +82,8 @@ export const StoreRepository = {
   createStore: async (
     name: string,
     location_id: number,
+    description: string,
     retour: string,
-    description?: string,
   ): Promise<Store> => {
     const querry = storeQueries.createStore();
     const params = [name, location_id, description, retour];
