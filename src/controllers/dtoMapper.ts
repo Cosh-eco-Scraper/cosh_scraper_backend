@@ -25,6 +25,8 @@ export const dtoMapper = {
       openingAt: openingHours.openingAt,
       closingAt: openingHours.closingAt,
       storeId: openingHours.storeId,
+      closingAtAfterNoon: openingHours.closingAtAfterNoon,
+      openingAtAfterNoon: openingHours.openingAtAfterNoon,
     };
   },
   mapBrand: (brand: DatabaseBrand): BrandDto => {

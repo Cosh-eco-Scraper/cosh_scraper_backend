@@ -110,6 +110,7 @@ function getInstructions(location: string): string {
   * The second range should be represented by "openAfterNoon" and "closeAfterNoon"
   * Times like "9:00-12:00, 14:00-18:00" should be parsed as:
     {"open": "09:00", "close": "12:00", "openAfterNoon": "14:00", "closeAfterNoon": "18:00"}
+  * Time like "10:00 - 18:00 - (Gesloten 12:00 - 12:30)" should be parsed as: {"open": "10:00", "close": "12:00", "openAfterNoon": "12:30", "closeAfterNoon": "18:00"}
 
 - For "openingHours", recognize common lunch break patterns such as:
   * "9:00-12:00 and 14:00-18:00"
@@ -129,6 +130,8 @@ function getInstructions(location: string): string {
 - For "openingHours" and "location", extract ONLY the information relevant to the store matching the provided "${location}" (case-insensitive, match city name). If multiple stores are present, prioritize the matching location.
 
 - For "openingHours", if the opening hours cannot be found on the provided URL, first attempt to look them up on google.com using the store name and the city name. If still no results are found, return {"open": "closed", "close": "closed", "openAfterNoon": null, "closeAfterNoon": null} for that day.
+
+- For "openingHours", check if the information is correct and complete with the store url. if not, correct this information.
 `;
 }
 function getSnippets(snippets: string[]): string {

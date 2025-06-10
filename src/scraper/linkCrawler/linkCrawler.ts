@@ -125,7 +125,7 @@ const IGNORED_QUERY_PARAMS: string[] = [
  * @returns True if the string can be parsed as a URL, false otherwise.
  */
 function isValidUrlFormat(url: string): boolean {
-  if (!url || typeof url !== 'string' || url.trim() === '') {
+  if (!url || url.trim() === '') {
     return false;
   }
   try {
@@ -210,8 +210,7 @@ function hasAllowedPageExtension(url: string): boolean {
       return ALLOWED_PAGE_EXTENSIONS.includes(''); // Check for URLs with no extension
     }
     const extension = path.substring(lastDotIndex + 1).toLowerCase();
-    const isAllowed = ALLOWED_PAGE_EXTENSIONS.includes(extension);
-    return isAllowed;
+    return ALLOWED_PAGE_EXTENSIONS.includes(extension);
   } catch {
     return false;
   }
@@ -219,8 +218,8 @@ function hasAllowedPageExtension(url: string): boolean {
 
 function isBlacklistedUrl(url: string): boolean {
   // This now checks against URL_BLACKLIST_PATTERNS using String.prototype.includes()
-  const isBlacklisted = URL_BLACKLIST_PATTERNS.some((pattern) => url.includes(pattern));
-  return isBlacklisted;
+
+  return URL_BLACKLIST_PATTERNS.some((pattern) => url.includes(pattern));
 }
 
 function isValidUrl(url: string): boolean {
@@ -268,11 +267,7 @@ function isValidUrl(url: string): boolean {
     return false;
   }
 
-  if (isProductPage(normalizedUrl)) {
-    return false;
-  }
-
-  return true;
+  return !isProductPage(normalizedUrl);
 }
 
 function shouldCrawlUrl(
@@ -640,7 +635,9 @@ async function getUrlsFromUrl(url: string): Promise<string[]> {
 
     const $ = cheerio.load(res.data);
     const baseUrl = new URL(url);
-    const extractedUrls = $('a[href]')
+
+    // console.log( `[getUrlsFromUrl] Finished extracting links from ${url}. Found ${extractedUrls.length} raw links.`);
+    return $('a[href]')
       .map((_, el: any) => {
         const href = $(el).attr('href');
         if (href) {
@@ -648,8 +645,7 @@ async function getUrlsFromUrl(url: string): Promise<string[]> {
             return null;
           }
           try {
-            const absoluteUrl = new URL(href, baseUrl).toString();
-            return absoluteUrl;
+            return new URL(href, baseUrl).toString();
           } catch (e: any) {
             console.warn(
               `[getUrlsFromUrl] Could not resolve URL: ${href} relative to ${baseUrl.toString()}: ${e.message}`,
@@ -661,8 +657,6 @@ async function getUrlsFromUrl(url: string): Promise<string[]> {
       })
       .get()
       .filter(Boolean) as string[];
-    // console.log( `[getUrlsFromUrl] Finished extracting links from ${url}. Found ${extractedUrls.length} raw links.`);
-    return extractedUrls;
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
       if (error.response) {
