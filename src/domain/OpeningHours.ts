@@ -33,8 +33,8 @@ export type DatabaseOpeningHours = {
   createdAt: Date;
   updatedAt: Date;
   openingAt: string;
-  openingAtAfterNoon: string;
-  closingAtAfterNoon: string;
+  openingAtAfterNoon?: string | null;
+  closingAtAfterNoon?: string | null;
   closingAt: string;
   storeId: number;
 };
