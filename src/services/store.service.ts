@@ -104,8 +104,8 @@ export const StoreService = {
     const store = await StoreRepository.createStore(
       name,
       locationObj.id,
-      scrapedInfo.retour,
       betterDescription,
+      scrapedInfo.retour,
     );
 
     if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
