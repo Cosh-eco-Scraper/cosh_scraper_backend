@@ -3,43 +3,43 @@ export type ScrapedInfo = {
   name: string;
   brands: string[];
   openingHours: {
-    monday: {
+    Monday: {
       open: string;
       close: string;
       openAfterNoon: string | null;
       closeAfterNoon: string | null;
     } | null;
-    tuesday: {
+    Tuesday: {
       open: string;
       close: string;
       openAfterNoon: string | null;
       closeAfterNoon: string | null;
     } | null;
-    wednesday: {
+    Wednesday: {
       open: string;
       close: string;
       openAfterNoon: string | null;
       closeAfterNoon: string | null;
     } | null;
-    thursday: {
+    Thursday: {
       open: string;
       close: string;
       openAfterNoon: string | null;
       closeAfterNoon: string | null;
     } | null;
-    friday: {
+    Friday: {
       open: string;
       close: string;
       openAfterNoon: string | null;
       closeAfterNoon: string | null;
     } | null;
-    saturday: {
+    Saturday: {
       open: string;
       close: string;
       openAfterNoon: string | null;
       closeAfterNoon: string | null;
     } | null;
-    sunday: {
+    Sunday: {
       open: string;
       close: string;
       openAfterNoon: string | null;
