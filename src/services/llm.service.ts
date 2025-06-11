@@ -14,11 +14,24 @@ const sendPrompt = async (prompt: string): Promise<string | undefined> => {
   return response.text;
 };
 
+const descriptionGenerator = async (prompt: string): Promise<string | undefined> => {
+  const response = await ai.models.generateContent({
+    config: {
+      temperature: 0.2,
+    },
+    model: 'gemini-2.0-flash',
+    contents: prompt,
+  });
+  console.log(response.text);
+
+  return response.text;
+};
+
 const descriptionCheck = async (description: string): Promise<string | undefined> => {
   const response = await ai.models.generateContent({
     model: 'gemini-2.0-flash',
     contents:
-      'give me only true or false for answer. can you check if this description complies to the European and Belgian guidelines for greeNwashing:' +
+      'Give me only Yes, it does comply or No, It does not comply for an answer. can you check if this description complies to the European and Belgian guidelines for greeNwashing:' +
       description,
   });
   console.log(response.text);
@@ -29,4 +42,5 @@ const descriptionCheck = async (description: string): Promise<string | undefined
 export const LLMService = {
   sendPrompt,
   descriptionCheck,
+  descriptionGenerator,
 };

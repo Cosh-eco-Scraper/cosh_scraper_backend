@@ -665,6 +665,84 @@
           }
         }
       }
+    },
+    "/statements/{id}": {
+      "get": {
+        "tags": ["Statements"],
+        "summary": "Get a statement by ID",
+        "description": "Fetches a specific statement by its ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The ID of the statement to fetch"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "The requested statement",
+            "schema": {
+              "$ref": "#/definitions/Statement"
+            }
+          },
+          "404": {
+            "description": "Statement not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/statements": {
+      "get": {
+        "tags": ["Statements"],
+        "summary": "Get all statements",
+        "description": "Fetches all statements from the database.",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "A list of all statements",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Statement"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Statement": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "example": 1
+        },
+        "text": {
+          "type": "string",
+          "example": "This is a sample statement."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2023-10-01T12:00:00Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2023-10-02T12:00:00Z"
+        }
+      }
     }
   }
 }
