@@ -29,9 +29,9 @@ export const openingHoursRespository = {
     day: string,
     startTime: string,
     endTime: string,
-    startTimeAn: string,
-    endTimeAn: string,
     store_id: number,
+    startTimeAn?: string | null,
+    endTimeAn?: string | null,
   ): Promise<OpeningHours> => {
     const query = openingHoursQueries.createOpeningHours();
     const params = [day, startTime, endTime, startTimeAn, endTimeAn, store_id];
