@@ -59,12 +59,33 @@ export const StoreService = {
       throw new Error('Failed to scrape store information');
     }
 
-    const prompt = `Write a detailed store description between 300 and 500 words. 
-    Base the description strictly on the following two sources of information:
-      1. Store URL: ${URL}
-      2. About Info: "${scrapedInfo.about}
-      
-      make sure that (') is noted as ''.`;
+    function removeTrailingNewline(text: string): string {
+      return text.replace(/\n+$/, '');
+    }
+
+    const guidelines =
+      'https://www.europarl.europa.eu/topics/en/article/20240111STO16722/stopping-greenwashing-how-the-eu-regulates-green-claims';
+
+    const prompt = `
+    **personality: you are a professional store content describer, that is against greenwashing**
+    
+    **Action: you will write a description of the store in a paragraph of text. The description should be about 225 words long.**
+    
+    Important:
+    - The description should be about the store, not the products it sells.
+    - This is the store Url: "${URL}"
+    - The store is located in this location: "${location}"
+    - The Store has to comply with the EU Green Washing Guidelines: ${guidelines}
+    
+    Notes:
+    - The description is written in third person.
+    - The description should be one continuous paragraph.
+    - The city is mentioned in the beginning of the description.
+    - One sentence should be about the store's concept.
+    - One sentence about what makes the store unique compared to other stores, without explicitly stating that this makes the store unique. Just write about something unique about the store.
+    - One sentence about “find the brands they sell below” (for multibrands and possibly flagships, NOT for second-hand, workshops, ...).
+    - The description should not mention discounts, online shopping, or sales.
+    `;
 
     const largerDescription = await LLMService.sendPrompt(prompt);
     console.log('Larger description:', largerDescription);
@@ -87,12 +108,6 @@ export const StoreService = {
       scrapedInfo.retour,
     );
 
-    if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
-      for (const brandName of scrapedInfo.brands) {
-        await BrandService.createBrand(brandName, null);
-      }
-    }
-
     if (scrapedInfo.openingHours) {
       for (const [day, hours] of Object.entries(scrapedInfo.openingHours)) {
         if (hours) {
@@ -103,9 +118,15 @@ export const StoreService = {
 
     if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
       for (const brandName of scrapedInfo.brands) {
-        // Create or get the brand
-        const brand = await BrandService.createBrand(brandName, null);
-        // Associate the brand with the store
+        // Try to find an existing brand
+        let brand = await BrandService.getBrandByName(brandName);
+
+        if (!brand) {
+          // If it doesn't exist, create it
+          brand = await BrandService.createBrand(brandName, null);
+        }
+
+        // Now associate (whether new or existing)
         await storeBrandsService.addBrandToStore(store.id, brand.id);
       }
     }
