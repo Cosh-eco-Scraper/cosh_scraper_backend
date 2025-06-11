@@ -281,17 +281,24 @@ function validateScrapedInfo(data: any): ScrapedInfo {
   }
 
   // Basic checks for top-level properties
-  if (typeof data.url !== 'string') throw new Error('Invalid ScrapedInfo: url must be a string.');
-  if (typeof data.name !== 'string') throw new Error('Invalid ScrapedInfo: name must be a string.');
+  if (typeof data.url !== 'string') {
+    throw new Error('Invalid ScrapedInfo: url must be a string.');
+  }
+  if (typeof data.name !== 'string') {
+    throw new Error('Invalid ScrapedInfo: name must be a string.');
+  }
   if (!Array.isArray(data.brands) || !data.brands.every((item: any) => typeof item === 'string')) {
     throw new Error('Invalid ScrapedInfo: brands must be an array of strings.');
   }
-  if (typeof data.location !== 'string')
+  if (typeof data.location !== 'string') {
     throw new Error('Invalid ScrapedInfo: location must be a string.');
-  if (typeof data.about !== 'string')
+  }
+  if (typeof data.about !== 'string') {
     throw new Error('Invalid ScrapedInfo: about must be a string.');
-  if (typeof data.retour !== 'string')
+  }
+  if (typeof data.retour !== 'string') {
     throw new Error('Invalid ScrapedInfo: retour must be a string.');
+  }
   if (!Array.isArray(data.type) || !data.type.every((item: any) => typeof item === 'string')) {
     throw new Error('Invalid ScrapedInfo: type must be an array of strings.');
   }
@@ -382,6 +389,7 @@ export async function summarizeRelevantInfoWithAI(
       if (!aiResponse) {
         console.error('LLMService returned an empty response.');
         attempts++;
+        // eslint-disable-next-line no-undef
         await new Promise((resolve) => setTimeout(resolve, baseDelay * Math.pow(2, attempts)));
         continue;
       }
@@ -413,6 +421,7 @@ export async function summarizeRelevantInfoWithAI(
         // This catch block handles JSON parsing errors or validation errors.
         // The LLMService.sendPrompt is expected to handle its own internal API retries.
         attempts++;
+        // eslint-disable-next-line no-undef
         await new Promise((resolve) => setTimeout(resolve, baseDelay * Math.pow(2, attempts)));
       }
     } catch (error) {
@@ -423,6 +432,7 @@ export async function summarizeRelevantInfoWithAI(
       // For general errors, we still apply the backoff and retry logic,
       // assuming they might be transient.
       attempts++;
+      // eslint-disable-next-line no-undef
       await new Promise((resolve) => setTimeout(resolve, baseDelay * Math.pow(2, attempts)));
     }
   }
