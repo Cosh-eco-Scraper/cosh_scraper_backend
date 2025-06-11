@@ -106,10 +106,10 @@ function getSpecificInstructions(keyword: string): string {
  * "sat" becomes "Saturday"
  * "sun" becomes "Sunday"
  This will work the same for other languages.
- return every opening and closing hours in a table per city
+ return every opening and closing hours in a table per store
  example:
  "
- Leuven, Belgium:
+ Bondgenotenlaan 24 , 3000 Leuven, Belgium:
  | days      | morning open | morning close | after noon open | after noon close |
  | Monday    | 10:00        | 13:00         | 13:30           | 18:00            |
  | Tuesday   | 10:00        | 13:00         | 13:30           | 18:00            |

@@ -43,10 +43,10 @@ export const StoreService = {
     return storeTypes;
   },
 
-  createCompleteStore: async (name: string, URL: string, location: string) => {
+  createCompleteStore: async (url: string, location: string) => {
     // eslint-disable-next-line no-undef
     const startTime = performance.now();
-    const scrapedInfo = await run(URL, location);
+    const scrapedInfo = await run(url, location);
     // eslint-disable-next-line no-undef
     const endTime = performance.now();
     const executionTime = endTime - startTime;
@@ -73,7 +73,7 @@ export const StoreService = {
     
     Important:
     - The description should be about the store, not the products it sells.
-    - This is the store Url: "${URL}"
+    - This is the store Url: "${url}"
     - The store is located in this location: "${location}"
     - The Store has to comply with the EU Green Washing Guidelines: ${guidelines}
     
@@ -105,7 +105,7 @@ export const StoreService = {
     );
 
     const store = await StoreRepository.createStore(
-      name,
+      scrapedInfo.name,
       locationObj.id,
       betterDescription,
       scrapedInfo.retour,

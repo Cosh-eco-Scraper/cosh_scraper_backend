@@ -119,6 +119,19 @@ function getInstructions(location: string): string {
   * "9:00-12:00 & 14:00-18:00"
   * "9:00-18:00 (closed between 12:00-14:00)"
 
+* For "openingHours", recognize common siesta patterns such as:
+   Bondgenotenlaan 24 , 3000 Leuven, Belgium:
+ | days      | morning open | morning close | after noon open | after noon close |
+ | Monday    | 10:00        | 13:00         | 13:30           | 18:00            |
+ | Tuesday   | 10:00        | 13:00         | 13:30           | 18:00            |
+ | Wednesday | 10:00        | 13:00         | 13:30           | 18:00            |
+ | Thursday  | 10:00        | 13:00         | 13:30           | 18:00            |
+ | Friday    | 10:00        | 13:00         | 13:30           | 18:00            |
+ | Saturday  | 10:00        | open          | open            | 18:00            |
+ | Sunday    | closed       | closed        | closed          | closed           |
+ - if it is moring open and only closes at after noon close, set "openAfterNoon" to "close" and "closeAfterNoon" to null. and use the value of after noon close in "close"
+
+
 - For "openingHours", ensure that if either openAfterNoon or closeAfterNoon is set, both must be set with valid times
 
 - For "openingHours", if a store is open continuously without any breaks within the day (e.g., "10:00-18:00"), set "open" to the start time and "close" to the end time. Set "openAfterNoon" and "closeAfterNoon" values to null.

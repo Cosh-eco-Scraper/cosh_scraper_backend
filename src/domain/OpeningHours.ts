@@ -19,8 +19,8 @@ export type OpeningHoursDto = {
   day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
   openingAt: string;
   closingAt: string;
-  openingAtAfterNoon: string;
-  closingAtAfterNoon: string;
+  openingAtAfterNoon?: string | null;
+  closingAtAfterNoon?: string | null;
   storeId: number;
 };
 

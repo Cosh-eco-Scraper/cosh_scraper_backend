@@ -275,37 +275,81 @@ function findKeywordContexts(
  * @param {ScrapedInfo} parsed - The parsed ScrapedInfo object from the AI response.
  * @returns {boolean} True if validation passes, throws an error otherwise.
  */
-function validateScrapedInfo(parsed: ScrapedInfo): boolean {
-  if (parsed.name.trim() === '') {
-    throw new Error('Validation Error: "name" is missing or empty.');
-  }
-  if (!Array.isArray(parsed.brands)) {
-    throw new Error('Validation Error: "brands" is not an array.');
-  }
-  if (typeof parsed.openingHours !== 'object' || parsed.openingHours === null) {
-    throw new Error('Validation Error: "openingHours" is missing or malformed.');
+function validateScrapedInfo(data: any): ScrapedInfo {
+  if (typeof data !== 'object' || data === null) {
+    throw new Error('Invalid ScrapedInfo: not an object or is null.');
   }
 
-  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  for (const day of days) {
-    const dayHours = parsed.openingHours[day as keyof typeof parsed.openingHours];
-    if (dayHours !== null) {
-      if (dayHours.open.trim() === '' || dayHours.close.trim() === '') {
-        console.warn(
-          `Validation Warning: openingHours for ${day} has invalid open/close times. Attempting to proceed.`,
-        );
-      }
+  // Basic checks for top-level properties
+  if (typeof data.url !== 'string') throw new Error('Invalid ScrapedInfo: url must be a string.');
+  if (typeof data.name !== 'string') throw new Error('Invalid ScrapedInfo: name must be a string.');
+  if (!Array.isArray(data.brands) || !data.brands.every((item: any) => typeof item === 'string')) {
+    throw new Error('Invalid ScrapedInfo: brands must be an array of strings.');
+  }
+  if (typeof data.location !== 'string')
+    throw new Error('Invalid ScrapedInfo: location must be a string.');
+  if (typeof data.about !== 'string')
+    throw new Error('Invalid ScrapedInfo: about must be a string.');
+  if (typeof data.retour !== 'string')
+    throw new Error('Invalid ScrapedInfo: retour must be a string.');
+  if (!Array.isArray(data.type) || !data.type.every((item: any) => typeof item === 'string')) {
+    throw new Error('Invalid ScrapedInfo: type must be an array of strings.');
+  }
+
+  // Validate openingHours structure
+  if (typeof data.openingHours !== 'object' || data.openingHours === null) {
+    throw new Error('Invalid ScrapedInfo: openingHours must be an object.');
+  }
+
+  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  // IMPORTANT: Ensure all expected days are present as keys in openingHours first.
+  // This prevents 'Cannot read properties of undefined' if a day is missing from the AI's output.
+  for (const day of daysOfWeek) {
+    if (!(day in data.openingHours)) {
+      throw new Error(
+        `Validation Error: 'openingHours' is missing expected day: "${day}". The AI must provide all days.`,
+      );
     }
   }
 
-  if (parsed.location.trim() === '') {
-    console.warn('Validation Warning: "location" is missing or empty. Attempting to proceed.');
+  // Now iterate and validate content for each day, knowing the key exists
+  for (const day of daysOfWeek) {
+    const dayData = data.openingHours[day]; // This should now always be defined, if the previous check passes.
+    if (typeof dayData !== 'object' || dayData === null) {
+      // This check is a safeguard, but the previous 'day in data.openingHours' should prevent this.
+      throw new Error(
+        `Validation Error: openingHours.${day} must be an object (got ${typeof dayData}).`,
+      );
+    }
+    if (typeof dayData.open !== 'string') {
+      throw new Error(`Validation Error: openingHours.${day}.open must be a string.`);
+    }
+    if (typeof dayData.close !== 'string') {
+      throw new Error(`Validation Error: openingHours.${day}.close must be a string.`);
+    }
+    // Check optional fields
+    if (dayData.openAfterNoon !== null && typeof dayData.openAfterNoon !== 'string') {
+      throw new Error(
+        `Validation Error: openingHours.${day}.openAfterNoon must be a string or null.`,
+      );
+    }
+    if (dayData.closeAfterNoon !== null && typeof dayData.closeAfterNoon !== 'string') {
+      throw new Error(
+        `Validation Error: openingHours.${day}.closeAfterNoon must be a string or null.`,
+      );
+    }
+
+    // This is the line that previously caused the error because dayData was undefined.
+    // It is now safer because we've confirmed dayData and its 'open'/'close' properties are strings.
+    if (dayData.open.trim() === '' || dayData.close.trim() === '') {
+      console.warn(
+        `Validation Warning: openingHours for ${day} has empty open/close times. Attempting to proceed.`,
+      );
+    }
   }
 
-  if (!Array.isArray(parsed.type)) {
-    throw new Error('Validation Error: "type" is not an array.');
-  }
-  return true; // All validations passed or warnings issued
+  return data as ScrapedInfo;
 }
 
 /**
@@ -327,47 +371,58 @@ export async function summarizeRelevantInfoWithAI(
   const prompt = getPrompt(url, snippets, location);
   let attempts = 0;
   const maxAttempts = 5;
-  const baseDelay = 1500;
+  const baseDelay = 1500; // 1.5 seconds
 
   while (attempts < maxAttempts) {
     try {
-      const aiResponse = await LLMService.sendPrompt(prompt);
+      console.log(`Attempt ${attempts + 1}: Sending prompt to LLMService...`);
+      // Use the LLMService.sendPrompt method
+      let aiResponse = await LLMService.sendPrompt(prompt);
 
       if (!aiResponse) {
-        console.error('AI response is empty');
+        console.error('LLMService returned an empty response.');
         attempts++;
-        // eslint-disable-next-line no-undef
         await new Promise((resolve) => setTimeout(resolve, baseDelay * Math.pow(2, attempts)));
         continue;
       }
 
+      console.log('Raw AI response from LLMService:', aiResponse);
+
       try {
-        const jsonMatch = aiResponse.match(/\{[\s\S]*}/);
-        if (jsonMatch) {
-          const jsonString = jsonMatch[0];
-          const parsed = JSON.parse(jsonString) as ScrapedInfo;
-          validateScrapedInfo(parsed); // Use the new validation function
-          return parsed;
+        // Pre-process the AI response to remove markdown code block delimiters if present.
+        // The error "Unexpected token '`', '```json" indicates the AI is wrapping the JSON
+        // in markdown code block syntax despite the prompt's instruction.
+        if (aiResponse.startsWith('```json')) {
+          aiResponse = aiResponse.substring('```json'.length);
         }
-        throw new Error('No JSON found in AI response, or JSON is malformed.');
+        if (aiResponse.endsWith('```')) {
+          aiResponse = aiResponse.substring(0, aiResponse.length - '```'.length);
+        }
+        // Trim any leading/trailing whitespace that might remain
+        aiResponse = aiResponse.trim();
+
+        console.log('Cleaned AI response for JSON parsing:', aiResponse);
+
+        // The LLMService.sendPrompt returns a string, which should be the JSON.
+        // We'll attempt to parse it directly.
+        const parsed = JSON.parse(aiResponse) as ScrapedInfo;
+        validateScrapedInfo(parsed); // Use the validation function
+        return parsed;
       } catch (err) {
         console.error('Failed to parse or validate AI response as JSON:', err);
+        // This catch block handles JSON parsing errors or validation errors.
+        // The LLMService.sendPrompt is expected to handle its own internal API retries.
         attempts++;
-        // eslint-disable-next-line no-undef
         await new Promise((resolve) => setTimeout(resolve, baseDelay * Math.pow(2, attempts)));
       }
     } catch (error) {
-      const err = error as any; // Cast to any for statusCode property
-
-      if ((err.statusCode === 429 || err.statusCode === 503) && attempts < maxAttempts - 1) {
-        attempts++;
-        // eslint-disable-next-line no-undef
-        await new Promise((resolve) => setTimeout(resolve, baseDelay * Math.pow(2, attempts)));
-        continue;
-      }
-      console.error('Failed to backoff from AI API:', err.message);
+      // This outer catch block primarily catches errors originating from LLMService.sendPrompt
+      // that are not internally handled (e.g., unexpected critical errors from the service itself).
+      const err = error as any;
+      console.error('Error during LLMService call:', err.message);
+      // For general errors, we still apply the backoff and retry logic,
+      // assuming they might be transient.
       attempts++;
-      // eslint-disable-next-line no-undef
       await new Promise((resolve) => setTimeout(resolve, baseDelay * Math.pow(2, attempts)));
     }
   }
