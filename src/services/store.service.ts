@@ -86,7 +86,7 @@ export const StoreService = {
     - One sentence about what makes the store unique compared to other stores, without explicitly stating that this makes the store unique. Just write about something unique about the store.
     - One sentence about “find the brands they sell below” (for multibrands and possibly flagships, NOT for second-hand, workshops, ...).
     - The description should not mention discounts, online shopping, or sales.
-`;
+    `;
 
     await sendMessage(`Creating a description.`);
     const largerDescription = await LLMService.descriptionGenerator(prompt);
@@ -112,12 +112,6 @@ export const StoreService = {
       scrapedInfo.retour,
     );
 
-    if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
-      for (const brandName of scrapedInfo.brands) {
-        await BrandService.createBrand(brandName, null);
-      }
-    }
-
     if (scrapedInfo.openingHours) {
       for (const [day, hours] of Object.entries(scrapedInfo.openingHours)) {
         if (hours) {
@@ -135,9 +129,15 @@ export const StoreService = {
 
     if (scrapedInfo.brands && scrapedInfo.brands.length > 0) {
       for (const brandName of scrapedInfo.brands) {
-        // Create or get the brand
-        const brand = await BrandService.createBrand(brandName, null);
-        // Associate the brand with the store
+        // Try to find an existing brand
+        let brand = await BrandService.getBrandByName(brandName);
+
+        if (!brand) {
+          // If it doesn't exist, create it
+          brand = await BrandService.createBrand(brandName, null);
+        }
+
+        // Now associate (whether new or existing)
         await storeBrandsService.addBrandToStore(store.id, brand.id);
       }
     }
