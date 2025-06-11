@@ -5,7 +5,7 @@ import { ScrapedInfo } from '../domain/ScrapedInfo';
 /**
  * Helper to check if a day's hours are considered 'empty' or 'null'
  */
-function isDayHoursEmpty(dayHours: ScrapedInfo['openingHours']['monday']): boolean {
+function isDayHoursEmpty(dayHours: ScrapedInfo['openingHours']['Monday']): boolean {
   return (
     !dayHours ||
     (!dayHours.open && !dayHours.close && !dayHours.openAfterNoon && !dayHours.closeAfterNoon)
@@ -24,13 +24,13 @@ export function consolidateScrapedInfoResults(results: ScrapedInfo[]): ScrapedIn
     name: '',
     brands: [],
     openingHours: {
-      monday: null,
-      tuesday: null,
-      wednesday: null,
-      thursday: null,
-      friday: null,
-      saturday: null,
-      sunday: null,
+      Monday: null,
+      Tuesday: null,
+      Wednesday: null,
+      Thursday: null,
+      Friday: null,
+      Saturday: null,
+      Sunday: null,
     },
     location: '',
     about: '',
@@ -79,17 +79,17 @@ export function consolidateScrapedInfoResults(results: ScrapedInfo[]): ScrapedIn
 
   // --- Consolidate Opening Hours ---
   const days: Array<keyof ScrapedInfo['openingHours']> = [
-    'monday',
-    'tuesday',
-    'wednesday',
-    'thursday',
-    'friday',
-    'saturday',
-    'sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
   ];
 
   days.forEach((day) => {
-    let bestDayHours: ScrapedInfo['openingHours']['monday'] | null = null;
+    let bestDayHours: ScrapedInfo['openingHours']['Monday'] | null = null;
     let hasExplicitlyClosed = false;
 
     // Prioritize non-null entries
