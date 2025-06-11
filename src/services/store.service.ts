@@ -6,6 +6,7 @@ import LocationService from './location.service';
 import storeBrandsService from './storeBrands.service';
 import { LLMService } from './llm.service';
 import { sendMessage } from '../middlewares/rabbitMQ';
+import TypeService from './type.service';
 
 export const StoreService = {
   getAllStores: async () => {
@@ -138,6 +139,13 @@ export const StoreService = {
         const brand = await BrandService.createBrand(brandName, null);
         // Associate the brand with the store
         await storeBrandsService.addBrandToStore(store.id, brand.id);
+      }
+    }
+
+    if (scrapedInfo.type && Array.isArray(scrapedInfo.type) && scrapedInfo.type.length > 0) {
+      for (const typeName of scrapedInfo.type) {
+        const type = await TypeService.findOrCreateType(typeName);
+        await TypeService.addTypeToStore(store.id, type.id);
       }
     }
 
