@@ -5,6 +5,7 @@ import OpeningHoursService from './openingshours.service';
 import LocationService from './location.service';
 import storeBrandsService from './storeBrands.service';
 import { LLMService } from './llm.service';
+import { sendMessage } from '../middlewares/rabbitMQ';
 
 export const StoreService = {
   getAllStores: async () => {
@@ -86,10 +87,12 @@ export const StoreService = {
     - The description should not mention discounts, online shopping, or sales.
 `;
 
+    await sendMessage(`Creating a description.`);
     const largerDescription = await LLMService.descriptionGenerator(prompt);
     console.log('prompt:', prompt);
     const betterDescription = removeTrailingNewline(largerDescription || '');
 
+    await sendMessage(`Saving data`);
     const [street, number, postalCode, city, country] = (scrapedInfo.location || '')
       .split(',')
       .map((s) => s.trim());

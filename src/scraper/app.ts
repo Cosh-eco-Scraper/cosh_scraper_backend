@@ -8,6 +8,7 @@ import getRobotParser from './robot/robot';
 import { smallSummarize } from './prompt/smallSummarize';
 import { LLMService } from '../services/llm.service';
 import { summarizeRelevantInfoWithAI } from './scraper';
+import { sendMessage } from '../middlewares/rabbitMQ';
 // The consolidateScrapedInfoResults is not needed in run.ts for Strategy B,
 // as we're consolidating raw contexts, not pre-summarized ScrapedInfo objects.
 // import { consolidateScrapedInfoResults } from './misc/consolidate'; // <-- Remove this line
@@ -53,6 +54,8 @@ export async function run(baseURL: string, location: string) {
   const delayMs = crawlDelay * 1000 || parseInt(process.env.SCRAPER_DELAY as string, 10) || 1000;
 
   const allLinks = await getAllValidUrls(new URL(baseURL).toString());
+  await sendMessage(`number of urls found to find data: ${allLinks.length}`);
+
   console.log(`Discovered total ${allLinks.length} internal links.`);
 
   const numberOfWorkers = parseInt(process.env.CONCURRENT_WORKERS || '4', 10);
@@ -160,6 +163,8 @@ export async function run(baseURL: string, location: string) {
             console.log(
               `Main: Worker ${workerId} completed ${msg.url}. Processed: ${tasksProcessed}/${allLinks.length}. Queue: ${taskQueue.length}.`,
             );
+            const completedPercentage = Math.round((tasksProcessed / allLinks.length) * 100);
+            sendMessage(`Completed ${completedPercentage}% of the links`);
             checkCompletionAndTerminateWorkers();
           } else if (msg.type === 'task_error') {
             tasksProcessed++;
@@ -208,6 +213,7 @@ export async function run(baseURL: string, location: string) {
   );
   console.log(`Starting post-processing and AI summarization...`);
 
+  await sendMessage(`Filtering on keywords`);
   // --- Post-processing: Filter and Prioritize Collected Keyword Contexts (SITE-WIDE) ---
   const finalSiteWideKeywordContexts: Record<string, string[]> = {};
 
@@ -226,6 +232,7 @@ export async function run(baseURL: string, location: string) {
   const promptDelayMs = 1500; // Delay between LLM calls to respect rate limits
   const maxChunksPerKeyword = 20; // New constant for the maximum number of chunks
 
+  await sendMessage(`Summerizing the keywords, this may take a while.`);
   for (const [keyword, contexts] of Object.entries(finalSiteWideKeywordContexts)) {
     const maxContextsCharsPerPrompt = 200000; // Aim for Flash-Lite context window (1M chars)
     let currentChunk: string[] = [];
@@ -298,6 +305,7 @@ export async function run(baseURL: string, location: string) {
     `Sending final consolidated data to summarizeRelevantInfoWithAI (${finalSnippetsForSummarizeAI.length} combined snippets).`,
   );
 
+  await sendMessage(`Running the final summarization.`);
   const finalSummary = await summarizeRelevantInfoWithAI(
     baseURL,
     finalSnippetsForSummarizeAI,
