@@ -5,7 +5,6 @@ import OpeningHoursService from './openingshours.service';
 import LocationService from './location.service';
 import storeBrandsService from './storeBrands.service';
 import { LLMService } from './llm.service';
-import getRobotParser from '../scraper/robot/robot';
 
 export const StoreService = {
   getAllStores: async () => {
@@ -59,9 +58,9 @@ export const StoreService = {
       throw new Error('Failed to scrape store information');
     }
 
-    function removeTrailingNewline(text: string): string {
-      return text.replace(/\n+$/, '');
-    }
+    // function removeTrailingNewline(text: string): string {
+    //   return text.replace(/\n+$/, '');
+    // }
 
     const guidelines =
       'https://www.europarl.europa.eu/topics/en/article/20240111STO16722/stopping-greenwashing-how-the-eu-regulates-green-claims';
