@@ -30,3 +30,21 @@ export async function getAllBrands(_req: Request, res: Response, next: NextFunct
     next(error);
   }
 }
+
+export async function getBrandByName(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { name } = req.params;
+    if (!name) {
+      res.status(400).json({ message: 'Brand name is required' });
+    }
+
+    const brand = await BrandService.getBrandByName(name);
+    if (!brand) {
+      res.status(404).json({ message: 'Brand not found' });
+    } else {
+      res.json(dtoMapper.mapBrandsforAll(brand));
+    }
+  } catch (error) {
+    next(error);
+  }
+}
