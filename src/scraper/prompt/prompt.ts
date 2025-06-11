@@ -24,13 +24,13 @@ function getSchemaDefinition(): string {
   name: string;
   brands: string[];
   openingHours: {
-    monday: { open: string; close: string } | null;
-    tuesday: { open: string; close: string } | null;
-    wednesday: { open: string; close: string } | null;
-    thursday: { open: string; close: string } | null;
-    friday: { open: string; close: string } | null;
-    saturday: { open: string; close: string } | null;
-    sunday: { open: string; close: string } | null;
+    Monday: { open: string; close: string } | null;
+    Tuesday: { open: string; close: string } | null;
+    Wednesday: { open: string; close: string } | null;
+    Thursday: { open: string; close: string } | null;
+    Friday: { open: string; close: string } | null;
+    Saturday: { open: string; close: string } | null;
+    Sunday: { open: string; close: string } | null;
   };
   location: string;
   about: string;
