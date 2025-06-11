@@ -61,7 +61,6 @@ const sendPrompt = async (prompt: string): Promise<string | undefined> => {
   }
 };
 
-
 const descriptionGenerator = async (prompt: string): Promise<string | undefined> => {
   const response = await ai.models.generateContent({
     config: {
