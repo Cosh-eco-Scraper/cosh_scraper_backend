@@ -121,9 +121,9 @@ export const StoreService = {
             day,
             hours.open,
             hours.close,
+            store.id,
             hours.openAfterNoon,
             hours.closeAfterNoon,
-            store.id,
           );
         }
       }
