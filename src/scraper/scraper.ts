@@ -389,8 +389,10 @@ export async function summarizeRelevantInfoWithAI(
       if (!aiResponse) {
         console.error('LLMService returned an empty response.');
         attempts++;
+        const delay = baseDelay * Math.pow(2, attempts);
+
         // eslint-disable-next-line no-undef
-        await new Promise((resolve) => setTimeout(resolve, baseDelay * Math.pow(2, attempts)));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         continue;
       }
 
