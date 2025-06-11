@@ -1,3 +1,4 @@
+import { get } from 'axios';
 import databasePool from '../config/dbConnectionConfig';
 import { Brand } from '../domain/Brand';
 import { mapper } from './mapper';
@@ -20,6 +21,14 @@ const BrandRepository = {
 
     brands = result.rows.map(mapper.mapBrandForList);
     return brands;
+  },
+
+  getBrandByName: async (name: string) => {
+    const result = await databasePool.query(brandQueries.getBrandbyName(), [name]);
+    if (result.rows.length === 0) {
+      return null;
+    }
+    return mapper.mapBrandForList(result.rows[0]);
   },
 };
 
