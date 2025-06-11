@@ -145,6 +145,9 @@ function getInstructions(location: string): string {
 - For "openingHours", if the opening hours cannot be found on the provided URL, first attempt to look them up on google.com using the store name and the city name. If still no results are found, return {"open": "closed", "close": "closed", "openAfterNoon": null, "closeAfterNoon": null} for that day.
 
 - For "openingHours", check if the information is correct and complete with the store url. if not, correct this information.
+
+- For "retour", if no information is found on the website, return "No information found".
+- For "About", if no information is found on the website, return "No information found".
 `;
 }
 function getSnippets(snippets: string[]): string {
