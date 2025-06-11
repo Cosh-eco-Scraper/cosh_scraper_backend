@@ -226,9 +226,14 @@ export async function summarizeRelevantInfoWithAI(
         console.error('AI response is empty');
         attempts++;
         const delay = baseDelay * Math.pow(2, attempts);
+<<<<<<< HEAD
 
         // @ts-ignore
         await new Promise((resolve) => setTimeout(resolve, delay)); // eslint-disable-line no-undef
+=======
+        // eslint-disable-next-line no-undef
+        await new Promise((resolve) => setTimeout(resolve, delay));
+>>>>>>> fee069d (again)
         continue;
       }
 

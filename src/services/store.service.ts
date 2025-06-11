@@ -58,9 +58,9 @@ export const StoreService = {
       throw new Error('Failed to scrape store information');
     }
 
-    function removeTrailingNewline(text: string): string {
-      return text.replace(/\n+$/, '');
-    }
+    // function removeTrailingNewline(text: string): string {
+    //   return text.replace(/\n+$/, '');
+    // }
 
     const guidelines =
       'https://www.europarl.europa.eu/topics/en/article/20240111STO16722/stopping-greenwashing-how-the-eu-regulates-green-claims';
