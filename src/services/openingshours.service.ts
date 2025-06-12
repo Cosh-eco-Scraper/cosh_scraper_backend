@@ -23,12 +23,16 @@ const createOpeningHours = async (
   startTime: string,
   endTime: string,
   store_id: number,
+  startTimeAn?: string | null,
+  endTimeAn?: string | null,
 ): Promise<OpeningHours> => {
   const result = await openingHoursRespository.createOpeningHours(
     day,
     startTime,
     endTime,
     store_id,
+    startTimeAn,
+    endTimeAn,
   );
   return result;
 };

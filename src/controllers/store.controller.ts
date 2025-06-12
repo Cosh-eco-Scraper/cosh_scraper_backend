@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { StoreService } from '../services/store.service';
 import { dtoMapper } from './dtoMapper';
 
@@ -115,14 +115,14 @@ export async function createCompleteStore(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const { name, url, location } = req.body;
+    const { url, location } = req.body;
 
-    if (!name || !url) {
-      res.status(400).json({ message: 'Name and URL are required' });
+    if (!url) {
+      res.status(400).json({ message: 'URL is required' });
       return;
     }
 
-    const store = await StoreService.createCompleteStore(name, url, location);
+    const store = await StoreService.createCompleteStore(url, location);
 
     res.status(201).json({ id: store.id, message: 'Store created successfully' });
   } catch (error) {

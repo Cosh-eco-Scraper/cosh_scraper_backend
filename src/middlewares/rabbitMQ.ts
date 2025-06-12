@@ -34,7 +34,7 @@ export async function receiveMessages(onMessage?: (msg: string) => void) {
 
     await channel.assertQueue(variables.queue, { durable: true });
 
-    channel.consume(
+    await channel.consume(
       variables.queue,
       (msg) => {
         if (msg !== null) {

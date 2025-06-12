@@ -5,6 +5,7 @@ import OpeningHoursService from './openingshours.service';
 import LocationService from './location.service';
 import storeBrandsService from './storeBrands.service';
 import { LLMService } from './llm.service';
+import { sendMessage } from '../middlewares/rabbitMQ';
 import TypeService from './type.service';
 
 export const StoreService = {
@@ -43,10 +44,10 @@ export const StoreService = {
     return storeTypes;
   },
 
-  createCompleteStore: async (name: string, URL: string, location: string) => {
+  createCompleteStore: async (url: string, location: string) => {
     // eslint-disable-next-line no-undef
     const startTime = performance.now();
-    const scrapedInfo = await run(URL, location);
+    const scrapedInfo = await run(url, location);
     // eslint-disable-next-line no-undef
     const endTime = performance.now();
     const executionTime = endTime - startTime;
@@ -73,7 +74,7 @@ export const StoreService = {
     
     Important:
     - The description should be about the store, not the products it sells.
-    - This is the store Url: "${URL}"
+    - This is the store Url: "${url}"
     - The store is located in this location: "${location}"
     - The Store has to comply with the EU Green Washing Guidelines: ${guidelines}
     
@@ -87,10 +88,12 @@ export const StoreService = {
     - The description should not mention discounts, online shopping, or sales.
 `;
 
+    await sendMessage(`Creating a description.`);
     const largerDescription = await LLMService.descriptionGenerator(prompt);
     console.log('prompt:', prompt);
     const betterDescription = removeTrailingNewline(largerDescription || '');
 
+    await sendMessage(`Saving data`);
     const [street, number, postalCode, city, country] = (scrapedInfo.location || '')
       .split(',')
       .map((s) => s.trim());
@@ -103,7 +106,7 @@ export const StoreService = {
     );
 
     const store = await StoreRepository.createStore(
-      name,
+      scrapedInfo.name,
       locationObj.id,
       betterDescription,
       scrapedInfo.retour,
@@ -118,7 +121,14 @@ export const StoreService = {
     if (scrapedInfo.openingHours) {
       for (const [day, hours] of Object.entries(scrapedInfo.openingHours)) {
         if (hours) {
-          await OpeningHoursService.createOpeningHours(day, hours.open, hours.close, store.id);
+          await OpeningHoursService.createOpeningHours(
+            day,
+            hours.open,
+            hours.close,
+            store.id,
+            hours.openAfterNoon,
+            hours.closeAfterNoon,
+          );
         }
       }
     }

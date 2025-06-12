@@ -111,6 +111,8 @@ describe('StoreService', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
           storeId: 1,
+          openingAtAfterNoon: null,
+          closingAtAfterNoon: null,
         },
         {
           day: { name: 'monday', orderValue: 0 },

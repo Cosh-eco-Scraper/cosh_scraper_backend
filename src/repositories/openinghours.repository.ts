@@ -30,18 +30,17 @@ export const openingHoursRespository = {
     startTime: string,
     endTime: string,
     store_id: number,
+    startTimeAn?: string | null,
+    endTimeAn?: string | null,
   ): Promise<OpeningHours> => {
-    // const result = await databasePool.query(
-    //   openingHoursQueries.createOpeningHours(day, startTime, endTime, store_id),
-    // );
     const query = openingHoursQueries.createOpeningHours();
-    const params = [day, startTime, endTime, store_id];
+    const params = [day, startTime, endTime, startTimeAn, endTimeAn, store_id];
     const result = await databasePool.query(query, params);
 
     if (!result.rowCount) {
       throw new NotFoundError('Opening hours not found');
     }
-    const opening_hours = result.rows.map(mapper.mapHour)[0] as OpeningHours;
+    const opening_hours = result.rows.map(mapper.mapHour)[0] as unknown as OpeningHours;
     return opening_hours;
   },
 };

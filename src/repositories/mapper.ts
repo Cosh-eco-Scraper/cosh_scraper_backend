@@ -68,6 +68,8 @@ function mapHours(databaseResult: any): DatabaseOpeningHours {
     },
     openingAt: databaseResult.opening_at,
     closingAt: databaseResult.closing_at,
+    openingAtAfterNoon: databaseResult.closing_at_after_noon,
+    closingAtAfterNoon: databaseResult.closing_at_after_noon,
     storeId: databaseResult.store_id,
     createdAt: databaseResult.created_at,
     updatedAt: databaseResult.updated_at,
