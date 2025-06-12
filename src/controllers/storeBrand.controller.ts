@@ -7,11 +7,13 @@ export async function addBrandToStore(req: Request, res: Response, next: NextFun
 
     if (!storeId) {
       res.status(400).json({ message: 'Store ID is required' });
+      return;
     }
 
     const updatedStoreId = await storeBrandsService.addBrandToStore(parseInt(storeId), brandId);
 
     res.status(200).json({ id: updatedStoreId });
+    return;
   } catch (error) {
     next(error);
   }
