@@ -61,6 +61,8 @@ describe('OpeningHoursService', () => {
           day,
           startTime,
           endTime,
+          null,
+          null,
           store_id,
         );
         expect.fail('Expected an error to be thrown');
@@ -69,7 +71,15 @@ describe('OpeningHoursService', () => {
       }
 
       expect(
-        updateOpeningHoursStub.calledOnceWith(openingHoursId, day, startTime, endTime, store_id),
+        updateOpeningHoursStub.calledOnceWith(
+          openingHoursId,
+          day,
+          startTime,
+          endTime,
+          store_id,
+          null,
+          null,
+        ),
       ).to.be.true;
     });
   });
