@@ -391,7 +391,7 @@ export async function summarizeRelevantInfoWithAI(
         attempts++;
         const delay = baseDelay * Math.pow(2, attempts);
 
-        // @ts-ignore
+        // eslint-disable-next-line no-undef
         await new Promise((resolve) => setTimeout(resolve, delay));
         continue;
       }
