@@ -5,7 +5,13 @@ const addBrandToStore = async (storeId: number, brandId: number): Promise<number
   return result;
 };
 
+const removeBrandFromStore = async (storeId: number, brandId: number): Promise<number | null> => {
+  const result = await storeBrandsRepository.removeBrandFromStore(storeId, brandId);
+  return result;
+};
+
 const storeBrandsService = {
   addBrandToStore,
+  removeBrandFromStore,
 };
 export default storeBrandsService;

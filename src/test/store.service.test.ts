@@ -200,4 +200,49 @@ describe('StoreService', () => {
       }
     });
   });
+
+  describe('addBrandsToStore()', () => {
+    it('should add all provided brands to the specified store', async () => {
+      const storeId = 1;
+      const expectedStores = [{ id: storeId, name: 'Store 1' }] as Store[];
+
+      // Mock getAllStores to return the expected store list
+      StoreRepository.getAllStores = async () => expectedStores;
+
+      const brands = ['Nike', 'Adidas', 'Puma'];
+
+      // Call the method under test
+      await StoreService.addBrandsToStore(storeId, brands);
+
+      // Retrieve added brands
+      const storeBrands = await StoreService.getBrandsByStoreId(storeId);
+
+      // Assert that all brands are added
+      assert.strictEqual(storeBrands.length, brands.length, 'Brand count mismatch');
+
+      // Assert that brand names match (case-insensitive sort for comparison)
+      const addedBrandNames = storeBrands.map((b) => b.name).sort();
+      const expectedBrandNames = brands.sort();
+
+      assert.deepStrictEqual(
+        addedBrandNames,
+        expectedBrandNames,
+        'Added brand names do not match expected',
+      );
+    });
+
+    // it('should throw error when database operation fails', async () => {
+    //   const error = new Error('Database error');
+    //   StoreRepository.addBrandsToStore = async () => {
+    //     throw error;
+    //   };
+
+    //   try {
+    //     await StoreService.addBrandsToStore(1, [1, 2]);
+    //     assert.fail('Should have thrown error');
+    //   } catch (e) {
+    //     assert.strictEqual(e, error);
+    //   }
+    // });
+  });
 });
