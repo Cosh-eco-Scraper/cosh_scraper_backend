@@ -130,14 +130,14 @@ export async function createCompleteStore(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const { url, location } = req.body;
+    const { url, location, clientId } = req.body;
 
     if (!url) {
       res.status(400).json({ message: 'URL is required' });
       return;
     }
 
-    const store = await StoreService.createCompleteStore(url, location);
+    const store = await StoreService.createCompleteStore(url, location, clientId);
 
     res.status(201).json({ id: store.id, message: 'Store created successfully' });
     return;
