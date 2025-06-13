@@ -11,12 +11,22 @@ export const openingHoursRespository = {
     startTime?: string,
     endTime?: string,
     store_id?: number,
+    openingAtAfterNoon?: string | null,
+    closingAtAfterNoon?: string | null,
   ): Promise<number> => {
     // const result = await databasePool.query(
     //   openingHoursQueries.updateOpeningHours(openingHoursId, day, startTime, endTime, store_id),
     // );
     const query = openingHoursQueries.updateOpeningHours();
-    const params = [day, startTime, endTime, store_id, openingHoursId];
+    const params = [
+      day,
+      startTime,
+      endTime,
+      openingAtAfterNoon,
+      closingAtAfterNoon,
+      store_id,
+      openingHoursId,
+    ];
     const result = await databasePool.query(query, params);
 
     if (!result.rowCount) {

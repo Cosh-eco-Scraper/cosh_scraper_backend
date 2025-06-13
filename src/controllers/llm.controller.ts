@@ -8,6 +8,7 @@ export async function sendPrompt(req: Request, res: Response) {
     res.json({ response });
   } catch {
     res.status(500).json({ error: 'An error occurred while processing the request.' });
+    return;
   }
 }
 
@@ -16,7 +17,9 @@ export async function descriptionCheck(req: Request, res: Response) {
     const { description } = req.body;
     const response = await LLMService.descriptionCheck(description);
     res.json({ response });
+    return;
   } catch {
     res.status(500).json({ error: 'An error occurred while processing the request.' });
+    return;
   }
 }

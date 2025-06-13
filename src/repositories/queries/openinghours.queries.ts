@@ -4,8 +4,10 @@ export const openingHoursQueries = {
     SET day = $1,
         openingat = $2,
         closingat = $3,
-        store_id = $4
-    WHERE id = $5;
+        openingatafternoon = $4,
+        closingatafternoon = $5,
+        store_id = $6
+    WHERE id = $7;
   `,
 
   createOpeningHours: () => `

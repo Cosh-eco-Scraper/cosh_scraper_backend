@@ -35,21 +35,18 @@ export const storeQueries = {
                 JOIN locations l ON s.location_id = l.id;
        `,
 
-  getStoreWithOpeningsHoursById: () => `
-    SELECT s.id                  as store_id,
-           oh.id                 as id,
-           oh.day                as "day",
-           oh.openingat          as opening_at,
-           oh.closingat          as closing_at,
-           oh.openingatAfterNoon  as opening_at_after_noon,
-           oh.closingatAfterNoon as closing_at_after_noon,
-           oh.created_at         as created_at,
-           oh.updated_at         as updated_at
-    FROM stores s
-           JOIN opening_hours oh ON oh.store_id = s.id
-    WHERE s.id = $1;
-  `,
-
+  getStoreWithOpeningsHoursById: () => `SELECT s.id                  as store_id,
+                                               oh.id                 as id,
+                                               oh.day                as "day",
+                                               oh.openingat          as opening_at,
+                                               oh.closingat          as closing_at,
+                                               oh.openingatAfterNoon as opening_at_after_noon,
+                                               oh.closingatAfterNoon as closing_at_after_noon,
+                                               oh.created_at         as created_at,
+                                               oh.updated_at         as updated_at
+                                        FROM stores s
+                                               JOIN opening_hours oh ON oh.store_id = s.id
+                                        WHERE s.id = $1;`,
   getBrandsByStoreId: () => `
          SELECT b.id, b.name, b.label, sb.store_id
          FROM stores s
