@@ -67,6 +67,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.4.0",
+    "@modelcontextprotocol/sdk": "^1.12.3",
     "@types/express": "^5.0.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.15.18",
