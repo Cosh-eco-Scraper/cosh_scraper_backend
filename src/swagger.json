@@ -714,6 +714,114 @@
           }
         }
       }
+    },
+    "/types": {
+      "get": {
+        "tags": ["Types"],
+        "description": "Get all types",
+        "responses": {
+          "200": {
+            "description": "This will return if all types are found"
+          },
+          "204": {
+            "description": "No content"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/storeTypes": {
+      "post": {
+        "tags": ["Store Types"],
+        "description": "connect store and type",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "The type and store you want to connect",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "storeId": {
+                  "type": "number",
+                  "example": "1"
+                },
+                "typeId": {
+                  "type": "number",
+                  "example": "1"
+                }
+              },
+              "required": ["typeId", "storeId"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "This will return if all types are found"
+          },
+          "204": {
+            "description": "No content"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Store Types"],
+        "description": "remove a storeType",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "The type and store you want to remove",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "storeId": {
+                  "type": "number",
+                  "example": "1"
+                },
+                "typeId": {
+                  "type": "number",
+                  "example": "1"
+                }
+              },
+              "required": ["typeId", "storeId"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "This will return if all types are found"
+          },
+          "204": {
+            "description": "No content"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
     }
   },
   "definitions": {

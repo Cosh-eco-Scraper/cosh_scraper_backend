@@ -29,4 +29,14 @@ export const TypeRepository = {
 
     return result.rows.map(mapper.mapType);
   },
+  async getType(typeId: number) {
+    const query = typeQueries.getType();
+    const result = await databasePool.query(query, [typeId]);
+
+    if (result.rowCount === 0) {
+      throw new Error(`Type not found`);
+    }
+
+    return result.rows.map(mapper.mapType)[0];
+  },
 };
