@@ -1,6 +1,7 @@
 import sinon from 'sinon';
 import OpeningHoursService from '../services/openingshours.service';
 import { openingHoursRespository } from '../repositories/openinghours.repository';
+
 let expect: typeof import('chai').expect;
 before(async () => {
   ({ expect } = await import('chai'));
@@ -31,15 +32,24 @@ describe('OpeningHoursService', () => {
         day,
         startTime,
         endTime,
+        null,
+        null,
         store_id,
       );
 
       // Assert
       expect(
-        updateOpeningHoursStub.calledOnceWith(openingHoursId, day, startTime, endTime, store_id),
+        updateOpeningHoursStub.calledOnceWith(
+          openingHoursId,
+          day,
+          startTime,
+          endTime,
+          store_id,
+          null,
+          null,
+        ),
       ).to.be.true;
     });
-
     it('should throw an error if the repository fails (unhappy case)', async () => {
       // Arrange
       const openingHoursId = 1;
@@ -61,6 +71,8 @@ describe('OpeningHoursService', () => {
           day,
           startTime,
           endTime,
+          null,
+          null,
           store_id,
         );
         expect.fail('Expected an error to be thrown');
@@ -69,7 +81,15 @@ describe('OpeningHoursService', () => {
       }
 
       expect(
-        updateOpeningHoursStub.calledOnceWith(openingHoursId, day, startTime, endTime, store_id),
+        updateOpeningHoursStub.calledOnceWith(
+          openingHoursId,
+          day,
+          startTime,
+          endTime,
+          store_id,
+          null,
+          null,
+        ),
       ).to.be.true;
     });
   });

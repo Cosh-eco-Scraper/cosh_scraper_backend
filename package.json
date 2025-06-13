@@ -94,7 +94,6 @@
     ]
   },
   "overrides": {
-    "node-fetch": "^3.3.2",
     "whatwg-url": "^13.0.0"
   }
 }

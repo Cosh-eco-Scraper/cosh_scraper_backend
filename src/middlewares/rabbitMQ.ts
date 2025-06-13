@@ -12,7 +12,7 @@ export async function sendMessage(message: string) {
     const channel = await connection.createChannel();
 
     await channel.assertQueue(variables.queue, { durable: true });
-    await channel.sendToQueue(variables.queue, Buffer.from(message));
+    channel.sendToQueue(variables.queue, Buffer.from(message));
 
     console.log('Message sent:', message);
 
