@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { addBrandToStore } from '../controllers/storeBrand.controller';
+import { addBrandsToStore, removeBrandFromStore } from '../controllers/storeBrand.controller';
 
 const router = Router();
 
-router.post('/', addBrandToStore);
+router.post('/:id/brands', addBrandsToStore); // Assuming this is for adding brands to a store
+router.delete('/:storeId/brands/:brandId', removeBrandFromStore); // Assuming this is for removing brands from a store
 export default router;
