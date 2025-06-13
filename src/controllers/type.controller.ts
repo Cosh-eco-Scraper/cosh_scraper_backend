@@ -6,8 +6,9 @@ export async function GetAllTypes(_req: Request, res: Response, next: NextFuncti
   try {
     const types = await TypeService.getAllTypes();
 
-    if (!types.length) {
-      res.status(204);
+    if (types.length === 0) {
+      res.status(204).end();
+      console.log('No types found');
       return;
     }
 

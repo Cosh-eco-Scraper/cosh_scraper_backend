@@ -6,7 +6,7 @@ import {
   getStoreOpeningsHours,
   updateStore,
   createCompleteStore,
-  getStoreType
+  getStoreType,
 } from '../controllers/store.controller';
 
 const router = Router();

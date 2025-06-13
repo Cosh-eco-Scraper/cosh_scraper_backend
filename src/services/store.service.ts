@@ -151,6 +151,4 @@ export const StoreService = {
 
     return store;
   },
-
-  
 };

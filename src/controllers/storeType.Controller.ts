@@ -29,7 +29,7 @@ export async function addTypeToStore(req: Request, res: Response, next: NextFunc
     }
 
     await storeTypeService.addTypeToStore(typeId, storeId);
-    res.status(200);
+    res.status(200).end();
     return;
   } catch (error) {
     if (error instanceof NotFoundError) {
@@ -48,7 +48,7 @@ export async function removeTypeFromStore(req: Request, res: Response, next: Nex
       return;
     }
     await storeTypeService.removeTypeFromStore(typeId, storeId);
-    res.status(200);
+    res.status(200).end();
     return;
   } catch (error) {
     if (error instanceof NotFoundError) {

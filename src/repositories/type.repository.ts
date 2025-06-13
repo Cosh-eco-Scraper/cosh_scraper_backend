@@ -25,7 +25,10 @@ export const TypeRepository = {
   },
   async getAllTypes() {
     const query = typeQueries.getAllTypes();
+    console.log(query);
+
     const result = await databasePool.query(query);
+    console.log(result);
 
     return result.rows.map(mapper.mapType);
   },
