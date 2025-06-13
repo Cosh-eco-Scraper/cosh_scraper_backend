@@ -44,5 +44,3 @@ export async function removeBrandFromStore(req: Request, res: Response, next: Ne
     next(error);
   }
 }
-
-
