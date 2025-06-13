@@ -72,8 +72,8 @@ export const storeQueries = {
   `,
 
   createStore: () => `
-         INSERT INTO stores (name, location_id, description, retour)
-         VALUES ($1, $2, $3, $4)
-         RETURNING *;
+    INSERT INTO stores (name, location_id, description, retour)
+    VALUES ($1, $2, $3, $4)
+      RETURNING *;
        `,
 };
