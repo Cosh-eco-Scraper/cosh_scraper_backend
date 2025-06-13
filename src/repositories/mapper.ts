@@ -3,7 +3,7 @@ import { Day } from '../domain/Day';
 import { DatabaseOpeningHours } from '../domain/OpeningHours';
 import { DatabaseBrand, DatabaseBrandForList } from '../domain/Brand';
 import { Location } from '../domain/Location';
-import { StoreType } from '../domain/StoreType';
+import { DatabaseStoreType, StoreType } from '../domain/StoreType';
 import { Statement } from '../domain/Statement';
 
 function mapStore(databaseResult: any): Store {
@@ -89,6 +89,13 @@ function mapLocation(databaseResult: any): Location {
   };
 }
 
+function mapType(databaseResult: any): DatabaseStoreType {
+  return {
+    id: databaseResult.id,
+    name: databaseResult.name,
+  };
+}
+
 export const mapper = {
   mapStore: (databaseResult: any) => mapStore(databaseResult),
   mapHour: (databaseResult: any) => mapHours(databaseResult),
@@ -97,4 +104,5 @@ export const mapper = {
   mapBrandForList: (databaseResult: any) => mapBrandForList(databaseResult),
   mapStoreType: (databaseResult: any) => mapStoreType(databaseResult),
   mapStatement: (databaseResult: any) => mapStatement(databaseResult),
+  mapType: (databaseResult: any) => mapType(databaseResult),
 };

@@ -11,6 +11,7 @@ import openingHoursRoutes from './routes/openingHours.routes';
 import storeBrandsRoutes from './routes/storeBrands.routes';
 import statementRoutes from './routes/statement.routes';
 import cors from 'cors';
+import typeRoutes from './routes/type.routes';
 
 const app = express();
 app.use(cors({ origin: '*' })); // Allow any origin
@@ -36,6 +37,7 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/openinghours', openingHoursRoutes);
 app.use('/api/storebrands', storeBrandsRoutes);
 app.use('/api/statements', statementRoutes);
+app.use('/api/types', typeRoutes);
 
 // Global error handler (should be after routes)
 app.use(errorHandler);
