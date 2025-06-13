@@ -3,7 +3,7 @@ import { Buffer } from 'buffer';
 
 export const variables = {
   queue: 'scraper_updates',
-  connectionUrl: 'amqp://guest:guest@localhost:5672',
+  connectionUrl: process.env.RABBIT_CONNECTION_URL || '',
 };
 
 export async function sendMessage(message: string) {
@@ -27,35 +27,9 @@ export async function sendMessage(message: string) {
   }
 }
 
-export async function receiveMessages(onMessage?: (msg: string) => void) {
-  try {
-    const connection = await amqp.connect(variables.connectionUrl);
-    const channel = await connection.createChannel();
-
-    await channel.assertQueue(variables.queue, { durable: true });
-
-    await channel.consume(
-      variables.queue,
-      (msg) => {
-        if (msg !== null) {
-          const messageContent = msg.content.toString();
-          if (onMessage) {
-            onMessage(messageContent);
-          }
-          channel.ack(msg);
-        }
-      },
-      { noAck: false },
-    );
-  } catch (error) {
-    console.error('Error receiving messages:', error);
-  }
-}
-
 const RabbitMQMiddleware = {
   variables,
   sendMessage,
-  receiveMessages,
 };
 
 export default RabbitMQMiddleware;
