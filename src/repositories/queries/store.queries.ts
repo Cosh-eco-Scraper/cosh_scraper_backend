@@ -64,12 +64,12 @@ export const storeQueries = {
   },
 
   updateStore: () => `
-         UPDATE stores
-         SET name = $1,
-             description = $2,
-             retour = $3
-         WHERE id = $4;
-       `,
+    UPDATE stores
+    SET name        = $1,
+        description = $2,
+        retour      = $3
+    WHERE id = $4;
+  `,
 
   createStore: () => `
          INSERT INTO stores (name, location_id, description, retour)

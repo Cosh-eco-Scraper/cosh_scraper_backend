@@ -1,7 +1,7 @@
 import { Store, StoreDto } from '../domain/Store';
 import { DatabaseOpeningHours, OpeningHoursDto } from '../domain/OpeningHours';
 import { BrandDto, BrandForListDto, DatabaseBrand, DatabaseBrandForList } from '../domain/Brand';
-import { StoreType } from '../domain/StoreType';
+import { DatabaseStoreType, StoreType, StoreTypeDto } from '../domain/StoreType';
 
 export const dtoMapper = {
   mapStore: (store: Store): StoreDto => {
@@ -52,6 +52,12 @@ export const dtoMapper = {
       id: brand.id,
       name: brand.name,
       label: brand.label,
+    };
+  },
+  mapType(databaseStoreType: DatabaseStoreType): StoreTypeDto {
+    return {
+      id: databaseStoreType.id,
+      name: databaseStoreType.name,
     };
   },
 };

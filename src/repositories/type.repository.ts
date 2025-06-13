@@ -1,4 +1,6 @@
 import databasePool from '../config/dbConnectionConfig';
+import { typeQueries } from './queries/type.queries';
+import { mapper } from './mapper';
 
 export const TypeRepository = {
   async findOrCreateType(typeName: string, description?: string) {
@@ -20,5 +22,11 @@ export const TypeRepository = {
     }
     const insertQuery = 'INSERT INTO store_types (store_id, type_id) VALUES ($1, $2)';
     await databasePool.query(insertQuery, [storeId, typeId]);
+  },
+  async getAllTypes() {
+    const query = typeQueries.getAllTypes();
+    const result = await databasePool.query(query);
+
+    return result.rows.map(mapper.mapType);
   },
 };
