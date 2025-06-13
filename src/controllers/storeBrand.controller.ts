@@ -26,11 +26,14 @@ export async function removeBrandFromStore(req: Request, res: Response, next: Ne
     if (!storeId) {
       res.status(400).json({ message: 'Store ID is required' });
       return;
+<<<<<<< 123-adding-and-delete-brands
     }
 
     if (!brandId) {
       res.status(400).json({ message: 'Brand ID is required' });
       return;
+=======
+>>>>>>> main
     }
 
     const updatedStoreId = await storeBrandsService.removeBrandFromStore(
@@ -38,7 +41,11 @@ export async function removeBrandFromStore(req: Request, res: Response, next: Ne
       parseInt(brandId),
     );
 
+<<<<<<< 123-adding-and-delete-brands
     res.status(200).json({ rowAffected: updatedStoreId });
+=======
+    res.status(200).json({ id: updatedStoreId });
+>>>>>>> main
     return;
   } catch (error) {
     next(error);

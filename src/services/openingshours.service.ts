@@ -6,6 +6,8 @@ const updateOpeningHours = async (
   day?: string,
   startTime?: string,
   endTime?: string,
+  openingAtAfterNoon?: string | null,
+  closingAtAfterNoon?: string | null,
   store_id?: number,
 ): Promise<number> => {
   const result = await openingHoursRespository.updateOpeningHours(
@@ -14,6 +16,8 @@ const updateOpeningHours = async (
     startTime,
     endTime,
     store_id,
+    openingAtAfterNoon,
+    closingAtAfterNoon,
   );
   return result;
 };
