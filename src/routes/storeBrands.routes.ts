@@ -4,5 +4,5 @@ import { addBrandsToStore, removeBrandFromStore } from '../controllers/storeBran
 const router = Router();
 
 router.post('/:id/brands', addBrandsToStore); // Assuming this is for adding brands to a store
-router.delete('/:storeId/brands/:brandId', removeBrandFromStore); // Assuming this is for removing brands from a store
+router.delete('/', removeBrandFromStore); // Assuming this is for removing brands from a store
 export default router;
