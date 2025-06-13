@@ -6,7 +6,7 @@ import {
   getStoreOpeningsHours,
   updateStore,
   createCompleteStore,
-  getStoreType,
+  getStoreType
 } from '../controllers/store.controller';
 
 const router = Router();
@@ -18,4 +18,5 @@ router.get('/:id/openingshours', getStoreOpeningsHours);
 router.get('/:id/brands', getStoreBrands);
 router.get('/:id/types', getStoreType);
 router.post('/', createCompleteStore);
+
 export default router;
