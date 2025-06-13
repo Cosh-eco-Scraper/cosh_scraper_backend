@@ -9,7 +9,6 @@ import { smallSummarize } from './prompt/smallSummarize';
 import { LLMService } from '../services/llm.service';
 import { summarizeRelevantInfoWithAI } from './scraper';
 import { sendMessage } from '../middlewares/rabbitMQ';
-import { send } from 'process';
 // The consolidateScrapedInfoResults is not needed in run.ts for Strategy B,
 // as we're consolidating raw contexts, not pre-summarized ScrapedInfo objects.
 // import { consolidateScrapedInfoResults } from './misc/consolidate'; // <-- Remove this line
