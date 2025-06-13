@@ -1,22 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
 import storeBrandsService from '../services/storeBrands.service';
 
-export async function addBrandToStore(req: Request, res: Response, next: NextFunction) {
+export async function addBrandsToStore(req: Request, res: Response, next: NextFunction) {
   try {
-    const { storeId, brandId } = req.body;
+    const storeId = req.params.id;
+    const { brands } = req.body;
 
-    if (!storeId) {
-      res.status(400).json({ message: 'Store ID is required' });
+    if (!storeId || !brands || !Array.isArray(brands)) {
+      res.status(400).json({ message: 'Store ID and brand IDs are required' });
+      return;
     }
 
-    const updatedStoreId = await storeBrandsService.addBrandToStore(parseInt(storeId), brandId);
+    const result = await storeBrandsService.addBrandsToStore(parseInt(storeId), brands);
 
-    res.status(200).json({ id: updatedStoreId });
+    res.status(200).json({ message: result });
   } catch (error) {
     next(error);
   }
 }
-
 export async function removeBrandFromStore(req: Request, res: Response, next: NextFunction) {
   try {
     const storeId = req.params.storeId;
@@ -40,3 +41,5 @@ export async function removeBrandFromStore(req: Request, res: Response, next: Ne
     next(error);
   }
 }
+
+

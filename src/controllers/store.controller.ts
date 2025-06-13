@@ -130,20 +130,3 @@ export async function createCompleteStore(
   }
 }
 
-export async function addBrandsToStore(req: Request, res: Response, next: NextFunction) {
-  try {
-    const storeId = req.params.id;
-    const { brands } = req.body;
-
-    if (!storeId || !brands || !Array.isArray(brands)) {
-      res.status(400).json({ message: 'Store ID and brand IDs are required' });
-      return;
-    }
-
-    const result = await StoreService.addBrandsToStore(parseInt(storeId), brands);
-
-    res.status(200).json({ message: result });
-  } catch (error) {
-    next(error);
-  }
-}
