@@ -5,6 +5,7 @@ export const getRandomStatement = async (req: Request, res: Response, next: Next
   try {
     const statement = await StatementService.getRandomStatement();
     res.json(statement);
+    return;
   } catch (err) {
     next(err);
   }
@@ -19,10 +20,12 @@ export const getStatementById = async (
     const { id } = req.params;
     if (!id) {
       res.status(404).json({ message: 'Statement not found' });
+      return;
     }
 
     const statement = await StatementService.getStatementById(parseInt(id));
     res.json(statement);
+    return;
   } catch (err) {
     next(err);
   }
@@ -32,6 +35,7 @@ export const getAllStatements = async (req: Request, res: Response, next: NextFu
   try {
     const statements = await StatementService.getAllStatements();
     res.json(statements);
+    return;
   } catch (err) {
     next(err);
   }

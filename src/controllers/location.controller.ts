@@ -12,12 +12,14 @@ export async function updateLocation(
 
     if (!locationId) {
       res.status(400).json({ message: 'Brand ID is required' });
+      return;
     }
 
     if (!street || !number || !postalCode || !city || !country) {
       res
         .status(400)
         .json({ message: 'Street, number, postal_code, city and country are required' });
+      return;
     }
 
     const result = await LocationService.updateLocation(
@@ -29,6 +31,7 @@ export async function updateLocation(
       country,
     );
     res.status(200).json({ id: result });
+    return;
   } catch (error) {
     next(error);
   }
