@@ -12,8 +12,8 @@ export async function addBrandsToStore(req: Request, res: Response, next: NextFu
     }
 
     const result = await storeBrandsService.addBrandsToStore(parseInt(storeId), brands);
-
     res.status(200).json({ message: result });
+    return;
   } catch (error) {
     next(error);
   }
@@ -25,10 +25,12 @@ export async function removeBrandFromStore(req: Request, res: Response, next: Ne
 
     if (!storeId) {
       res.status(400).json({ message: 'Store ID is required' });
+      return;
     }
 
     if (!brandId) {
       res.status(400).json({ message: 'Brand ID is required' });
+      return;
     }
 
     const updatedStoreId = await storeBrandsService.removeBrandFromStore(
@@ -37,6 +39,7 @@ export async function removeBrandFromStore(req: Request, res: Response, next: Ne
     );
 
     res.status(200).json({ rowAffected: updatedStoreId });
+    return;
   } catch (error) {
     next(error);
   }
