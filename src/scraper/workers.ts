@@ -72,6 +72,7 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
 
           const result: ScraperResult = await scraper(url, currentPage); // Passed URL and Page
 
+          // eslint-disable-next-line no-undef
           await new Promise((resolve) => setTimeout(resolve, delayMs));
 
           // Send the result back using the 'keywordContexts' property name
