@@ -1,8 +1,7 @@
 import { parentPort, workerData } from 'worker_threads';
 import dotenv from 'dotenv';
-import { Browser, chromium, Page } from 'playwright'; // Import Page type
-import { scraper } from './scraper'; // Assuming scraper.ts exports 'scraper'
-// Define ScraperResult directly here, as it's the expected return type from scraper
+import { Browser, chromium, Page } from 'playwright';
+import { scraper } from './scraper';
 type ScraperResult = Record<string, string[]> | null;
 
 dotenv.config();
@@ -39,8 +38,6 @@ type WorkerToMainMessage =
       type: 'worker_terminated'; // NEW: Worker confirms it has terminated gracefully
     };
 
-// Destructure workerData. location is now used to pass to scraper if needed,
-// but remember the scraper function itself doesn't currently accept it.
 const { delayMs } = workerData as { delayMs: number };
 
 let browser: Browser | null = null;
@@ -73,13 +70,8 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
         try {
           currentPage = await browser!.newPage(); // Create new page for each task
 
-          // IMPORTANT FIX: Call scraper with correct arguments (url, page)
-          // The 'location' argument is NOT expected by the current 'scraper' function signature.
-          // If 'scraper' needs location, it should get it from a closure or workerData internally.
           const result: ScraperResult = await scraper(url, currentPage); // Passed URL and Page
 
-          // Add a delay between scrapes to respect crawl-delay and avoid overwhelming the server
-          // eslint-disable-next-line no-undef
           await new Promise((resolve) => setTimeout(resolve, delayMs));
 
           // Send the result back using the 'keywordContexts' property name
