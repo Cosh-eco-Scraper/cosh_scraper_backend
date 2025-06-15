@@ -1,5 +1,3 @@
-// workers.ts
-
 import { parentPort, workerData } from 'worker_threads';
 import dotenv from 'dotenv';
 import { Browser, chromium, Page } from 'playwright'; // Import Page type
