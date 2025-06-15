@@ -96,14 +96,17 @@ export async function run(baseURL: string, location: string, clientId: string) {
 
   for (let i = 0; i < numberOfWorkers; i++) {
     const workerId = i + 1;
-    const workerPath = path.resolve(__dirname, 'workers.ts'); // Ensure this path is correct
+    // BELANGRIJKE WIJZIGING: Verwijs naar de gecompileerde .js file in de dist map
+    const workerPath = path.resolve(__dirname, 'workers.js');
 
     const worker = new Worker(workerPath, {
       workerData: {
         location,
         delayMs,
       },
-      execArgv: ['-r', 'ts-node/register'], // Needed if using ts-node to run workers directly
+      // BELANGRIJKE WIJZIGING: Verwijder execArgv, dit is niet nodig voor gecompileerde JS
+      // en kan problemen veroorzaken met ts-node in productie.
+      // execArgv: ['-r', 'ts-node/register'],
     });
 
     workers.push(worker);
