@@ -1,0 +1,75 @@
+{
+  "url": "https://shop.fonetik.be/",
+  "name": "Fonetik - Aalst",
+  "brands": [
+    "5mm Paper",
+    "Bon Parfumeur",
+    "Cîme",
+    "Fest Amsterdam",
+    "Hindbag",
+    "Moebe",
+    "Nadja Carlotti",
+    "O My Bag",
+    "Ray",
+    "Studio MHL",
+    "Turina"
+  ],
+  "openingHours": {
+    "Monday": {
+      "open": "closed",
+      "close": "closed",
+      "openAfterNoon": null,
+      "closeAfterNoon": null
+    },
+    "Tuesday": {
+      "open": "11:00",
+      "close": "13:00",
+      "openAfterNoon": "13:30",
+      "closeAfterNoon": "18:00"
+    },
+    "Wednesday": {
+      "open": "11:00",
+      "close": "13:00",
+      "openAfterNoon": "13:30",
+      "closeAfterNoon": "18:00"
+    },
+    "Thursday": {
+      "open": "11:00",
+      "close": "13:00",
+      "openAfterNoon": "13:30",
+      "closeAfterNoon": "18:00"
+    },
+    "Friday": {
+      "open": "11:00",
+      "close": "13:00",
+      "openAfterNoon": "13:30",
+      "closeAfterNoon": "18:00"
+    },
+    "Saturday": {
+      "open": "closed",
+      "close": "closed",
+      "openAfterNoon": null,
+      "closeAfterNoon": null
+    },
+    "Sunday": {
+      "open": "closed",
+      "close": "closed",
+      "openAfterNoon": null,
+      "closeAfterNoon": null
+    }
+  },
+  "location": "Korte Zoutstraat,13,9300,Aalst,Belgium",
+  "about": "Fonetik is a cozy shop in Aalst offering interior and lifestyle articles, workshops, and more. The shop aims to help people express themselves through their personality, interests, clothing, and interior, much like the phonetic alphabet helps to pronounce words. The goal is to provide a way for people to express themselves through a gift for themselves or someone else.",
+  "retour": "No information found",
+  "type": [
+    "Clothing",
+    "Home Goods",
+    "Accessories",
+    "Gifts & Lifestyle",
+    "Book & Media",
+    "Art & Craft",
+    "Specialty Food & Drink",
+    "Decor",
+    "Baby & Kids"
+  ]
+}

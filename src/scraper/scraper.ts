@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import getPrompt from './prompt/prompt';
 import getKeywords from './keywords'; // This now returns KeywordConfig
 import { LLMService } from '../services/llm.service';
+import { OpenAIService } from '../services/openai.service';
 import { ScrapedInfo } from './domain/ScrapedInfo';
 
 dotenv.config();
@@ -180,25 +181,35 @@ async function extractPageText(page: Page): Promise<string> {
   const pageText = await page.evaluate(() => {
     // Select common elements that typically contain main content
     // Avoid scripts and styles as they are not readable content
-    const selectors = 'body *:not(script):not(style):not(noscript)';
-    let fullText = '';
-    // eslint-disable-next-line no-undef
-    document.querySelectorAll(selectors).forEach((element: Element) => {
-      // Explicitly type element
-      // eslint-disable-next-line no-undef
-      const computedStyle = window.getComputedStyle(element);
-      if (
-        computedStyle.display !== 'none' &&
-        computedStyle.visibility !== 'hidden' &&
-        element.textContent?.trim()
-      ) {
-        const text = element.textContent?.trim();
-        if (text) {
-          fullText += text + ' ';
-        }
+    // const selectors = 'body *:not(script):not(style):not(noscript)';
+    const skipTags = new Set([
+      'SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE', 'HEAD', 'META', 'LINK',
+      'IFRAME', 'OBJECT', 'EMBED'
+    ]);
+
+    function extractVisibleText(node: Node): string {
+      let text = '';
+
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as HTMLElement;
+        if (skipTags.has(el.tagName)) return '';
+
+        const computedStyle = window.getComputedStyle(el);
+        if (computedStyle.display === 'none' ||
+          computedStyle.visibility === 'hidden'
+        ) return '';
+        el.childNodes.forEach((child) => {
+          text += extractVisibleText(child);
+        });
+      } else if (node.nodeType === Node.TEXT_NODE) {
+        const trimmed = node.textContent?.trim();
+        if (trimmed) text += trimmed + ' ';
       }
-    });
-    return fullText.replace(/\s+/g, ' ').trim();
+
+      return text;
+    };
+
+    return extractVisibleText(document.body).replace(/\s+/g, ' ').trim().toLowerCase();
   });
   return pageText;
 }
@@ -384,7 +395,8 @@ export async function summarizeRelevantInfoWithAI(
     try {
       console.log(`Attempt ${attempts + 1}: Sending prompt to LLMService...`);
       // Use the LLMService.sendPrompt method
-      let aiResponse = await LLMService.sendPrompt(prompt);
+      const aiRepsonseObj = await OpenAIService.sendFinalMergePrompt(prompt);
+      let aiResponse = JSON.stringify(aiRepsonseObj);
 
       if (!aiResponse) {
         console.error('LLMService returned an empty response.');
@@ -512,9 +524,9 @@ type ScraperResult = Record<string, string[]> | null;
  * It also includes logic to skip detected product detail pages.
  * @param {string} url - The URL to scrape.
  * @param {Page} page - The Playwright Page object.
- * @returns {Promise<ScraperResult>} The raw keyword contexts, or null if skipped or on error.
+ * @returns {Promise<string|null>} The raw keyword contexts, or null if skipped or on error.
  */
-export async function scraper(url: string, page: Page): Promise<ScraperResult> {
+export async function scraper(url: string, page: Page): Promise<string|null> {
   console.log(`Scraping URL: ${url}`);
 
   try {
@@ -531,18 +543,18 @@ export async function scraper(url: string, page: Page): Promise<ScraperResult> {
     await handleOverlays(page); // Handle cookie banners, chat widgets, etc.
     await clickInteractiveButtons(page); // Click "load more" buttons
 
-    const detectedLanguage = await detectLanguage(page);
-    const keywordConfig = getKeywords(detectedLanguage); // Get keywords based on detected language
+    // const detectedLanguage = await detectLanguage(page);
+    // const keywordConfig = getKeywords(detectedLanguage); // Get keywords based on detected language
 
     const pageText = await extractPageText(page);
-    const keywordContexts = findKeywordContexts(
+    /*const keywordContexts = findKeywordContexts(
       pageText,
       keywordConfig.keywords,
       keywordConfig.wordsBeforeMap,
       keywordConfig.wordsAfterMap,
-    );
+    );*/
 
-    return keywordContexts; // Return the raw keyword contexts for the main thread to consolidate
+    return pageText; // Return the raw keyword contexts for the main thread to consolidate
   } catch (error: any) {
     console.error('Error scraping URL:', url, error);
     return null;

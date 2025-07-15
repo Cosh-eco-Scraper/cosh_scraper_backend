@@ -137,9 +137,11 @@ export async function createCompleteStore(
       return;
     }
 
-    const store = await StoreService.createCompleteStore(url, location, clientId);
+    // const store = await StoreService.createCompleteStore(url, location, clientId);
+    await StoreService.createCompleteStore(url, location, clientId);
 
-    res.status(201).json({ id: store.id, message: 'Store created successfully' });
+    // res.status(201).json({ id: store.id, message: 'Store created successfully' });
+    res.status(201).json({ id: '', message: 'Store created successfully' });
     return;
   } catch (error) {
     next(error);

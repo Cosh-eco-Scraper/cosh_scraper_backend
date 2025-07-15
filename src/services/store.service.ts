@@ -47,7 +47,8 @@ export const StoreService = {
   createCompleteStore: async (url: string, location: string, clientId: string) => {
     // eslint-disable-next-line no-undef
     const startTime = performance.now();
-    const scrapedInfo = await run(url, location, clientId);
+    // const scrapedInfo = await run(url, location, clientId);
+    await run(url, location, clientId);
     // eslint-disable-next-line no-undef
     const endTime = performance.now();
     const executionTime = endTime - startTime;
@@ -55,7 +56,9 @@ export const StoreService = {
     const seconds = Math.floor((executionTime % 60000) / 1000);
     const milliseconds = Math.floor(executionTime % 1000);
     console.log(`Execution time: ${minutes}min ${seconds}s ${milliseconds}ms`);
+    return;
 
+    /*
     if (!scrapedInfo) {
       throw new Error('Failed to scrape store information');
     }
@@ -149,6 +152,6 @@ export const StoreService = {
       }
     }
 
-    return store;
+    return store;*/
   },
 };

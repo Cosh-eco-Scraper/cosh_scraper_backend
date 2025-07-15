@@ -7,6 +7,8 @@ export const variables = {
 };
 
 export async function sendMessage(message: string) {
+  // console.warn('SENDING MESSAGES TEMPORARILY TURNED OFF');
+  return;
   try {
     const connection = await amqp.connect(variables.connectionUrl);
     const channel = await connection.createChannel();

@@ -1,6 +1,6 @@
 import { parentPort, workerData } from 'worker_threads';
 import dotenv from 'dotenv';
-import { Browser, chromium, Page } from 'playwright';
+import { Browser, BrowserContext, chromium, Page } from 'playwright';
 import { scraper } from './scraper';
 type ScraperResult = Record<string, string[]> | null;
 
@@ -21,6 +21,7 @@ type WorkerToMainMessage =
       type: 'task_complete';
       url: string;
       // Corrected to reflect the actual resolved type from scraper
+      cleanedText: string|null;
       keywordContexts: ScraperResult; // This will be Record<string, string[]> | null
     }
   | {
@@ -41,6 +42,7 @@ type WorkerToMainMessage =
 const { delayMs } = workerData as { delayMs: number };
 
 let browser: Browser | null = null;
+let context: BrowserContext | null = null;
 let isShuttingDown = false; // Flag to prevent new tasks during shutdown
 
 (async () => {
@@ -51,6 +53,10 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
 
   try {
     browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36',
+      viewport: { width: 1280, height: 720 },
+    });
     console.log(`Worker (ID: ${process.pid}) started and ready.`);
 
     // Signal to the main thread that this worker is ready for a task
@@ -68,9 +74,11 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
         console.log(`Worker (ID: ${process.pid}) scraping URL: ${url}`);
         let currentPage: Page | null = null; // Specify Page type for currentPage
         try {
-          currentPage = await browser!.newPage(); // Create new page for each task
+          // currentPage = await browser!.newPage(); // Create new page for each task
+          currentPage = await context!.newPage(); // Create new page for each task
+          await currentPage.waitForTimeout(Math.random() * 2000 + 500); // Randomly wait to bypass captcha
 
-          const result: ScraperResult = await scraper(url, currentPage); // Passed URL and Page
+          const result = await scraper(url, currentPage); // Passed URL and Page
 
           // eslint-disable-next-line no-undef
           await new Promise((resolve) => setTimeout(resolve, delayMs));
@@ -79,7 +87,8 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
           parentPort!.postMessage({
             type: 'task_complete',
             url: url,
-            keywordContexts: result, // result is already ScraperResult
+            cleanedText: result,
+            keywordContexts: {}, // result is already ScraperResult
           } as WorkerToMainMessage);
         } catch (e: any) {
           console.error(`Worker (ID: ${process.pid}) error scraping ${url}:`, e);
