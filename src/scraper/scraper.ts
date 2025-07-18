@@ -175,9 +175,9 @@ export async function clickInteractiveButtons(page: Page): Promise<void> {
 /**
  * Extracts the full text content from the main content elements of the page, excluding scripts and styles.
  * @param {Page} page - The Playwright Page object.
- * @returns {Promise<string>} The concatenated and cleaned text content of the page.
+ * @returns {Promise<any>} The concatenated and cleaned text content of the page.
  */
-async function extractPageText(page: Page): Promise<string> {
+async function extractPageText(page: Page): Promise<any> {
   const pageText = await page.evaluate(() => {
     // Select common elements that typically contain main content
     // Avoid scripts and styles as they are not readable content
@@ -187,29 +187,53 @@ async function extractPageText(page: Page): Promise<string> {
       'IFRAME', 'OBJECT', 'EMBED'
     ]);
 
-    function extractVisibleText(node: Node): string {
+    function extractVisibleText(node: Node, parent: HTMLElement | null): any {
       let text = '';
+      let structuredPage: any[] = [];
 
       if (node.nodeType === Node.ELEMENT_NODE) {
         const el = node as HTMLElement;
-        if (skipTags.has(el.tagName)) return '';
+        if (skipTags.has(el.tagName)) return {
+          text: '',
+          structuredPage: [],
+        };
 
         const computedStyle = window.getComputedStyle(el);
         if (computedStyle.display === 'none' ||
           computedStyle.visibility === 'hidden'
-        ) return '';
+        ) return {
+          text: '',
+          structuredPage: [],
+        };
         el.childNodes.forEach((child) => {
-          text += extractVisibleText(child);
+          const result = extractVisibleText(child, el);
+          text += result.text;
+          if (result.structuredPage) {
+            structuredPage.push(...result.structuredPage);
+          }
         });
       } else if (node.nodeType === Node.TEXT_NODE) {
         const trimmed = node.textContent?.trim();
-        if (trimmed) text += trimmed + ' ';
+        if (trimmed) {
+          text += trimmed + ' ';
+          structuredPage.push({
+            tag: parent?.tagName || '',
+            text: trimmed,
+          })
+        }
       }
 
-      return text;
+      return {
+        text,
+        structuredPage,
+      };
     };
 
-    return extractVisibleText(document.body).replace(/\s+/g, ' ').trim().toLowerCase();
+    const res = extractVisibleText(document.body, null);
+    return {
+      text: res.text.replace(/\s+/g, ' ').trim().toLowerCase(),
+      structuredPage: res.structuredPage,
+    };
   });
   return pageText;
 }
@@ -387,6 +411,7 @@ export async function summarizeRelevantInfoWithAI(
   location: string,
 ): Promise<ScrapedInfo | null> {
   const prompt = getPrompt(url, snippets, location);
+  console.log(prompt);
   let attempts = 0;
   const maxAttempts = 5;
   const baseDelay = 1500; // 1.5 seconds
@@ -524,9 +549,9 @@ type ScraperResult = Record<string, string[]> | null;
  * It also includes logic to skip detected product detail pages.
  * @param {string} url - The URL to scrape.
  * @param {Page} page - The Playwright Page object.
- * @returns {Promise<string|null>} The raw keyword contexts, or null if skipped or on error.
+ * @returns {Promise<any|null>} The raw keyword contexts, or null if skipped or on error.
  */
-export async function scraper(url: string, page: Page): Promise<string|null> {
+export async function scraper(url: string, page: Page): Promise<any|null> {
   console.log(`Scraping URL: ${url}`);
 
   try {
@@ -546,7 +571,7 @@ export async function scraper(url: string, page: Page): Promise<string|null> {
     // const detectedLanguage = await detectLanguage(page);
     // const keywordConfig = getKeywords(detectedLanguage); // Get keywords based on detected language
 
-    const pageText = await extractPageText(page);
+    const { text, structuredPage } = await extractPageText(page);
     /*const keywordContexts = findKeywordContexts(
       pageText,
       keywordConfig.keywords,
@@ -554,10 +579,17 @@ export async function scraper(url: string, page: Page): Promise<string|null> {
       keywordConfig.wordsAfterMap,
     );*/
 
-    return pageText; // Return the raw keyword contexts for the main thread to consolidate
+    // Return the raw keyword contexts for the main thread to consolidate
+    return {
+      cleanedText: text,
+      structuredPage,
+    };
   } catch (error: any) {
     console.error('Error scraping URL:', url, error);
-    return null;
+    return {
+      cleanedText: null,
+      structuredPage: null,
+    };
   } finally {
     if (page && !page.isClosed()) {
       await page.close();

@@ -8,7 +8,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   organization: 'org-H3OBf2yD2orRAzBVcQ78HPeG',
 });
-const maxRPM = 13; // This is your self-imposed rate limit
+const maxRPM = 30; // This is your self-imposed rate limit
 const minDelay = Math.ceil(60000 / maxRPM);
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -138,8 +138,8 @@ const sendPrompt = async (creationObject: any): Promise<any | undefined> => {
   let backOffTime = 1000;
   let retry: boolean = true;
 
-  console.log(`[AI] waiting for ${minDelay}ms before sending prompt.`);
-  await sleep(minDelay);
+  // console.log(`[AI] waiting for ${minDelay}ms before sending prompt.`);
+  // await sleep(minDelay);
 
   while (retry) {
     try {

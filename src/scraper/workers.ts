@@ -53,7 +53,7 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
 
   try {
     browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext({
+    context = await browser.newContext({
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36',
       viewport: { width: 1280, height: 720 },
     });
@@ -76,9 +76,12 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
         try {
           // currentPage = await browser!.newPage(); // Create new page for each task
           currentPage = await context!.newPage(); // Create new page for each task
-          await currentPage.waitForTimeout(Math.random() * 2000 + 500); // Randomly wait to bypass captcha
+          /*currentPage.on('console', msg => {
+            console.log(`PAGE LOG: ${msg.text()}`);
+          });*/
+          await currentPage.waitForTimeout(Math.random() * 1500 + 500); // Randomly wait to bypass captcha
 
-          const result = await scraper(url, currentPage); // Passed URL and Page
+          const { cleanedText, structuredPage } = await scraper(url, currentPage); // Passed URL and Page
 
           // eslint-disable-next-line no-undef
           await new Promise((resolve) => setTimeout(resolve, delayMs));
@@ -87,7 +90,8 @@ let isShuttingDown = false; // Flag to prevent new tasks during shutdown
           parentPort!.postMessage({
             type: 'task_complete',
             url: url,
-            cleanedText: result,
+            cleanedText,
+            structuredPage,
             keywordContexts: {}, // result is already ScraperResult
           } as WorkerToMainMessage);
         } catch (e: any) {

@@ -10,6 +10,7 @@ import { smallSummarize } from './prompt/smallSummarizeOpenAi';
 import { OpenAIService } from '../services/openai.service';
 import { summarizeRelevantInfoWithAI } from './scraper';
 import { sendMessage } from '../middlewares/rabbitMQ';
+import OpenAIQueue from '../services/openai.queue.service';
 // The consolidateScrapedInfoResults is not needed in run.ts for Strategy B,
 // as we're consolidating raw contexts, not pre-summarized ScrapedInfo objects.
 // import { consolidateScrapedInfoResults } from './misc/consolidate'; // <-- Remove this line
@@ -33,6 +34,7 @@ type WorkerToMainMessage =
       url: string;
       cleanedText: string|null;
       keywordContexts: Record<string, string[]> | null; // Worker returns keyword contexts
+      structuredPage: any;
     }
   | {
       type: 'task_error';
@@ -50,13 +52,13 @@ type WorkerToMainMessage =
     };
 
 const createLLMChunks = (
-  cleanedTexts: Record<string, string>,
+  cleanedTexts: string[],
   maxChunkSize = 24_000,
 ): string[] => {
   const allChunks: string[] = [];
   let chunk: string[] = [];
 
-  for (const text of Object.values(cleanedTexts)) {
+  for (const text of cleanedTexts) {
     if (text.startsWith('your connection needs to be verified before you can proceed')) continue;
     const words = text.split(/\s+/);
 
@@ -92,6 +94,65 @@ const getCombinedChunks = (
   return allChunks;
 };
 
+type PageTag = {
+  tag: string;
+  text: string;
+};
+
+type StructuredPages = Record<string, PageTag[]>;
+
+const getDocumentFrequency = (
+  structuredPages: StructuredPages
+): Record<string, number> => {
+  const dfCounter: Record<string, number> = {};
+
+  for (const structuredPage of Object.values(structuredPages)) {
+    const seenInPage = new Set<string>();
+
+    for (const pageTag of structuredPage) {
+      const key = `${pageTag.tag}::${pageTag.text.toLowerCase()}`;
+      seenInPage.add(key);
+    }
+
+    for (const key of seenInPage) {
+      dfCounter[key] = (dfCounter[key] || 0) + 1;
+    }
+  }
+
+  return dfCounter;
+};
+
+const splitBoilerplateTags = (
+  dfCounter: Record<string, number>,
+  structuredPages: StructuredPages,
+) : string[] => {
+  const threshold = Object.keys(structuredPages).length * 0.9;
+  const boilerPlateTags = new Set<string>();
+  const cleanedPages: string[] = [];
+
+  for (const [_, structuredPage] of Object.entries(structuredPages)) {
+    const cleanedPage: string[] = [];
+
+    for (const pageTag of structuredPage) {
+      const key = `${pageTag.tag}::${pageTag.text.toLowerCase()}`;
+      if (dfCounter[key] >= threshold) {
+        boilerPlateTags.add(pageTag.text.toLowerCase());
+      } else {
+        cleanedPage.push(pageTag.text.toLowerCase());
+      }
+    }
+
+    if (cleanedPage.length >= 5) {
+      cleanedPages.push(cleanedPage.join(' ').trim().toLowerCase());
+    }
+  }
+
+  return [
+    ...boilerPlateTags,
+    ...cleanedPages,
+  ];
+};
+
 export async function run(baseURL: string, location: string, clientId: string) {
   const host = new URL(baseURL).host;
   const robot = await getRobotParser(`https://${host}`);
@@ -114,7 +175,8 @@ export async function run(baseURL: string, location: string, clientId: string) {
   // This will store ALL keyword contexts collected from ALL pages
   const collectedKeywordContexts: Record<string, string[]> = {};
   const allDetectedKeywords = new Set<string>(); // To keep track of all unique keywords found
-  const cleanedTexts: Record<string, string> = {};
+  // const cleanedTexts: Record<string, string> = {};
+  const structuredPages: Record<string, any> = {};
 
   let allChunks = [];
 
@@ -220,8 +282,11 @@ export async function run(baseURL: string, location: string, clientId: string) {
                   }
                 }
               }*/
-              if (msg.cleanedText) {
+              /*if (msg.cleanedText) {
                 cleanedTexts[msg.url] = msg.cleanedText;
+              }*/
+              if (msg.structuredPage) {
+                structuredPages[msg.url] = msg.structuredPage;
               }
               console.log(
                 `Main: Worker ${workerId} completed ${msg.url}. Processed: ${tasksProcessed}/${allLinks.length}. Queue: ${taskQueue.length}.`,
@@ -280,6 +345,13 @@ export async function run(baseURL: string, location: string, clientId: string) {
     console.log(
       `All workers have completed or exited. Total tasks processed: ${tasksProcessed}/${allLinks.length}`,
     );
+    // const jsonDataPages = JSON.stringify(structuredPages);
+    // fs.writeFileSync('webpages.json', jsonDataPages);
+
+    // Calc document frequency of structured pages and filter out high freq terms
+    const df = getDocumentFrequency(structuredPages);
+    const cleanedTexts = splitBoilerplateTags(df, structuredPages);
+
     allChunks = createLLMChunks(cleanedTexts);
     const jsonData = JSON.stringify(allChunks, null, 2);
     fs.writeFileSync('chunks.json', jsonData);
@@ -294,8 +366,7 @@ export async function run(baseURL: string, location: string, clientId: string) {
     results = JSON.parse(fileContent);
   } else {
     // Chunk all texts for optimal prompting
-    const promptDelayMs = 4500; // Delay between LLM calls to respect rate limits
-    const results = [];
+    results = [];
     for (const chunk of allChunks) {
       // send chunk to openai
       const smallPrompt = smallSummarize(chunk, location, baseURL);
@@ -306,7 +377,6 @@ export async function run(baseURL: string, location: string, clientId: string) {
       if (summaryPart) {
         results.push(summaryPart);
       }
-      await new Promise((resolve) => setTimeout(resolve, promptDelayMs));
     }
     const jsonData = JSON.stringify(results, null, 2);
     fs.writeFileSync('combined.json', jsonData);

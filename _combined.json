@@ -1,0 +1,776 @@
+[
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "A-dam",
+      "Bon Parfumeur",
+      "Cîme",
+      "Fest Amsterdam",
+      "Hindbag",
+      "Kulu Club",
+      "O My Bag",
+      "Ray Studio",
+      "Studio MHL"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": ""
+    },
+    "location": "Korte Zoutstraat,13,9300,Aalst,Belgium",
+    "about": "Fonetik is a store that has been operating since 2016, focusing on creating a welcoming environment for customers. They offer a wide range of products including home decor, beauty items, clothing, and accessories, emphasizing sustainability and quality in their selections.",
+    "retour": "Free shipping on orders over €100, in-store pickup available.",
+    "type": [
+      "Clothing",
+      "Footwear",
+      "Accessories",
+      "Home Goods",
+      "Health & Beauty"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Fest Amsterdam",
+      "Moebe"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00,13:30-18:00",
+      "Tuesday": "10:00-13:00,13:30-18:00",
+      "Wednesday": "10:00-13:00,13:30-18:00",
+      "Thursday": "10:00-13:00,13:30-18:00",
+      "Friday": "10:00-13:00,13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": "Closed"
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a furniture store specializing in high-quality, contemporary designs. They offer a curated selection of brands and products that focus on sustainability and craftsmanship. Their mission is to provide stylish and functional furniture that enhances living spaces.",
+    "retour": "30-day return policy, free shipping on orders over €50",
+    "type": [
+      "Furniture",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Cîme",
+      "Ray",
+      "Fest Amsterdam",
+      "Mustard Made",
+      "Tiptoe",
+      "Petite Friture",
+      "Moebe",
+      "Huf",
+      "Abel"
+    ],
+    "openingHours": {
+      "Monday": "11:00-18:00*",
+      "Tuesday": "11:00-18:00*",
+      "Wednesday": "11:00-18:00*",
+      "Thursday": "11:00-16:00",
+      "Friday": "11:00-18:00*",
+      "Saturday": "10:00-18:00",
+      "Sunday": ""
+    },
+    "location": "Korte Zoutstraat 13,0,9300,Aalst,Belgium",
+    "about": "Fonetik is a cozy store in Aalst where you can find interior and lifestyle products, workshops, and more. Just like phonetic script helps to pronounce words, we use our personality, interests, clothing, and interior to express who we are. This way, we distinguish ourselves from each other. I want to provide people with a way to express themselves; through a gift for themselves or for someone else.",
+    "retour": "30-day return window, free shipping over €50.",
+    "type": [
+      "Clothing",
+      "Footwear",
+      "Accessories",
+      "Home Goods",
+      "Gifts & Lifestyle"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Bon Parfumeur",
+      "Cîme",
+      "Ray Studio",
+      "O My Bag",
+      "Behout",
+      "Beeb",
+      "Barbara Van Ransbeeck"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": "Closed"
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a creative store located in Aalst, specializing in unique and artisanal products ranging from home decor to skincare. The store emphasizes sustainability and craftsmanship, offering a curated selection of items that reflect contemporary design and artistic expression. With a focus on quality and originality, Fonetik aims to provide customers with distinctive pieces that enhance their living spaces and personal style.",
+    "retour": "30-day return policy, exchange allowed, free shipping over €50.",
+    "type": [
+      "Home Goods",
+      "Beauty",
+      "Gifts & Lifestyle"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Cîme",
+      "Colorful Standard",
+      "Coudre Berlin",
+      "Fest Amsterdam"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00,13:30-18:00",
+      "Tuesday": "10:00-13:00,13:30-18:00",
+      "Wednesday": "10:00-13:00,13:30-18:00",
+      "Thursday": "10:00-13:00,13:30-18:00",
+      "Friday": "10:00-13:00,13:30-18:00",
+      "Saturday": "10:00-13:00,13:30-18:00",
+      "Sunday": ""
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a Belgian store that specializes in sustainable and ethically produced products. They offer a wide range of items including clothing, home goods, and personal care products, all made with a focus on quality and environmental responsibility. The store is committed to transparency and fair trade practices, ensuring that their products not only benefit customers but also support local communities.",
+    "retour": "30-day return policy, free shipping over €50",
+    "type": [
+      "Clothing",
+      "Footwear",
+      "Accessories",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Greenstone",
+      "Ray",
+      "Dunbar",
+      "Petite Friture"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-13:00, 13:30-18:00",
+      "Sunday": "Closed"
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a design store that specializes in unique and innovative furniture and accessories. They collaborate with renowned designers to offer timeless and expressive designs that add character to any space. Their mission is to provide stylish and bold design solutions for customers looking for quality and aesthetics in their home decor.",
+    "retour": "30-day return policy, free shipping on orders over €50.",
+    "type": [
+      "Furniture",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Edition Selekkt",
+      "Fest Amsterdam"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00,13:30-18:00",
+      "Tuesday": "10:00-13:00,13:30-18:00",
+      "Wednesday": "10:00-13:00,13:30-18:00",
+      "Thursday": "10:00-13:00,13:30-18:00",
+      "Friday": "10:00-13:00,13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": "Closed"
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a contemporary design store located in Aalst, Belgium, specializing in unique and playful home accessories and furniture. The store features a curated selection of products from various designers, focusing on creativity, functionality, and sustainability. Fonetik aims to provide customers with distinctive items that enhance their living spaces and reflect their personal style.",
+    "retour": "30-day return policy, exchange possible within 14 days, shipping options available.",
+    "type": [
+      "Home Goods",
+      "Decor",
+      "Gifts & Lifestyle"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Foekje Fleur",
+      "Fromme",
+      "Gentlemen's Hardware"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": ""
+    },
+    "location": "Aalst, Belgium",
+    "about": "Fonetik is a store that focuses on sustainability, originality, and craftsmanship, offering a colorful and functional collection of items that make a statement in any interior. The Dutch brand is known for its iconic bottle vases and the Bubble Buddy, a clever and stylish soap grater and box that makes liquid cleaning products (and plastic bottles) unnecessary, contributing to a cleaner planet. Discover the collection at Fonetik and choose design with a positive impact!",
+    "retour": "30-day return policy, free shipping on orders over €50.",
+    "type": [
+      "Home Goods",
+      "Gifts & Lifestyle"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Cîme",
+      "Hindbag",
+      "Helio Ferretti",
+      "Hektik",
+      "O My Bag"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": ""
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a vibrant lifestyle store located in Aalst, Belgium, specializing in unique and trendy accessories for everyday life. The store offers a curated selection of products that blend creativity and functionality, including home decor, gifts, and personal items. Fonetik is committed to sustainability and ethical practices, sourcing items from brands that prioritize environmental responsibility and social empowerment.",
+    "retour": "30-day return policy, free shipping on orders over €50.",
+    "type": [
+      "Accessories",
+      "Clothing",
+      "Footwear",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Amava",
+      "Bobby",
+      "Cibele",
+      "Fest Amsterdam",
+      "Guillaume",
+      "Huf",
+      "Humade",
+      "Homestudyo",
+      "Lili",
+      "Moebe",
+      "Oscar",
+      "Pierre",
+      "Sofia",
+      "Vibes"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-18:00",
+      "Sunday": "Closed"
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a Belgian design store that bridges the gap between high-end exclusive design collectibles and impersonal mass production. Founded by Mathieu Van Damme and Esther Noben, they create handmade, affordable, and everyday objects with a twist. Their colorful and cheerful products aim to inspire customers to curate their spaces as personal art collections, contributing to comfort and identity.",
+    "retour": "30-day return policy, free shipping on orders over €50.",
+    "type": [
+      "Clothing",
+      "Footwear",
+      "Accessories",
+      "Home Goods",
+      "Gifts & Lifestyle"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Fest Amsterdam"
+    ],
+    "openingHours": {
+      "Monday": "10:00 - 13:00, 13:30 - 18:00",
+      "Tuesday": "10:00 - 13:00, 13:30 - 18:00",
+      "Wednesday": "10:00 - 13:00, 13:30 - 18:00",
+      "Thursday": "10:00 - 13:00, 13:30 - 18:00",
+      "Friday": "10:00 - 13:00, 13:30 - 18:00",
+      "Saturday": "10:00 - 13:00, 13:30 - 18:00",
+      "Sunday": "Closed"
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a unique shop specializing in a variety of home accessories, gifts, and lifestyle products. They focus on providing creative and playful items that bring joy and personality to everyday life. Their mission is to offer a curated selection of products that inspire creativity and self-expression.",
+    "retour": "30-day return policy, exchange possible within 14 days, shipping options available.",
+    "type": [
+      "Gifts & Lifestyle",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [],
+    "openingHours": {
+      "Monday": "10:00-13:00,13:30-18:00",
+      "Tuesday": "10:00-13:00,13:30-18:00",
+      "Wednesday": "10:00-13:00,13:30-18:00",
+      "Thursday": "10:00-13:00,13:30-18:00",
+      "Friday": "10:00-13:00,13:30-18:00",
+      "Saturday": "10:00-13:00",
+      "Sunday": ""
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a creative shop that specializes in unique and humorous cards, gifts, and home accessories. They focus on providing a personal touch to greetings and celebrations, ensuring that every card carries a message that resonates with the recipient. The shop is known for its quirky designs and commitment to spreading joy through creativity.",
+    "retour": "30-day return policy, exchanges accepted.",
+    "type": [
+      "Gifts & Lifestyle",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Fonetik"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00,13:30-18:00",
+      "Tuesday": "10:00-13:00,13:30-18:00",
+      "Wednesday": "10:00-13:00,13:30-18:00",
+      "Thursday": "10:00-13:00,13:30-18:00",
+      "Friday": "10:00-13:00,13:30-18:00",
+      "Saturday": "10:00-13:00,13:30-18:00",
+      "Sunday": "Closed"
+    },
+    "location": "Aalst, Belgium",
+    "about": "Fonetik is a unique store located in Aalst, Belgium, specializing in a variety of home goods and lifestyle products. They focus on offering high-quality items that enhance everyday living, with a commitment to sustainability and design. The store features a curated selection of products that reflect contemporary trends and timeless styles, catering to diverse customer needs.",
+    "retour": "30-day return policy, exchange possible, shipping options available.",
+    "type": [
+      "Home Goods",
+      "Gifts & Lifestyle"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Kiki",
+      "Label Kiki",
+      "MHL",
+      "Turina"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": ""
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a Belgian brand focused on sustainable fashion and unique design. Founded by Astrid and Cleome, the brand specializes in creating stylish clothing and accessories from overstock materials, ensuring that each piece is not only fashionable but also environmentally friendly. Their mission is to offer original, colorful items that cater to various body types, promoting the idea that everyone can look good in sustainable fashion.",
+    "retour": "30-day return policy, free shipping on orders over €50.",
+    "type": [
+      "Clothing",
+      "Accessories"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Bon Parfumeur",
+      "Cîme",
+      "Label Kiki",
+      "Mhl",
+      "O My Bag",
+      "Pebble",
+      "Preus Jewelry",
+      "Ray Studio",
+      "Turina"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-18:00",
+      "Sunday": "Closed"
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a Belgian store specializing in a curated selection of unique and playful products, including fashion accessories, home goods, and wellness items. They focus on sustainability and offer a variety of brands that align with their values of quality and creativity. The store aims to provide customers with original designs that bring joy and enhance everyday life.",
+    "retour": "30-day return policy, free shipping over €50.",
+    "type": [
+      "Clothing",
+      "Accessories",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Fest Amsterdam",
+      "Moebe",
+      "Tiptoe"
+    ],
+    "openingHours": {
+      "Monday": "10:00 - 13:00, 13:30 - 18:00",
+      "Tuesday": "10:00 - 13:00, 13:30 - 18:00",
+      "Wednesday": "10:00 - 13:00, 13:30 - 18:00",
+      "Thursday": "10:00 - 13:00, 13:30 - 18:00",
+      "Friday": "10:00 - 13:00, 13:30 - 18:00",
+      "Saturday": "10:00 - 13:00, 13:30 - 18:00",
+      "Sunday": ""
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a furniture store that offers a curated selection of beautiful collections for both small and large furniture pieces for your interior. They focus on providing quality designs and have a showroom where customers can view different models by appointment or during opening hours.",
+    "retour": "No information found",
+    "type": [
+      "Furniture",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Moebe"
+    ],
+    "openingHours": {
+      "Monday": "10:00 - 13:00, 13:30 - 18:00",
+      "Tuesday": "10:00 - 13:00, 13:30 - 18:00",
+      "Wednesday": "10:00 - 13:00, 13:30 - 18:00",
+      "Thursday": "10:00 - 13:00, 13:30 - 18:00",
+      "Friday": "10:00 - 13:00, 13:30 - 18:00",
+      "Saturday": "10:00 - 13:00, 13:30 - 18:00",
+      "Sunday": "Closed"
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a Danish design brand that stands for minimalism, functionality, and craftsmanship. With a focus on sustainable and modular design, they create timeless furniture and accessories that fit seamlessly into any interior. Iconic products such as frame displays, wall hooks, and storage systems combine sleek Scandinavian design with smart, practical details. Thanks to their modular approach, Fonetik's products are versatile and adaptable to your living space.",
+    "retour": "30-day return policy, free shipping over €50",
+    "type": [
+      "Furniture",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Nadja Carlotti",
+      "Mustard Made",
+      "Ray"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": ""
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a Belgian store that specializes in a curated selection of home goods, furniture, and accessories. They focus on providing stylish and functional products that enhance everyday living. The store is known for its unique offerings, including items from various designers and brands, emphasizing quality and design.",
+    "retour": "30-day return policy, exchange possible within 30 days, free shipping over €50.",
+    "type": [
+      "Home Goods",
+      "Furniture",
+      "Accessories"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Cîme",
+      "O My Bag"
+    ],
+    "openingHours": {
+      "Monday": "10:00 - 13:00, 13:30 - 18:00",
+      "Tuesday": "10:00 - 13:00, 13:30 - 18:00",
+      "Wednesday": "10:00 - 13:00, 13:30 - 18:00",
+      "Thursday": "10:00 - 13:00, 13:30 - 18:00",
+      "Friday": "10:00 - 13:00, 13:30 - 18:00",
+      "Saturday": "10:00 - 13:00, 13:30 - 18:00",
+      "Sunday": "Closed"
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a store that specializes in offering a curated selection of home goods, accessories, and natural skincare products. They focus on sustainability and ethical production, providing customers with high-quality items that are both stylish and environmentally friendly. The store is known for its unique offerings and commitment to customer satisfaction.",
+    "retour": "30-day return policy, exchange allowed within 14 days, free shipping on orders over €50.",
+    "type": [
+      "Home Goods",
+      "Accessories",
+      "Health & Beauty"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Bon Parfumeur",
+      "Fest Amsterdam",
+      "Petite Friture"
+    ],
+    "openingHours": {
+      "Monday": "10:00 - 13:00, 13:30 - 18:00",
+      "Tuesday": "10:00 - 13:00, 13:30 - 18:00",
+      "Wednesday": "10:00 - 13:00, 13:30 - 18:00",
+      "Thursday": "10:00 - 13:00, 13:30 - 18:00",
+      "Friday": "10:00 - 13:00, 13:30 - 18:00",
+      "Saturday": "10:00 - 18:00",
+      "Sunday": "Closed"
+    },
+    "location": "Parstraat 1, 9300, Aalst, Belgium",
+    "about": "Fonetik is a design store located in Aalst, Belgium, specializing in unique furniture, home accessories, and lifestyle products. The store collaborates with renowned designers and brands to offer a curated selection of stylish and functional items that enhance living spaces. With a focus on quality and aesthetics, Fonetik aims to provide customers with distinctive pieces that reflect their personal style.",
+    "retour": "30-day return policy, exchange possible within 14 days, shipping options available.",
+    "type": [
+      "Home Goods",
+      "Decor",
+      "Furniture"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Hindbag",
+      "Lili",
+      "O My Bag",
+      "Preus Jewelry",
+      "Ray",
+      "Lanius"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00,13:30-18:00",
+      "Tuesday": "10:00-13:00,13:30-18:00",
+      "Wednesday": "10:00-13:00,13:30-18:00",
+      "Thursday": "10:00-13:00,13:30-18:00",
+      "Friday": "10:00-13:00,13:30-18:00",
+      "Saturday": "10:00-13:00,13:30-18:00",
+      "Sunday": "Closed"
+    },
+    "location": "Edge Poef, 101, 9300, Aalst, Belgium",
+    "about": "Fonetik is a Belgian store that specializes in a curated selection of unique and sustainable products, including fashion accessories, home goods, and jewelry. The store emphasizes creativity and quality, offering items that reflect a commitment to craftsmanship and design. Fonetik aims to provide customers with distinctive pieces that enhance their everyday lives while promoting sustainable practices.",
+    "retour": "30-day return policy, exchange possible, free shipping over €50.",
+    "type": [
+      "Clothing",
+      "Footwear",
+      "Accessories",
+      "Jewelry",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Kiki",
+      "Scandle",
+      "Serax"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": "Closed"
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a unique store located in Aalst, specializing in a variety of products including home goods, accessories, and gifts. The store prides itself on offering a curated selection of items that blend functionality with aesthetic appeal. Fonetik is committed to providing quality products that enhance everyday living.",
+    "retour": "30-day return policy, exchange available, shipping options vary.",
+    "type": [
+      "Home Goods",
+      "Accessories",
+      "Gifts & Lifestyle"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Sophie Home",
+      "Studio MHL",
+      "Studio Flash",
+      "Stan Editions"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00,13:30-18:00",
+      "Tuesday": "10:00-13:00,13:30-18:00",
+      "Wednesday": "10:00-13:00,13:30-18:00",
+      "Thursday": "10:00-13:00,13:30-18:00",
+      "Friday": "10:00-13:00,13:30-18:00",
+      "Saturday": "10:00-13:00,13:30-18:00",
+      "Sunday": ""
+    },
+    "location": "Aalst, Belgium",
+    "about": "Fonetik is a creative shop located in Aalst, Belgium, specializing in a diverse range of products including home accessories, textiles, and unique gifts. The store is known for its commitment to quality and sustainability, offering items from various brands that emphasize ethical production and design. Fonetik aims to provide a curated shopping experience that reflects contemporary aesthetics and values.",
+    "retour": "30-day return policy, exchanges accepted, shipping options available.",
+    "type": [
+      "Home Goods",
+      "Gifts & Lifestyle"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Fest Amsterdam"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-13:00",
+      "Sunday": ""
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a contemporary furniture and home accessories store located in Aalst, Belgium. They specialize in offering a wide range of stylish and functional products for modern living. Their mission is to provide high-quality, innovative designs that enhance the aesthetic and functionality of homes. Fonetik is committed to sustainability and often features eco-friendly products.",
+    "retour": "30-day return policy, exchange possible within 14 days, shipping options available.",
+    "type": [
+      "Furniture",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Tiptoe",
+      "Turina",
+      "Ucon Acrobatics"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": ""
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a contemporary design store specializing in innovative and sustainable furniture and interior accessories. They focus on minimalistic and modular designs, offering a wide range of products that combine functionality with style. Their mission is to provide unique, customizable pieces that enhance living spaces while emphasizing craftsmanship and sustainability.",
+    "retour": "30-day return policy, free shipping over €50.",
+    "type": [
+      "Clothing",
+      "Footwear",
+      "Accessories",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Fest Amsterdam"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": "Closed"
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a contemporary design store located in Aalst, Belgium, specializing in high-quality furniture and home decor. The store offers a curated selection of unique pieces that blend functionality with aesthetic appeal, catering to a diverse clientele looking for stylish and sustainable options for their living spaces.",
+    "retour": "30-day return policy, exchange possible within 14 days.",
+    "type": [
+      "Home Goods",
+      "Decor"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Cîme",
+      "Ray"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00,13:30-18:00",
+      "Tuesday": "10:00-13:00,13:30-18:00",
+      "Wednesday": "10:00-13:00,13:30-18:00",
+      "Thursday": "10:00-13:00,13:30-18:00",
+      "Friday": "10:00-13:00,13:30-18:00",
+      "Saturday": "10:00-13:00,13:30-18:00",
+      "Sunday": "Closed"
+    },
+    "location": "Aalst, Belgium",
+    "about": "Fonetik is a Belgian design studio known for its playful, wavy forms and vibrant colors. Utilizing innovative 3D printing technologies and recycled materials, Fonetik creates striking objects that blend functionality with artistic expression. Their collection includes accessories and planters, each featuring distinctive 'wavy curves' that transform spaces into artistic environments. With a focus on sustainability and creativity, Fonetik offers products that are both aesthetically pleasing and environmentally friendly.",
+    "retour": "30-day return policy, free shipping on orders over €50.",
+    "type": [
+      "Clothing",
+      "Footwear",
+      "Accessories",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Cîme",
+      "Petite Friture"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": ""
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a store that offers a diverse range of interior and lifestyle products, aiming to help individuals express themselves and convey their messages through unique items. Founded in 2016, the store was born out of a personal need to find suitable decor for a newly renovated home. The owner, Melanie, emphasizes connection and storytelling through each product, ensuring that they resonate with her values of transparency, authenticity, and sustainability. Fonetik also plans to expand with a second location that will serve as a space for personalized interior advice and community events.",
+    "retour": "30-day return policy, exchange possible within 14 days, free shipping over €50.",
+    "type": [
+      "Clothing",
+      "Footwear",
+      "Accessories",
+      "Home Goods"
+    ]
+  },
+  {
+    "url": "https://shop.fonetik.be",
+    "name": "Fonetik - Aalst",
+    "brands": [
+      "Fest Amsterdam"
+    ],
+    "openingHours": {
+      "Monday": "10:00-13:00, 13:30-18:00",
+      "Tuesday": "10:00-13:00, 13:30-18:00",
+      "Wednesday": "10:00-13:00, 13:30-18:00",
+      "Thursday": "10:00-13:00, 13:30-18:00",
+      "Friday": "10:00-13:00, 13:30-18:00",
+      "Saturday": "10:00-17:00",
+      "Sunday": "Closed"
+    },
+    "location": "<street>,<number>,<postalCode>,Aalst,Belgium",
+    "about": "Fonetik is a furniture store that offers a wide range of stylish and contemporary furniture pieces. They focus on providing high-quality products that cater to various tastes and preferences, ensuring that customers can find the perfect items for their homes. The store emphasizes personalized service, allowing customers to explore custom options and receive tailored advice.",
+    "retour": "30-day return policy, exchange available within 30 days, shipping options available.",
+    "type": [
+      "Furniture"
+    ]
+  }
+]
