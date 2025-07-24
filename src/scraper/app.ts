@@ -359,25 +359,33 @@ export async function run(baseURL: string, location: string, clientId: string) {
 
   console.log(`Starting post-processing and AI summarization...`);
 
-  let results = [];
+  let results: string[] = [];
 
   if (fs.existsSync('combined.json')) {
     const fileContent = fs.readFileSync('combined.json', 'utf-8');
     results = JSON.parse(fileContent);
   } else {
     // Chunk all texts for optimal prompting
-    results = [];
+    const queue = new OpenAIQueue();
     for (const chunk of allChunks) {
-      // send chunk to openai
-      const smallPrompt = smallSummarize(chunk, location, baseURL);
-      console.log(
-        `Sending smallSumerize prompt (chunk size: ${chunk.length} snippets, chars: ${smallPrompt.length}).`,
-      );
-      const summaryPart = await OpenAIService.sendBasePrompt(smallPrompt);
-      if (summaryPart) {
-        results.push(summaryPart);
-      }
+      const charCount = chunk.length;
+      const run = async () => {
+        const smallPrompt = smallSummarize(chunk, location, baseURL);
+        console.log(
+          `Sending smallSumerize prompt (chunk size: ${chunk.length} snippets, chars: ${smallPrompt.length}).`,
+        );
+        const summaryPart = await OpenAIService.sendBasePrompt(smallPrompt);
+        if (summaryPart) {
+          results.push(summaryPart);
+        }
+      };
+      queue.enqueue({
+        charCount,
+        run,
+      });
     }
+    await queue.processQueue();
+    console.log('processed queue');
     const jsonData = JSON.stringify(results, null, 2);
     fs.writeFileSync('combined.json', jsonData);
   }
